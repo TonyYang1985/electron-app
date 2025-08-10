@@ -1,0 +1,219 @@
+name: 构建和发布
+
+# 触发条件
+on:
+  # 推送标签时触发
+  push:
+    tags:
+      - 'v*'
+  # 也可以手动触发
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本号 (例如: 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+# 权限设置
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # 构建任务
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, macOS-latest, ubuntu-latest]
+    
+    steps:
+      # 检出代码
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      # 设置Node.js环境
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # 安装依赖
+      - name: 安装依赖
+        run: npm ci
+      
+      # Windows构建
+      - name: 构建Windows版本
+        if: matrix.os == 'windows-latest'
+        run: npm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # macOS构建
+      - name: 构建macOS版本  
+        if: matrix.os == 'macOS-latest'
+        run: npm run build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Linux构建
+      - name: 构建Linux版本
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 上传构建产物
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: dist/
+          retention-days: 30
+
+  # 发布任务
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      # 检出代码
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      # 下载所有构建产物
+      - name: 下载Windows构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-windows-latest
+          path: dist-windows/
+      
+      - name: 下载macOS构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-macOS-latest
+          path: dist-macos/
+      
+      - name: 下载Linux构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-ubuntu-latest
+          path: dist-linux/
+      
+      # 准备发布文件
+      - name: 准备发布文件
+        run: |
+          mkdir -p release-files
+          
+          # 复制Windows文件
+          find dist-windows/ -name "*.exe" -o -name "*.blockmap" -o -name "*.yml" | while read file; do
+            cp "$file" release-files/
+          done
+          
+          # 复制macOS文件
+          find dist-macos/ -name "*.dmg" -o -name "*.zip" -o -name "*.blockmap" -o -name "*.yml" | while read file; do
+            cp "$file" release-files/
+          done
+          
+          # 复制Linux文件
+          find dist-linux/ -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.yml" | while read file; do
+            cp "$file" release-files/
+          done
+          
+          # 显示准备发布的文件
+          echo "准备发布的文件:"
+          ls -la release-files/
+      
+      # 提取版本号
+      - name: 获取版本号
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+      
+      # 生成更新日志
+      - name: 生成更新日志
+        id: changelog
+        run: |
+          CHANGELOG=$(cat << EOF
+          ## 🚀 版本 ${{ steps.version.outputs.version }} 更新内容
+          
+          ### ✨ 新增功能
+          - 功能特性描述
+          
+          ### 🐛 问题修复
+          - 修复的问题描述
+          
+          ### 🔧 改进优化
+          - 性能优化和改进
+          
+          ### 📦 下载说明
+          
+          **Windows用户:**
+          - \`My-Electron-App-Setup-${{ steps.version.outputs.version }}.exe\` - 安装程序版本
+          - \`My-Electron-App-${{ steps.version.outputs.version }}-win-x64.exe\` - 便携版本
+          
+          **macOS用户:**
+          - \`My-Electron-App-${{ steps.version.outputs.version }}-mac-x64.dmg\` - Intel芯片Mac
+          - \`My-Electron-App-${{ steps.version.outputs.version }}-mac-arm64.dmg\` - Apple Silicon Mac
+          
+          **Linux用户:**
+          - \`My-Electron-App-${{ steps.version.outputs.version }}-x86_64.AppImage\` - 通用版本
+          - \`My-Electron-App_${{ steps.version.outputs.version }}_amd64.deb\` - Ubuntu/Debian
+          - \`My-Electron-App-${{ steps.version.outputs.version }}.x86_64.rpm\` - CentOS/Fedora
+          
+          ### 🔍 校验信息
+          所有文件都包含SHA512校验值，确保下载完整性。
+          
+          ---
+          **完整更新日志:** [查看所有更改](https://github.com/${{ github.repository }}/compare/v${{ steps.version.outputs.version }}...main)
+          EOF
+          )
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      # 创建GitHub Release
+      - name: 创建GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "🎉 My Electron App v${{ steps.version.outputs.version }}"
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+          files: release-files/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 发送通知（可选）
+      - name: 发布成功通知
+        run: |
+          echo "🎉 发布成功!"
+          echo "版本: ${{ steps.version.outputs.version }}"
+          echo "下载地址: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+
+  # 清理任务
+  cleanup:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 清理构建产物
+        uses: geekyeggo/delete-artifact@v4
+        with:
+          name: |
+            dist-windows-latest
+            dist-macOS-latest
+            dist-ubuntu-latest
+        continue-on-error: true

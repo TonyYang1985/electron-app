@@ -1,14 +1,170 @@
 {
   "name": "electron-app",
   "version": "1.0.0",
-  "description": "your-electron-app",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "我的Electron应用",
+  "main": "src/main.js",
+  "homepage": "https://github.com/your-username/my-electron-app",
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://your-website.com"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/my-electron-app.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "publish": "electron-builder --publish=always",
+    "publish:win": "electron-builder --win --publish=always",
+    "publish:mac": "electron-builder --mac --publish=always",
+    "publish:linux": "electron-builder --linux --publish=always",
+    "draft": "electron-builder --publish=onTagOrDraft",
+    "release": "npm version patch && git push && git push --tags"
+  },
+  
+  "build": {
+    "appId": "com.yourcompany.myelectronapp",
+    "productName": "My Electron App",
+    "copyright": "Copyright © 2025 Your Company",
+    "directories": {
+      "output": "dist",
+      "resources": "resources"
+    },
+    "files": [
+      "src/**/*",
+      "resources/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/",
+        "to": ".",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "your-username",
+        "repo": "my-electron-app",
+        "releaseType": "release",
+        "publishAutoUpdate": true
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.ico",
+      "publisherName": "Your Company Name",
+      "requestedExecutionLevel": "asInvoker",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.icns",
+      "category": "public.app-category.productivity",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+      "darkModeSupport": true
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.png",
+      "category": "Utility",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "${productName}",
+      "include": "build/installer.nsh",
+      "installerIcon": "resources/installer-icon.ico",
+      "uninstallerIcon": "resources/uninstaller-icon.ico",
+      "installerHeaderIcon": "resources/installer-header-icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "dmg": {
+      "background": "resources/dmg-background.png",
+      "iconSize": 100,
+      "contents": [
+        {
+          "x": 380,
+          "y": 280,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 110,
+          "y": 280,
+          "type": "file"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    }
+  },
   "devDependencies": {
     "electron": "^37.2.6",
     "electron-builder": "^26.0.12",
