@@ -70,5 +70,18 @@ module.exports = {
     vendor: "TonyYang1985",
     synopsis: "基于Electron构建的现代化桌面应用",
     description: "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。"
-  }
+  },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    createDesktopShortcut: "always",
+    createStartMenuShortcut: true,
+    shortcutName: "${productName}",
+    deleteAppDataOnUninstall: false,
+    runAfterFinish: true,
+    menuCategory: "应用程序",
+    installerIcon: "resources/icon.ico",
+    uninstallerIcon: "resources/icon.ico"
+  },
 };
