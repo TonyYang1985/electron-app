@@ -1,0 +1,62 @@
+module.exports = {
+  appId: "com.tonyyang1985.myawesomeapp",
+  productName: "My Awesome App",
+  copyright: "Copyright © 2025 TonyYang1985",
+  directories: {
+    output: "dist"
+  },
+  files: [
+    "src/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  win: {
+    target: [
+      {
+        target: "nsis",
+        arch: ["x64"]
+      },
+      {
+        target: "portable",
+        arch: ["x64"]
+      }
+    ],
+    forceCodeSigning: false,
+    verifyUpdateCodeSignature: false,
+    requestedExecutionLevel: "asInvoker"
+  },
+  mac: {
+    target: [
+      {
+        target: "dmg",
+        arch: ["x64", "arm64"]
+      },
+      {
+        target: "zip",
+        arch: ["x64", "arm64"]
+      }
+    ],
+    category: "public.app-category.productivity"
+  },
+  linux: {
+    target: [
+      {
+        target: "AppImage",
+        arch: ["x64"]
+      },
+      {
+        target: "deb",
+        arch: ["x64"]
+      },
+      {
+        target: "rpm",
+        arch: ["x64"]
+      }
+    ],
+    category: "Utility",
+    maintainer: "TonyYang1985 <yangxindev@gmail.com>",
+    vendor: "TonyYang1985",
+    synopsis: "基于Electron构建的现代化桌面应用",
+    description: "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。"
+  }
+};

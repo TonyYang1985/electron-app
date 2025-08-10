@@ -4,7 +4,6 @@ npm-debug.log*
 
 # 构建输出
 dist/
-build/
 
 # 系统文件
 .DS_Store
