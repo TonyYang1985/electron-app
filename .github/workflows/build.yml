@@ -70,6 +70,7 @@ jobs:
         env:
           # 不设置GH_TOKEN，确保不会尝试发布
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # macOS构建 - 仅构建
       - name: macOS构建
@@ -77,6 +78,7 @@ jobs:
         run: npm run build:mac
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # Linux构建 - 仅构建
       - name: Linux构建
@@ -84,6 +86,7 @@ jobs:
         run: npm run build:linux
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # 验证构建结果
       - name: 验证构建结果
@@ -246,7 +249,7 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # 验证Release
       - name: 验证Release创建
