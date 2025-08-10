@@ -387,7 +387,7 @@ jobs:
       - name: 构建和发布
         run: npm run publish
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 EOF
 
     print_success "GitHub Actions工作流创建完成"
@@ -468,7 +468,7 @@ npm run publish
 
 1. 设置GitHub Token:
 \`\`\`bash
-export GH_TOKEN=your_github_token_here
+export GITHUB_TOKEN=your_github_token_here
 \`\`\`
 
 2. 构建并发布:
@@ -568,7 +568,7 @@ init_git() {
 - GitHub Actions CI/CD
 
 🚀 快速开始:
-1. 设置GitHub Token: export GH_TOKEN=your_token
+1. 设置GitHub Token: export GITHUB_TOKEN=your_token
 2. 运行开发模式: npm start  
 3. 构建应用: npm run build
 4. 发布到GitHub: npm run publish"
@@ -601,7 +601,7 @@ show_next_steps() {
     echo "   - 访问: https://github.com/settings/tokens"
     echo "   - 创建新token，勾选 'repo' 权限"
     echo "   - 设置环境变量:"
-    echo "     export GH_TOKEN=your_token_here"
+    echo "     export GITHUB_TOKEN=your_token_here"
     echo
     echo "5. 开始开发:"
     echo "   npm start              # 启动开发模式"

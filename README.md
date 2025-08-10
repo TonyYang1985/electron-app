@@ -48,7 +48,7 @@ npm run publish
 
 1. 设置GitHub Token:
 ```bash
-export GH_TOKEN=your_github_token_here
+export GITHUB_TOKEN=your_github_token_here
 ```
 
 2. 构建并发布:

@@ -17,13 +17,13 @@ npm version patch  # 1.0.0 -> 1.0.1
 ### 2. 设置环境变量
 ```bash
 # Windows (CMD)
-set GH_TOKEN=ghp_your_github_token_here
+set GITHUB_TOKEN=ghp_your_github_token_here
 
 # Windows (PowerShell) 
-$env:GH_TOKEN="ghp_your_github_token_here"
+$env:GITHUB_TOKEN="ghp_your_github_token_here"
 
 # macOS/Linux
-export GH_TOKEN=ghp_your_github_token_here
+export GITHUB_TOKEN=ghp_your_github_token_here
 ```
 
 ### 3. 构建并发布
