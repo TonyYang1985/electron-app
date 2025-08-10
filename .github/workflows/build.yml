@@ -7,16 +7,23 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '发布版本号 (例如: 1.0.4)'
+        description: '发布版本号 (例如: 1.0.5)'
         required: true
-        default: '1.0.4'
+        default: '1.0.5'
 
+# 明确设置权限
 permissions:
   contents: write
+  actions: read
+  metadata: read
   packages: write
+  pull-requests: read
+  repository-projects: read
+  security-events: read
+  statuses: read
 
 jobs:
-  # 第一阶段：仅构建，不发布
+  # 构建阶段
   build:
     name: 构建 ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -29,19 +36,18 @@ jobs:
           - os: windows-latest
             name: Windows
             platform: win
-            script: build:win
           - os: macos-latest
             name: macOS
             platform: mac
-            script: build:mac
           - os: ubuntu-latest
             name: Linux
             platform: linux
-            script: build:linux
     
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: 设置Node.js
         uses: actions/setup-node@v4
@@ -52,7 +58,21 @@ jobs:
       - name: 安装依赖
         run: npm ci
       
-      # Windows构建（仅构建，不发布）
+      # 验证Token可用性
+      - name: 验证GitHub Token
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "✅ GITHUB_TOKEN 已设置"
+            echo "Token长度: ${#GITHUB_TOKEN}"
+          else
+            echo "❌ GITHUB_TOKEN 未设置"
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Windows构建
       - name: Windows构建
         if: matrix.platform == 'win'
         shell: cmd
@@ -70,18 +90,16 @@ jobs:
         if: matrix.platform == 'linux'
         run: npm run build:linux
       
-      # 显示构建结果
-      - name: 显示构建结果
+      # 验证构建结果
+      - name: 验证构建结果
         shell: bash
         run: |
           echo "=== 构建完成 ==="
           if [ -d "dist" ]; then
             ls -la dist/
-            echo ""
-            echo "=== 文件大小 ==="
-            du -h dist/* 2>/dev/null || true
+            echo "✅ 构建成功"
           else
-            echo "❌ 构建失败"
+            echo "❌ 构建失败，dist目录不存在"
             exit 1
           fi
       
@@ -100,9 +118,9 @@ jobs:
             dist/*.yml
             dist/*.blockmap
           retention-days: 30
-          compression-level: 6
+          if-no-files-found: warn
 
-  # 第二阶段：发布到GitHub Releases
+  # 发布阶段
   release:
     name: 发布到GitHub Releases
     needs: build
@@ -113,6 +131,18 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      # 再次验证Token
+      - name: 验证发布权限
+        run: |
+          echo "验证GitHub API访问权限..."
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/repos/${{ github.repository }}" \
+               | jq '.permissions // "No permissions found"'
       
       - name: 获取版本信息
         id: version
@@ -120,37 +150,28 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           else
-            VERSION="${{ github.event.inputs.version || '1.0.4' }}"
+            VERSION="${{ github.event.inputs.version || '1.0.5' }}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "发布版本: $VERSION"
       
-      # 下载所有构建产物
-      - name: 下载Windows构建产物
+      # 下载构建产物
+      - name: 下载所有构建产物
         uses: actions/download-artifact@v4
         with:
-          name: Windows-build-${{ github.run_number }}
-          path: artifacts/windows/
-      
-      - name: 下载macOS构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: macOS-build-${{ github.run_number }}
-          path: artifacts/macos/
-      
-      - name: 下载Linux构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: Linux-build-${{ github.run_number }}
-          path: artifacts/linux/
+          path: artifacts/
       
       # 整理发布文件
       - name: 整理发布文件
         run: |
           mkdir -p release-files
           
-          # 复制所有文件到release目录
+          # 查看下载的文件
+          echo "=== 下载的工件 ==="
+          find artifacts/ -type f -ls
+          
+          # 复制所有构建文件
           find artifacts/ -type f \( \
             -name "*.exe" -o \
             -name "*.dmg" -o \
@@ -165,76 +186,66 @@ jobs:
           echo "=== 准备发布的文件 ==="
           ls -la release-files/
           
-          echo "=== 文件数量统计 ==="
-          echo "总文件数: $(ls -1 release-files/ | wc -l)"
-          echo "Windows文件: $(ls -1 release-files/*.exe 2>/dev/null | wc -l || echo 0)"
-          echo "macOS文件: $(ls -1 release-files/*.dmg 2>/dev/null | wc -l || echo 0)"
-          echo "Linux文件: $(ls -1 release-files/*.AppImage 2>/dev/null | wc -l || echo 0)"
+          # 检查是否有文件
+          if [ $(ls -1 release-files/ | wc -l) -eq 0 ]; then
+            echo "❌ 没有找到发布文件"
+            exit 1
+          fi
           
-          echo "=== 文件大小统计 ==="
-          du -h release-files/* | sort -h
+          echo "✅ 找到 $(ls -1 release-files/ | wc -l) 个发布文件"
       
-      # 生成Release说明
-      - name: 生成Release说明
+      # 生成发布说明
+      - name: 生成发布说明
         run: |
           cat > release_notes.md << 'EOF'
           ## 🚀 My Awesome App v${{ steps.version.outputs.version }}
           
-          ### 📦 下载指南
+          ### 📦 快速下载
           
-          **🪟 Windows用户:**
-          - **安装程序版本**: `My-Awesome-App-${{ steps.version.outputs.version }}-win-x64.exe` (推荐)
-          - 双击运行，按提示安装
+          **🪟 Windows:** 
+          - 安装程序版本 (推荐)
           
-          **🍎 macOS用户:**
-          - **Intel Mac**: `My-Awesome-App-${{ steps.version.outputs.version }}-mac-x64.dmg`
-          - **Apple Silicon**: `My-Awesome-App-${{ steps.version.outputs.version }}-mac-arm64.dmg`
-          - 下载后双击，拖拽到Applications文件夹
+          **🍎 macOS:**
+          - Intel Mac 和 Apple Silicon 都有对应版本
           
-          **🐧 Linux用户:**
-          - **通用版本**: `My-Awesome-App-${{ steps.version.outputs.version }}-x86_64.AppImage`
-          - **Ubuntu/Debian**: `my-awesome-app_${{ steps.version.outputs.version }}_amd64.deb`
-          - **CentOS/Fedora**: `my-awesome-app-${{ steps.version.outputs.version }}.x86_64.rpm`
+          **🐧 Linux:**
+          - AppImage (通用)、deb (Ubuntu)、rpm (CentOS) 版本
           
           ### 🔄 自动更新
-          应用内置自动更新功能，安装后会自动检测新版本。
+          应用支持自动更新，安装后会自动检测新版本。
           
-          ### 🛡️ 安全说明
-          - Windows: 首次运行可能提示"Windows已保护你的电脑"，点击"更多信息" → "仍要运行"
-          - macOS: 首次运行可能需要右键点击 → "打开"，或在系统偏好设置中允许
-          - Linux: AppImage需要添加执行权限：`chmod +x *.AppImage`
-          
-          ### ✨ 版本特性
-          - 跨平台支持 (Windows/macOS/Linux)
-          - 自动更新功能
-          - 现代化用户界面
-          - 高性能Electron架构
+          ### 📝 安装说明
+          - **Windows**: 下载exe文件，双击安装
+          - **macOS**: 下载dmg文件，拖拽到Applications文件夹
+          - **Linux**: 下载AppImage文件，添加执行权限后运行
           
           ---
-          **📋 技术信息:**
-          - Electron版本: 28.3.3
-          - Node.js版本: 18.x
-          - 构建时间: $(date)
-          
-          **🔗 相关链接:**
-          - [源代码](https://github.com/${{ github.repository }})
-          - [问题反馈](https://github.com/${{ github.repository }}/issues)
-          - [更新日志](https://github.com/${{ github.repository }}/releases)
+          **构建信息:** Electron 28.3.3 | Node.js 18.x
           EOF
       
-      # 创建GitHub Release
+      # 创建Release - 方法1：使用官方action
       - name: 创建GitHub Release
-        uses: softprops/action-gh-release@v2
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "🎉 My Awesome App v${{ steps.version.outputs.version }}"
+          release_name: "🎉 My Awesome App v${{ steps.version.outputs.version }}"
           body_path: release_notes.md
           draft: false
           prerelease: false
-          files: release-files/*
-          generate_release_notes: true
-          make_latest: true
-          fail_on_unmatched_files: true
+      
+      # 上传所有文件
+      - name: 上传发布文件
+        run: |
+          # 使用gh CLI上传文件
+          for file in release-files/*; do
+            if [ -f "$file" ]; then
+              echo "上传文件: $(basename "$file")"
+              gh release upload ${{ steps.version.outputs.tag }} "$file" --clobber
+            fi
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -242,16 +253,8 @@ jobs:
       - name: 发布成功通知
         run: |
           echo "🎉 发布成功!"
-          echo ""
-          echo "📊 发布统计:"
-          echo "  版本: ${{ steps.version.outputs.version }}"
-          echo "  文件数量: $(ls -1 release-files/ | wc -l)"
-          echo "  总大小: $(du -sh release-files/ | cut -f1)"
-          echo ""
-          echo "🔗 下载地址:"
-          echo "  https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
-          echo ""
-          echo "📱 用户现在可以下载并安装应用了!"
+          echo "版本: ${{ steps.version.outputs.version }}"
+          echo "下载地址: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
 
   # 清理工件
   cleanup:
@@ -269,6 +272,3 @@ jobs:
             macOS-build-${{ github.run_number }}
             Linux-build-${{ github.run_number }}
         continue-on-error: true
-      
-      - name: 清理完成
-        run: echo "🧹 构建工件清理完成"
