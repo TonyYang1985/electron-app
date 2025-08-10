@@ -1,11 +1,12 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "基于Electron构建的桌面应用",
   "main": "src/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
   "author": {
     "name": "TonyYang1985",
+    "email": "yangxindev@gmail.com",
     "url": "https://github.com/TonyYang1985"
   },
   "license": "MIT",
@@ -82,7 +83,11 @@
           "arch": ["x64"]
         }
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
+      "vendor": "TonyYang1985",
+      "synopsis": "基于Electron构建的现代化桌面应用",
+      "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。"
     }
   },
   "devDependencies": {
