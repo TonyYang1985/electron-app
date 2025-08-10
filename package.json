@@ -30,7 +30,7 @@
     "build:win": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --config build/electron-builder.config.js",
     "build:mac": "npm run build && electron-builder --mac --config build/electron-builder.config.js",
     "build:linux": "npm run build && electron-builder --linux --config build/electron-builder.config.js",
-    
+  
     "publish": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --publish=always --config build/electron-builder.config.js",
     "publish:win": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --publish=always --config build/electron-builder.config.js",
     "publish:mac": "npm run build && electron-builder --mac --publish=always --config build/electron-builder.config.js",
