@@ -2,12 +2,11 @@ module.exports = {
   appId: "com.tonyyang1985.myawesomeapp",
   productName: "My Awesome App",
   copyright: "Copyright © 2025 TonyYang1985",
-  main: "dist/main.js",
   directories: {
     output: "dist"
   },
   files: [
-    "src/**/*",
+    "dist/**/*",
     "node_modules/**/*",
     "package.json"
   ],

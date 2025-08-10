@@ -1,8 +1,8 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.9",
+  "version": "1.0.11",
   "description": "基于Electron构建的桌面应用",
-  "main": "dist/main.js",
+   "main": "dist/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
   "author": {
     "name": "TonyYang1985",
