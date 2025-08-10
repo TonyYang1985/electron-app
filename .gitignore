@@ -1,0 +1,35 @@
+out
+dist/
+yarn.lock
+node_modules/
+node_modules
+
+# 依赖
+node_modules/
+npm-debug.log*
+
+# 构建输出
+dist/
+build/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 环境变量
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+logs/
+*.log
+
+# 临时文件
+tmp/
+temp/
