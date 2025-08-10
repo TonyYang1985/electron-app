@@ -1,6 +1,6 @@
 {
   "name": "electron-app",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "基于Electron构建的桌面应用",
   "main": "src/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",

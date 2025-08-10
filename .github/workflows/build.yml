@@ -7,25 +7,19 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '发布版本号 (例如: 1.0.5)'
+        description: '发布版本号 (例如: 1.0.10)'
         required: true
-        default: '1.0.5'
+        default: '1.0.10'
 
-# 修正权限配置 - 移除无效权限
 permissions:
   contents: write
-  actions: read
-  packages: write
-  pull-requests: read
-  security-events: read
-  statuses: read
 
 jobs:
-  # 构建阶段
+  # 阶段1: 仅构建，不上传
   build:
     name: 构建 ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     
     strategy:
       fail-fast: false
@@ -34,18 +28,19 @@ jobs:
           - os: windows-latest
             name: Windows
             platform: win
+            build_script: build:win
           - os: macos-latest
             name: macOS
             platform: mac
+            build_script: build:mac
           - os: ubuntu-latest
             name: Linux
             platform: linux
+            build_script: build:linux
     
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: 设置Node.js
         uses: actions/setup-node@v4
@@ -56,63 +51,33 @@ jobs:
       - name: 安装依赖
         run: npm ci
       
-      # 修正Token验证
-      - name: 验证GitHub Token
+      # 仅构建，不发布到GitHub
+      - name: 构建 ${{ matrix.name }}
         shell: bash
         run: |
-          if [ -n "$GH_TOKEN" ]; then
-            echo "✅ GH_TOKEN 已设置"
-            echo "Token前缀: ${GH_TOKEN:0:10}..."
-          else
-            echo "❌ GH_TOKEN 未设置"
-            exit 1
+          if [ "${{ matrix.platform }}" = "win" ]; then
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          npm run ${{ matrix.build_script }}
       
-      # Windows构建并发布
-      - name: Windows构建并发布
-        if: matrix.platform == 'win'
-        shell: cmd
-        run: |
-          set CSC_IDENTITY_AUTO_DISCOVERY=false
-          npm run publish:win
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      
-      # macOS构建并发布
-      - name: macOS构建并发布
-        if: matrix.platform == 'mac'
-        run: npm run publish:mac
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      
-      # Linux构建并发布
-      - name: Linux构建并发布
-        if: matrix.platform == 'linux'
-        run: npm run publish:linux
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      
-      # 验证构建结果
-      - name: 验证构建结果
+      # 显示构建结果
+      - name: 显示构建结果
         shell: bash
         run: |
-          echo "=== 构建完成 ==="
+          echo "=== ${{ matrix.name }} 构建完成 ==="
           if [ -d "dist" ]; then
-            ls -la dist/
+            find dist/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.yml" -o -name "*.blockmap" \) -exec ls -lh {} \;
             echo "✅ 构建成功"
           else
-            echo "❌ 构建失败，dist目录不存在"
+            echo "❌ 构建失败"
             exit 1
           fi
       
-      # 上传构建产物作为备份
+      # 上传构建产物
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: ${{ matrix.name }}-build-${{ github.run_number }}
+          name: ${{ matrix.name }}-v${{ github.run_number }}
           path: |
             dist/*.exe
             dist/*.dmg
@@ -122,22 +87,20 @@ jobs:
             dist/*.AppImage
             dist/*.yml
             dist/*.blockmap
-          retention-days: 30
-          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
 
-  # 发布验证阶段
-  verify-release:
-    name: 验证发布结果
+  # 阶段2: 创建Release并上传文件
+  release:
+    name: 创建Release
     needs: build
     runs-on: ubuntu-latest
     if: needs.build.result == 'success'
-    timeout-minutes: 15
+    timeout-minutes: 30
     
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: 获取版本信息
         id: version
@@ -145,81 +108,167 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           else
-            VERSION="${{ github.event.inputs.version || '1.0.5' }}"
+            VERSION="${{ github.event.inputs.version || '1.0.10' }}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          echo "发布版本: $VERSION"
       
-      # 验证Release是否创建成功
-      - name: 验证Release状态
+      # 下载所有构建产物
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      
+      # 整理发布文件
+      - name: 整理发布文件
         run: |
-          echo "=== 验证Release创建状态 ==="
+          mkdir -p release-files
           
-          # 等待Release完全创建
-          sleep 30
+          echo "=== 下载的构建产物 ==="
+          find artifacts/ -type f -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.yml" -o -name "*.blockmap" | sort
           
-          # 检查Release是否存在
+          # 复制所有文件到release目录
+          find artifacts/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.yml" -o -name "*.blockmap" \) -exec cp {} release-files/ \;
+          
+          echo ""
+          echo "=== 准备发布的文件 ==="
+          ls -lah release-files/
+          
+          # 统计文件
+          file_count=$(ls -1 release-files/ | wc -l)
+          total_size=$(du -sh release-files/ | cut -f1)
+          
+          echo ""
+          echo "📊 发布统计:"
+          echo "  文件数量: $file_count"
+          echo "  总大小: $total_size"
+          
+          if [ $file_count -eq 0 ]; then
+            echo "❌ 没有找到可发布的文件"
+            exit 1
+          fi
+      
+      # 生成Release说明
+      - name: 生成Release说明
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 🚀 My Awesome App v${{ steps.version.outputs.version }}
+          
+          ### 📦 平台支持
+          
+          **🪟 Windows**
+          - 支持 Windows 10/11 (x64)
+          - 提供安装程序和便携版本
+          
+          **🍎 macOS**
+          - 支持 Intel 和 Apple Silicon
+          - macOS 10.12+ 系统要求
+          
+          **🐧 Linux**
+          - AppImage 通用版本
+          - Debian/Ubuntu (.deb)
+          - CentOS/Fedora (.rpm)
+          
+          ### 📝 安装指南
+          
+          **Windows:**
+          1. 下载 `.exe` 文件
+          2. 双击运行安装程序
+          3. 如提示安全警告，点击"更多信息" → "仍要运行"
+          
+          **macOS:**
+          1. 下载对应芯片的 `.dmg` 文件
+          2. 双击挂载，拖拽到 Applications 文件夹
+          3. 首次运行可能需要右键"打开"
+          
+          **Linux:**
+          1. 下载 `.AppImage` 文件
+          2. 添加执行权限: `chmod +x *.AppImage`
+          3. 双击或命令行运行
+          
+          ### 🔄 自动更新
+          应用内置自动更新功能，会自动检测和安装新版本。
+          
+          ### 🛠️ 技术信息
+          - **Electron**: 28.3.3
+          - **Node.js**: 18.x
+          - **构建时间**: $(date)
+          
+          ---
+          
+          **🔗 相关链接**
+          - [源代码](https://github.com/${{ github.repository }})
+          - [问题反馈](https://github.com/${{ github.repository }}/issues)
+          - [更新日志](https://github.com/${{ github.repository }}/releases)
+          EOF
+      
+      # 创建Release
+      - name: 创建GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "🎉 My Awesome App v${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: release-files/*
+          make_latest: true
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # 验证Release
+      - name: 验证Release创建
+        run: |
+          echo "等待Release完全创建..."
+          sleep 10
+          
+          echo "=== 验证Release ==="
           response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                           "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.version.outputs.tag }}")
           
           if echo "$response" | jq -e '.tag_name' > /dev/null; then
             echo "✅ Release创建成功"
-            release_name=$(echo "$response" | jq -r '.name')
+            
             release_url=$(echo "$response" | jq -r '.html_url')
-            
-            echo "Release名称: $release_name"
-            echo "Release URL: $release_url"
-            
-            # 检查assets数量
             assets_count=$(echo "$response" | jq '.assets | length')
-            echo "包含文件数量: $assets_count"
             
-            if [ "$assets_count" -gt 0 ]; then
+            echo "🔗 Release URL: $release_url"
+            echo "📦 文件数量: $assets_count"
+            
+            if [ $assets_count -gt 0 ]; then
               echo ""
-              echo "📦 Release文件列表:"
-              echo "$response" | jq -r '.assets[] | "  - \(.name) (\((.size / 1024 / 1024 * 100 | floor) / 100)MB)"'
-            else
-              echo "⚠️ Release创建成功但没有文件"
+              echo "📋 文件列表:"
+              echo "$response" | jq -r '.assets[] | "  ✓ \(.name) (\((.size / 1024 / 1024 * 100 | floor) / 100)MB)"'
             fi
-            
-            # 检查自动更新配置文件
-            echo ""
-            echo "🔍 检查自动更新配置:"
-            if echo "$response" | jq -e '.assets[] | select(.name | test("latest.*\\.yml"))' > /dev/null; then
-              echo "✅ 找到自动更新配置文件"
-            else
-              echo "⚠️ 未找到自动更新配置文件"
-            fi
-            
           else
-            echo "❌ Release创建失败或未找到"
-            echo "API响应: $response"
+            echo "❌ Release验证失败"
+            echo "$response" | jq '.'
             exit 1
           fi
       
-      # 发布成功通知
+      # 成功通知
       - name: 发布成功通知
         run: |
           echo ""
-          echo "🎉 构建和发布流程完成!"
+          echo "🎉🎉🎉 发布成功完成! 🎉🎉🎉"
           echo ""
           echo "📊 发布信息:"
-          echo "  版本: ${{ steps.version.outputs.version }}"
-          echo "  标签: ${{ steps.version.outputs.tag }}"
+          echo "  应用名称: My Awesome App"
+          echo "  版本号: ${{ steps.version.outputs.version }}"
+          echo "  发布标签: ${{ steps.version.outputs.tag }}"
           echo ""
-          echo "🔗 相关链接:"
-          echo "  Release页面: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
-          echo "  Actions页面: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "🔗 下载地址:"
+          echo "  https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
           echo ""
-          echo "📱 用户现在可以从Release页面下载对应平台的安装包!"
-          echo ""
-          echo "🔄 自动更新功能已配置，用户安装后会自动检测新版本。"
+          echo "✨ 用户现在可以下载并安装应用了!"
+          echo "🔄 应用支持自动更新，安装后会自动检测新版本。"
 
   # 清理工件
   cleanup:
-    name: 清理构建工件
-    needs: [build, verify-release]
+    name: 清理临时文件
+    needs: [build, release]
     runs-on: ubuntu-latest
     if: always()
     
@@ -228,10 +277,10 @@ jobs:
         uses: geekyeggo/delete-artifact@v5
         with:
           name: |
-            Windows-build-${{ github.run_number }}
-            macOS-build-${{ github.run_number }}
-            Linux-build-${{ github.run_number }}
+            Windows-v${{ github.run_number }}
+            macOS-v${{ github.run_number }}
+            Linux-v${{ github.run_number }}
         continue-on-error: true
       
       - name: 清理完成
-        run: echo "🧹 构建工件清理完成"
+        run: echo "🧹 临时文件清理完成"
