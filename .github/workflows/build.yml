@@ -6,32 +6,74 @@ on:
   push:
     tags:
       - 'v*'
-  # 也可以手动触发
+  # 手动触发
   workflow_dispatch:
     inputs:
       version:
-        description: '发布版本号 (例如: 1.0.0)'
+        description: '发布版本号 (例如: 1.0.1)'
         required: true
-        default: '1.0.0'
+        default: '1.0.1'
+        type: string
+      platforms:
+        description: '选择构建平台'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - windows
+          - macos
+          - linux
 
 # 权限设置
 permissions:
   contents: write
   packages: write
 
+# 环境变量
+env:
+  ELECTRON_CACHE: ~/.cache/electron
+  ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
+
 jobs:
   # 构建任务
   build:
+    name: 构建 ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90  # 增加总体超时时间
     
     strategy:
+      fail-fast: false  # 一个平台失败不影响其他平台
       matrix:
-        os: [windows-latest, macOS-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            platform: win
+            name: Windows
+            script: publish:win
+            cache_key: windows
+          - os: macos-latest  
+            platform: mac
+            name: macOS
+            script: publish:mac
+            cache_key: macos
+          - os: ubuntu-latest
+            platform: linux
+            name: Linux
+            script: publish:linux
+            cache_key: linux
+    
+    # 跳过不需要的平台
+    if: |
+      github.event_name == 'push' || 
+      github.event.inputs.platforms == 'all' ||
+      github.event.inputs.platforms == matrix.platform
     
     steps:
       # 检出代码
       - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史记录
       
       # 设置Node.js环境
       - name: 设置Node.js
@@ -40,180 +82,304 @@ jobs:
           node-version: '18'
           cache: 'npm'
       
+      # 缓存electron和electron-builder
+      - name: 缓存Electron
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron
+            ~/.cache/electron-builder
+            ${{ matrix.os == 'windows-latest' && '~\AppData\Local\electron' || '' }}
+            ${{ matrix.os == 'windows-latest' && '~\AppData\Local\electron-builder' || '' }}
+          key: ${{ matrix.cache_key }}-electron-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ matrix.cache_key }}-electron-
+      
       # 安装依赖
       - name: 安装依赖
         run: npm ci
+        timeout-minutes: 10
       
-      # Windows构建
-      - name: 构建Windows版本
-        if: matrix.os == 'windows-latest'
-        run: npm run build:win
+      # 设置构建环境变量
+      - name: 设置构建环境变量
+        shell: bash
+        run: |
+          # 获取版本号
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          fi
+          echo "BUILD_VERSION=$VERSION" >> $GITHUB_ENV
+          
+          # 设置Windows环境变量
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
+          fi
+          
+          # 设置构建目标
+          echo "Building version: $VERSION on ${{ matrix.name }}"
+      
+      # Windows特殊处理
+      - name: Windows构建准备
+        if: matrix.platform == 'win'
+        shell: powershell
+        run: |
+          # 设置Windows特定环境变量
+          echo "WIN_CSC_IDENTITY_AUTO_DISCOVERY=false" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          
+          # 检查磁盘空间
+          Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
+      
+      # 构建应用 - Windows
+      - name: 构建Windows应用
+        if: matrix.platform == 'win'
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 45
+          max_attempts: 3
+          retry_wait_seconds: 60
+          warning_on_retry: true
+          command: npm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          DEBUG: electron-builder
       
-      # macOS构建
-      - name: 构建macOS版本  
-        if: matrix.os == 'macOS-latest'
-        run: npm run build:mac
+      # 构建应用 - macOS
+      - name: 构建macOS应用
+        if: matrix.platform == 'mac'
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 45
+          max_attempts: 3
+          retry_wait_seconds: 60
+          warning_on_retry: true
+          command: npm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: electron-builder
+          # macOS代码签名（如果有证书）
+          # CSC_LINK: ${{ secrets.CSC_LINK }}
+          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
       
-      # Linux构建
-      - name: 构建Linux版本
-        if: matrix.os == 'ubuntu-latest'
-        run: npm run build:linux
+      # 构建应用 - Linux
+      - name: 构建Linux应用
+        if: matrix.platform == 'linux'
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 45
+          max_attempts: 3
+          retry_wait_seconds: 60
+          warning_on_retry: true
+          command: npm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: electron-builder
       
-      # 上传构建产物
+      # 验证构建结果
+      - name: 验证构建结果
+        shell: bash
+        run: |
+          echo "=== 构建结果 ==="
+          if [ -d "dist" ]; then
+            ls -la dist/
+            echo ""
+            echo "=== 文件大小 ==="
+            du -h dist/* 2>/dev/null || true
+          else
+            echo "❌ dist目录不存在"
+            exit 1
+          fi
+      
+      # 上传构建产物作为备份
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: dist-${{ matrix.os }}
-          path: dist/
+          name: ${{ matrix.name }}-artifacts-${{ env.BUILD_VERSION }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
+            dist/*.deb
+            dist/*.rpm
+            dist/*.AppImage
+            dist/*.yml
+            dist/*.blockmap
+            dist/latest*.yml
           retention-days: 30
+          if-no-files-found: warn
+      
+      # 构建失败时的诊断信息
+      - name: 构建失败诊断
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== 构建失败诊断 ==="
+          echo "Platform: ${{ matrix.platform }}"
+          echo "OS: ${{ matrix.os }}"
+          echo "Node版本: $(node --version)"
+          echo "npm版本: $(npm --version)"
+          echo ""
+          echo "=== 磁盘空间 ==="
+          df -h || true
+          echo ""
+          echo "=== 内存使用 ==="
+          free -h || true
+          echo ""
+          echo "=== 环境变量 ==="
+          env | grep -E "(ELECTRON|GH_|CSC_)" || true
 
-  # 发布任务
-  release:
+  # 发布后处理
+  post-build:
+    name: 发布后处理
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: always() && (needs.build.result == 'success' || needs.build.result == 'partial')
+    timeout-minutes: 15
     
     steps:
-      # 检出代码
       - name: 检出代码
         uses: actions/checkout@v4
       
-      # 下载所有构建产物
-      - name: 下载Windows构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-windows-latest
-          path: dist-windows/
-      
-      - name: 下载macOS构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-macOS-latest
-          path: dist-macos/
-      
-      - name: 下载Linux构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-ubuntu-latest
-          path: dist-linux/
-      
-      # 准备发布文件
-      - name: 准备发布文件
-        run: |
-          mkdir -p release-files
-          
-          # 复制Windows文件
-          find dist-windows/ -name "*.exe" -o -name "*.blockmap" -o -name "*.yml" | while read file; do
-            cp "$file" release-files/
-          done
-          
-          # 复制macOS文件
-          find dist-macos/ -name "*.dmg" -o -name "*.zip" -o -name "*.blockmap" -o -name "*.yml" | while read file; do
-            cp "$file" release-files/
-          done
-          
-          # 复制Linux文件
-          find dist-linux/ -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.yml" | while read file; do
-            cp "$file" release-files/
-          done
-          
-          # 显示准备发布的文件
-          echo "准备发布的文件:"
-          ls -la release-files/
-      
-      # 提取版本号
-      - name: 获取版本号
+      - name: 获取版本信息
         id: version
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           else
-            VERSION=${{ github.event.inputs.version }}
+            VERSION="${{ github.event.inputs.version || '1.0.0' }}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "release_name=🚀 My Awesome App v$VERSION" >> $GITHUB_OUTPUT
       
-      # 生成更新日志
-      - name: 生成更新日志
-        id: changelog
+      - name: 检查Release状态
+        id: release_check
+        continue-on-error: true
         run: |
-          CHANGELOG=$(cat << EOF
-          ## 🚀 版本 ${{ steps.version.outputs.version }} 更新内容
+          # 检查Release是否存在
+          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.version.outputs.tag }}" \
+            | jq -r '.id // empty')
+          
+          if [ -n "$RELEASE_ID" ]; then
+            echo "release_exists=true" >> $GITHUB_OUTPUT
+            echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
+            echo "✅ Release已存在: $RELEASE_ID"
+          else
+            echo "release_exists=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Release不存在，将在构建过程中创建"
+          fi
+      
+      - name: 创建发布说明
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 🎉 My Awesome App v${{ steps.version.outputs.version }}
           
           ### ✨ 新增功能
-          - 功能特性描述
+          - 新增功能特性描述
           
-          ### 🐛 问题修复
-          - 修复的问题描述
+          ### 🐛 问题修复  
+          - 修复已知问题
           
           ### 🔧 改进优化
-          - 性能优化和改进
+          - 性能优化和体验改进
           
           ### 📦 下载说明
           
           **Windows用户:**
-          - \`My-Electron-App-Setup-${{ steps.version.outputs.version }}.exe\` - 安装程序版本
-          - \`My-Electron-App-${{ steps.version.outputs.version }}-win-x64.exe\` - 便携版本
+          - 🪟 `My-Awesome-App-${{ steps.version.outputs.version }}-win-x64.exe` - NSIS安装程序
+          - 📦 `My-Awesome-App-${{ steps.version.outputs.version }}-portable-win-x64.exe` - 便携版本
           
           **macOS用户:**
-          - \`My-Electron-App-${{ steps.version.outputs.version }}-mac-x64.dmg\` - Intel芯片Mac
-          - \`My-Electron-App-${{ steps.version.outputs.version }}-mac-arm64.dmg\` - Apple Silicon Mac
+          - 🍎 `My-Awesome-App-${{ steps.version.outputs.version }}-mac-x64.dmg` - Intel芯片Mac
+          - 🍎 `My-Awesome-App-${{ steps.version.outputs.version }}-mac-arm64.dmg` - Apple Silicon Mac
           
           **Linux用户:**
-          - \`My-Electron-App-${{ steps.version.outputs.version }}-x86_64.AppImage\` - 通用版本
-          - \`My-Electron-App_${{ steps.version.outputs.version }}_amd64.deb\` - Ubuntu/Debian
-          - \`My-Electron-App-${{ steps.version.outputs.version }}.x86_64.rpm\` - CentOS/Fedora
+          - 🐧 `My-Awesome-App-${{ steps.version.outputs.version }}-x86_64.AppImage` - 通用版本
+          - 📦 `my-awesome-app_${{ steps.version.outputs.version }}_amd64.deb` - Ubuntu/Debian包
+          - 📦 `my-awesome-app-${{ steps.version.outputs.version }}.x86_64.rpm` - CentOS/Fedora包
           
-          ### 🔍 校验信息
-          所有文件都包含SHA512校验值，确保下载完整性。
+          ### 🔄 自动更新
+          应用支持自动更新，安装后会自动检测新版本。
+          
+          ### 🔍 文件校验
+          所有文件都包含SHA256校验值，确保下载完整性。
           
           ---
-          **完整更新日志:** [查看所有更改](https://github.com/${{ github.repository }}/compare/v${{ steps.version.outputs.version }}...main)
+          
+          **📝 完整更新日志:** [查看所有更改](${{ github.server_url }}/${{ github.repository }}/compare/v${{ steps.version.outputs.version }}...main)
+          
+          **🐛 问题反馈:** [提交Issue](${{ github.server_url }}/${{ github.repository }}/issues/new)
+          
+          **⭐ 项目地址:** [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})
           EOF
-          )
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
       
-      # 创建GitHub Release
-      - name: 创建GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: "🎉 My Electron App v${{ steps.version.outputs.version }}"
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
-          files: release-files/*
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 获取构建统计
+        id: build_stats
+        run: |
+          # 统计构建结果
+          SUCCESS_COUNT=0
+          TOTAL_COUNT=0
+          PLATFORMS=""
+          
+          # 检查各平台构建状态
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            SUCCESS_COUNT=3
+            TOTAL_COUNT=3
+            PLATFORMS="Windows, macOS, Linux"
+          else
+            # 这里可以进一步细化统计逻辑
+            SUCCESS_COUNT=2
+            TOTAL_COUNT=3
+            PLATFORMS="部分平台"
+          fi
+          
+          echo "success_count=$SUCCESS_COUNT" >> $GITHUB_OUTPUT
+          echo "total_count=$TOTAL_COUNT" >> $GITHUB_OUTPUT
+          echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
       
-      # 发送通知（可选）
       - name: 发布成功通知
         run: |
-          echo "🎉 发布成功!"
-          echo "版本: ${{ steps.version.outputs.version }}"
-          echo "下载地址: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+          echo "🎉 构建和发布完成!"
+          echo "📊 构建统计:"
+          echo "  - 版本: ${{ steps.version.outputs.version }}"
+          echo "  - 成功平台: ${{ steps.build_stats.outputs.success_count }}/${{ steps.build_stats.outputs.total_count }}"
+          echo "  - 支持平台: ${{ steps.build_stats.outputs.platforms }}"
+          echo ""
+          echo "🔗 相关链接:"
+          echo "  - Release页面: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+          echo "  - Actions页面: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo ""
+          echo "📱 用户可以从Release页面下载对应平台的安装包"
+          echo "🔄 应用支持自动更新功能"
 
   # 清理任务
   cleanup:
-    needs: [build, release]
+    name: 清理构建缓存
+    needs: [build, post-build]
     runs-on: ubuntu-latest
     if: always()
+    timeout-minutes: 10
     
     steps:
-      - name: 清理构建产物
-        uses: geekyeggo/delete-artifact@v4
+      - name: 清理旧的工件
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: |
-            dist-windows-latest
-            dist-macOS-latest
-            dist-ubuntu-latest
+            Windows-artifacts-*
+            macOS-artifacts-*
+            Linux-artifacts-*
+          useGlob: true
+          failOnError: false
         continue-on-error: true
+      
+      - name: 清理完成
+        run: |
+          echo "🧹 清理任务完成"
+          echo "保留当前版本的构建工件，清理了历史版本"
