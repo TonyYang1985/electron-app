@@ -1,6 +1,6 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "基于Electron构建的桌面应用",
    "main": "release/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
@@ -25,11 +25,12 @@
     "prebuild:electron": "npm run build",
 
     "build:electron": "npm run build && electron-builder --config build/electron-builder.config.js",
-    "build:all": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --linux --config build/electron-builder.config.js",
-    "build:all-platforms": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --mac --linux --config build/electron-builder.config.js",
+    "build:all": "npm run build:current-os",
+    "build:current-os": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --config build/electron-builder.config.js",
     "build:win": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --config build/electron-builder.config.js",
     "build:mac": "npm run build && electron-builder --mac --config build/electron-builder.config.js",
     "build:linux": "npm run build && electron-builder --linux --config build/electron-builder.config.js",
+    "build:all-platforms": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --mac --linux --config build/electron-builder.config.js",
   
     "publish": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --publish=always --config build/electron-builder.config.js",
     "publish:win": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --publish=always --config build/electron-builder.config.js",

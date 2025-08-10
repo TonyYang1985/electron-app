@@ -2,7 +2,7 @@
 
 基于Electron构建的跨平台桌面应用。
 
-## 📦 下载安装
+## 下载安装
 
 访问 [Releases页面](https://github.com/TonyYang1985/electron-app/releases) 下载最新版本。
 
@@ -21,14 +21,14 @@
 - 下载 `electron-app-x.x.x.AppImage` 文件
 - 添加执行权限并运行
 
-## ✨ 特性
+## 特性
 
-- 🚀 快速启动和响应
-- 🔄 自动更新功能
-- 🌍 跨平台支持
-- 🎨 现代化界面设计
+- 快速启动和响应
+- 自动更新功能
+- 跨平台支持
+- 现代化界面设计
 
-## 🛠️ 开发
+## 开发
 
 ```bash
 # 克隆项目
@@ -43,11 +43,25 @@ npm start
 # 构建应用
 npm run build
 
+# 构建当前平台
+npm run build:all
+
+# 构建特定平台
+npm run build:win    # Windows
+npm run build:mac    # macOS  
+npm run build:linux  # Linux
+
 # 发布到GitHub Releases
 npm run publish
 ```
 
-## 🚀 快速发布
+### 目录结构
+
+- `src/` - TypeScript 源码
+- `release/` - TypeScript 编译输出
+- `dist/` - Electron 最终打包输出
+
+## 快速发布
 
 1. 设置GitHub Token:
 
@@ -81,6 +95,6 @@ git push origin --delete v1.0.13
 输入版本号，点击 Run workflow
 ```
 
-## 📝 许可证
+## 许可证
 
 MIT License

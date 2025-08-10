@@ -44,6 +44,7 @@ temp/
 
 # TypeScript build artifacts
 dist/
+release/
 *.tsbuildinfo
 
 # Coverage directory used by tools like istanbul

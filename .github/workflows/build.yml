@@ -98,32 +98,10 @@ jobs:
           
           echo "✅ Git环境已清理，electron-builder不会检测到发布条件"
       
-      # Windows构建 - 仅构建不发布
-      - name: Windows构建
-        if: matrix.platform == 'win'
-        shell: cmd
+      # 构建
+      - name: 构建
         run: |
-          set CSC_IDENTITY_AUTO_DISCOVERY=false
-          set ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true
-          npm run build:win
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # macOS构建 - 仅构建不发布
-      - name: macOS构建
-        if: matrix.platform == 'mac'
-        shell: bash
-        run: npm run build:mac
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Linux构建 - 仅构建不发布
-      - name: Linux构建
-        if: matrix.platform == 'linux'
-        shell: bash
-        run: npm run build:linux
+          npm run build:${{ matrix.platform }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
