@@ -54,6 +54,8 @@ jobs:
       # 编译 TypeScript 代码
       - name: 编译 TypeScript
         run: npm run build:all
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       # 验证编译结果
       - name: 验证编译结果
