@@ -60,15 +60,15 @@ jobs:
         shell: bash
         run: |
           echo "=== TypeScript 编译验证 ==="
-          if [ -f "dist/main.js" ]; then
+          if [ -f "release/main.js" ]; then
             echo "✅ main.js 编译成功"
-            ls -la dist/
+            ls -la release/
           else
             echo "❌ TypeScript 编译失败: main.js 不存在"
             exit 1
           fi
           
-          if [ -f "dist/index.html" ]; then
+          if [ -f "release/index.html" ]; then
             echo "✅ index.html 复制成功"
           else
             echo "❌ 资源复制失败: index.html 不存在"
