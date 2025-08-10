@@ -10,6 +10,15 @@ module.exports = {
     "node_modules/**/*",
     "package.json"
   ],
+  extraResources: [
+    {
+      from: "resources",
+      to: "resources",
+      filter: [
+        "**/*"
+      ]
+    }
+  ],
   win: {
     target: [
       {
@@ -21,6 +30,7 @@ module.exports = {
         arch: ["x64"]
       }
     ],
+    icon: "resources/icon.png",
     forceCodeSigning: false,
     verifyUpdateCodeSignature: false,
     requestedExecutionLevel: "asInvoker"
@@ -36,6 +46,7 @@ module.exports = {
         arch: ["x64", "arm64"]
       }
     ],
+    icon: "resources/icon.png",
     category: "public.app-category.productivity"
   },
   linux: {
@@ -53,6 +64,7 @@ module.exports = {
         arch: ["x64"]
       }
     ],
+    icon: "resources/icon.png",
     category: "Utility",
     maintainer: "TonyYang1985 <yangxindev@gmail.com>",
     vendor: "TonyYang1985",
