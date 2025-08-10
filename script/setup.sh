@@ -185,8 +185,8 @@ init_npm() {
   },
   "devDependencies": {
     "electron": "^28.0.0",
-    "electron-builder": "^24.0.0", 
-    "electron-updater": "^6.0.0"
+    "electron-builder": "^26.0.12", 
+    "electron-updater": "^6.3.0"
   }
 }
 EOF
