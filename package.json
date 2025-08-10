@@ -1,8 +1,8 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "基于Electron构建的桌面应用",
-   "main": "release/main.js",
+  "main": "release/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
   "author": {
     "name": "TonyYang1985",
@@ -17,34 +17,22 @@
   "scripts": {
     "start": "npm run build && electron .",
     "dev": "npm run build && electron . --dev",
-
     "compile": "tsc",
-    "copy": "copy src\\index.html release\\index.html",
+    "copy": "cpy src/index.html release/",
     "build": "npm run compile && npm run copy",
-    "clean": "rmdir /s /q release 2>nul || echo cleaned",
-    "prebuild:electron": "npm run build",
-
-    "build:electron": "npm run build && electron-builder --config build/electron-builder.config.js",
-    "build:all": "npm run build:current-os",
-    "build:current-os": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --config build/electron-builder.config.js",
-    "build:win": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --config build/electron-builder.config.js",
+    "clean": "shx rm -rf release",
+    "build:win": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --config build/electron-builder.config.js",
     "build:mac": "npm run build && electron-builder --mac --config build/electron-builder.config.js",
-    "build:linux": "npm run build && electron-builder --linux --config build/electron-builder.config.js",
-    "build:all-platforms": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --mac --linux --config build/electron-builder.config.js",
-  
-    "publish": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --publish=always --config build/electron-builder.config.js",
-    "publish:win": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win --publish=always --config build/electron-builder.config.js",
-    "publish:mac": "npm run build && electron-builder --mac --publish=always --config build/electron-builder.config.js",
-    "publish:linux": "npm run build && electron-builder --linux --publish=always --config build/electron-builder.config.js",
-    "draft": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --publish=onTagOrDraft --config build/electron-builder.config.js",
-    "release": "npm version patch && git push && git push --tags"
+    "build:linux": "npm run build && electron-builder --linux --config build/electron-builder.config.js"
   },
-
   "devDependencies": {
+    "@types/node": "^20.10.0",
+    "cpy-cli": "^5.0.0",
+    "cross-env": "^7.0.3",
     "electron": "^28.0.0",
     "electron-builder": "^26.0.12",
-    "typescript": "^5.3.0",
-    "@types/node": "^20.10.0"
+    "shx": "^0.3.4",
+    "typescript": "^5.3.0"
   },
   "dependencies": {
     "electron-updater": "^6.6.2"
