@@ -6,7 +6,7 @@ module.exports = {
     output: "dist"
   },
   files: [
-    "dist/**/*",
+    "release/**/*",
     "node_modules/**/*",
     "package.json"
   ],
