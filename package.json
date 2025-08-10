@@ -1,6 +1,6 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "基于Electron构建的桌面应用",
   "main": "release/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
@@ -18,7 +18,7 @@
     "start": "npm run build && electron .",
     "dev": "npm run build && electron . --dev",
     "compile": "tsc",
-    "copy": "cpy src/index.html release/",
+    "copy": "shx mkdir -p release && shx cp src/index.html release/index.html",
     "build": "npm run compile && npm run copy",
     "clean": "shx rm -rf release",
     "build:win": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --config build/electron-builder.config.js",
