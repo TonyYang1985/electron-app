@@ -60,6 +60,9 @@ npm run publish
 ```bash
 git tag v1.0.1
 git push origin v1.0.1
+
+git tag -d v1.0.13
+git push origin --delete v1.0.13
 ```
 4. 方法二：手动触发发布:
 ```bash
@@ -69,7 +72,6 @@ git push origin v1.0.1
 点击 Run workflow
 输入版本号，点击 Run workflow
 ```
-
 ## 📝 许可证
 
 MIT License
