@@ -56,17 +56,12 @@ export GH_TOKEN=your_github_token_here
 npm run publish
 ```
 
-3. 或使用标签自动发布:
+3. 方法一：推送标签触发自动发布:
 ```bash
 git tag v1.0.1
 git push origin v1.0.1
 ```
-4. 方法一：推送标签触发:
-```bash
-git tag v1.0.1
-git push origin v1.0.1
-```
-5. 方法二：手动触发:
+4. 方法二：手动触发发布:
 ```bash
 打开GitHub仓库
 点击 Actions 标签
