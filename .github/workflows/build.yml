@@ -51,6 +51,30 @@ jobs:
       - name: 安装依赖
         run: npm ci
       
+      # 编译 TypeScript 代码
+      - name: 编译 TypeScript
+        run: npm run build:all
+        
+      # 验证编译结果
+      - name: 验证编译结果
+        shell: bash
+        run: |
+          echo "=== TypeScript 编译验证 ==="
+          if [ -f "dist/main.js" ]; then
+            echo "✅ main.js 编译成功"
+            ls -la dist/
+          else
+            echo "❌ TypeScript 编译失败: main.js 不存在"
+            exit 1
+          fi
+          
+          if [ -f "dist/index.html" ]; then
+            echo "✅ index.html 复制成功"
+          else
+            echo "❌ 资源复制失败: index.html 不存在"
+            exit 1
+          fi
+      
       # 彻底清理Git环境防止electron-builder检测标签
       - name: 清理Git标签环境
         shell: bash
