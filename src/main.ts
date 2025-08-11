@@ -31,7 +31,7 @@ function createWindow(): void {
       nodeIntegration: true,
       contextIsolation: false
     },
-    icon: path.join(__dirname, '../resources/icon.png'),
+    icon: path.join(__dirname, '../assets/icon.png'),
     show: false
   });
 

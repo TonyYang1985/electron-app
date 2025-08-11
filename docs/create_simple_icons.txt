@@ -3,11 +3,11 @@
 
 Write-Host "正在创建应用图标..." -ForegroundColor Green
 
-# 创建resources目录
-$resourcesDir = "resources"
-if (!(Test-Path $resourcesDir)) {
-    New-Item -ItemType Directory -Path $resourcesDir
-    Write-Host "已创建 $resourcesDir 目录" -ForegroundColor Yellow
+# assets
+$assetsDir = "assets"
+if (!(Test-Path $assetsDir)) {
+    New-Item -ItemType Directory -Path $assetsDir
+    Write-Host "已创建 $assetsDir 目录" -ForegroundColor Yellow
 }
 
 # 方法1: 下载免费图标
@@ -16,7 +16,7 @@ Write-Host "正在下载免费图标..." -ForegroundColor Cyan
 try {
     # 下载一个免费的应用图标（PNG格式）
     $iconUrl = "https://cdn-icons-png.flaticon.com/256/3659/3659898.png"
-    $iconPath = "$resourcesDir\icon.png"
+    $iconPath = "$assetsDir\icon.png"
     
     Invoke-WebRequest -Uri $iconUrl -OutFile $iconPath -ErrorAction Stop
     Write-Host "✅ 已下载图标: $iconPath" -ForegroundColor Green
@@ -63,16 +63,16 @@ $iconReadme = @"
 - linux.icon
 "@
 
-$iconReadme | Out-File -FilePath "$resourcesDir\README.md" -Encoding UTF8
+$iconReadme | Out-File -FilePath "$assetsDir\README.md" -Encoding UTF8
 
-Write-Host "✅ 已创建图标说明文件: $resourcesDir\README.md" -ForegroundColor Green
+Write-Host "✅ 已创建图标说明文件: $assetsDir\README.md" -ForegroundColor Green
 
 # 显示下一步操作
 Write-Host "`n📋 下一步操作：" -ForegroundColor Magenta
 Write-Host "1. 访问 https://www.icoconverter.com/" -ForegroundColor White
 Write-Host "2. 上传一张PNG图片，生成ICO文件" -ForegroundColor White
 Write-Host "3. 下载生成的ICO文件，重命名为 icon.ico" -ForegroundColor White
-Write-Host "4. 将 icon.ico 放入 resources 目录" -ForegroundColor White
+Write-Host "4. 将 icon.ico 放入 assets 目录" -ForegroundColor White
 Write-Host "5. 重新运行构建命令" -ForegroundColor White
 
 Write-Host "`n🚀 或者先跳过图标，直接测试构建：" -ForegroundColor Magenta

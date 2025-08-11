@@ -124,11 +124,11 @@ init_npm() {
     "copyright": "Copyright © 2025 $GITHUB_USERNAME",
     "directories": {
       "output": "dist",
-      "resources": "resources"
+      "assets": "assets"
     },
     "files": [
       "src/**/*",
-      "resources/**/*",
+      "assets/**/*",
       "node_modules/**/*",
       "package.json"
     ],
@@ -151,7 +151,7 @@ init_npm() {
           "arch": ["x64"]
         }
       ],
-      "icon": "resources/icon.ico"
+      "icon": "assets/icon.ico"
     },
     "mac": {
       "target": [
@@ -160,7 +160,7 @@ init_npm() {
           "arch": ["x64", "arm64"]
         }
       ],
-      "icon": "resources/icon.icns",
+      "icon": "assets/icon.icns",
       "category": "public.app-category.productivity"
     },
     "linux": {
@@ -174,7 +174,7 @@ init_npm() {
           "arch": ["x64"]
         }
       ],
-      "icon": "resources/icon.png",
+      "icon": "assets/icon.png",
       "category": "Utility"
     },
     "nsis": {
@@ -206,7 +206,7 @@ create_source_files() {
     print_info "创建源码文件..."
     
     mkdir -p src
-    mkdir -p resources
+    mkdir -p assets
     mkdir -p .github/workflows
     
     # 创建主进程文件
@@ -241,7 +241,7 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: false
     },
-    icon: path.join(__dirname, '../resources/icon.png'),
+    icon: path.join(__dirname, '../assets/icon.png'),
     show: false
   });
 
@@ -513,7 +513,7 @@ SOFTWARE.
 EOF
 
     # 创建简单的图标占位符说明
-    cat > resources/README.md << EOF
+    cat > assets/README.md << EOF
 # 图标文件
 
 请将以下图标文件放置在此目录中：
@@ -615,7 +615,7 @@ show_next_steps() {
     print_info "📚 更多信息请查看 README.md 文件"
     echo
     print_warning "⚠️  注意事项:"
-    echo "   - 请在 resources/ 目录中添加应用图标"
+    echo "   - 请在 assets/ 目录中添加应用图标"
     echo "   - 首次发布前请测试本地构建"
     echo "   - GitHub Actions需要推送代码后才能使用"
 }

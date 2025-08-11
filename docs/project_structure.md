@@ -9,7 +9,7 @@ my-electron-app/
 │   ├── main.js                       # 主进程代码
 │   ├── index.html                    # 渲染进程页面
 │   └── renderer.js                   # 渲染进程脚本(可选)
-├── resources/                        # 应用资源
+├── assets/                        # 应用资源
 │   ├── icon.png                      # Linux图标 (256x256)
 │   ├── icon.ico                      # Windows图标
 │   ├── icon.icns                     # macOS图标
@@ -34,8 +34,8 @@ my-electron-app/
 
 ### 1. 创建图标文件
 ```bash
-# 创建resources目录
-mkdir resources
+# assets
+mkdir assets
 
 # 准备不同格式的图标
 # icon.png - 256x256像素，用于Linux
