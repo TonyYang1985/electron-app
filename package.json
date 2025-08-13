@@ -1,6 +1,8 @@
 {
   "name": "my-awesome-app",
   "version": "1.0.18",
+  "staticVersion": "1.7.16",
+  "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",
   "main": "release/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
@@ -14,7 +16,16 @@
     "type": "git",
     "url": "https://github.com/TonyYang1985/electron-app.git"
   },
+  "config": {
+    "forge": "./config/forge.config.ts"
+  },
   "scripts": {
+    "config:ts:LOCAL": "cross-env API_ENV=LOCAL tsx src/scripts/start.ts",
+    "config:ts:DEV": "cross-env API_ENV=DEV tsx src/scripts/start.ts",
+    "config:ts:SIT": "cross-env API_ENV=SIT tsx src/scripts/start.ts",
+    "config:ts:UAT": "cross-env API_ENV=UAT tsx src/scripts/start.ts",
+    "config:ts:PROD": "cross-env API_ENV=PROD tsx src/scripts/start.ts",
+    "config:ts:DEMO": "cross-env API_ENV=DEMO tsx src/scripts/start.ts",
     "start": "npm run build && electron .",
     "dev": "npm run build && electron . --dev",
     "compile": "tsc",
@@ -26,13 +37,16 @@
     "build:linux": "npm run build && electron-builder --linux --config build/electron-builder.config.js"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@electron-forge/cli": "^7.8.3",
+    "@electron-forge/shared-types": "^7.8.3",
+    "@types/node": "^20.19.10",
     "cpy-cli": "^5.0.0",
     "cross-env": "^7.0.3",
     "electron": "^28.0.0",
     "electron-builder": "^26.0.12",
     "shx": "^0.3.4",
-    "typescript": "^5.3.0"
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "electron-updater": "^6.6.2"

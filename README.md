@@ -95,6 +95,31 @@ git push origin --delete v1.0.13
 输入版本号，点击 Run workflow
 ```
 
+## 时机顺序问题 (最关键)
+
+1. yarn config:LOCAL          # 生成 config.json
+2. electron-forge 启动        # 读取 forge.config.js
+3. forge.config.js 执行        # require('./config.json')
+4. Electron 进程启动           # 使用配置启动
+5. Application 初始化          # 应用运行时
+你的项目实际依赖链：
+
+yarn start
+    ↓
+yarn config:LOCAL (执行 start.js)
+    ↓  
+生成 config.json, icon.ico, electron-builder.json
+    ↓
+electron-forge start  
+    ↓
+读取 forge.config.js
+    ↓
+forge.config.js require('./config.json')  // ← 关键依赖点
+    ↓
+启动 Electron
+    ↓
+执行 main/index.js
+
 ## 许可证
 
 MIT License

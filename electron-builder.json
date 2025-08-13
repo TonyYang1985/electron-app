@@ -1,0 +1,28 @@
+{
+    "extraMetadata": {
+        "name": "bmo-mo-app-demo"
+    },
+    "directories": {
+        "output": "../BMO-MO-APP-RELEASES/DEMO"
+    },
+    "appId": "com.emarineonline.mo.demo",
+    "productName": "Middle Office - DEMO",
+    "copyright": "Copyright 2018 Marine Online Pte. Ltd.",
+    "win": {
+        "target": [
+            {
+                "target": "nsis",
+                "arch": [
+                    "x64",
+                    "ia32"
+                ]
+            }
+        ]
+    },
+    "publish": [
+        {
+            "provider": "generic",
+            "url": "http://minio.bm.bwoilmarine.com/nucleus/my-awesome-app/46002ce4c8d0c2058ec7aa73b55d5746/win32/x64/"
+        }
+    ]
+}

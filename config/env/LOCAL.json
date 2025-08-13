@@ -1,0 +1,8 @@
+{
+    "name": "fot-mo-app-local",
+    "CHANNEL_ID": "36545cd21295b745e13e5b03840f7d0c",
+    "PRODUCT_NAME": "Middle Office - LOCAL",
+    "appBundleId": "com.fot.mo.local",
+    "proxy": "http://mol.dev.fot.com",
+    "API_ENV": "LOCAL"
+}
