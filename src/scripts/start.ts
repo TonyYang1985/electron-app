@@ -112,7 +112,8 @@ export class ConfigurationGenerator {
     try {
       const outputFile = "./config/config.json";
       const mergedConfig = { ...commonConfig, ...envConfig };
-      const configContent = JSON.stringify(mergedConfig);
+     // const configContent = JSON.stringify(mergedConfig);
+      const configContent = JSON.stringify(mergedConfig, null, 2)
 
       await fs.writeFile(outputFile, configContent, "utf8");
       console.log(`📝 运行时配置已生成: ${outputFile}`);

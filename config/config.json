@@ -1,1 +1,8 @@
-{"name":"bmo-mo-app-demo","CHANNEL_ID":"46002ce4c8d0c2058ec7aa73b55d5746","PRODUCT_NAME":"Middle Office - DEMO","appBundleId":"com.emarineonline.mo.demo","proxy":"https://www.demo.emarineonline.com","API_ENV":"DEMO"}
+{
+  "name": "fot-mo-app-local",
+  "CHANNEL_ID": "36545cd21295b745e13e5b03840f7d0c",
+  "PRODUCT_NAME": "Middle Office - LOCAL",
+  "appBundleId": "com.fot.mo.local",
+  "proxy": "http://mol.dev.fot.com",
+  "API_ENV": "LOCAL"
+}

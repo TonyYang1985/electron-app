@@ -1,12 +1,12 @@
 {
     "extraMetadata": {
-        "name": "bmo-mo-app-demo"
+        "name": "fot-mo-app-local"
     },
     "directories": {
-        "output": "../BMO-MO-APP-RELEASES/DEMO"
+        "output": "../BMO-MO-APP-RELEASES/LOCAL"
     },
-    "appId": "com.emarineonline.mo.demo",
-    "productName": "Middle Office - DEMO",
+    "appId": "com.fot.mo.local",
+    "productName": "Middle Office - LOCAL",
     "copyright": "Copyright 2018 Marine Online Pte. Ltd.",
     "win": {
         "target": [
@@ -22,7 +22,7 @@
     "publish": [
         {
             "provider": "generic",
-            "url": "http://minio.bm.bwoilmarine.com/nucleus/my-awesome-app/46002ce4c8d0c2058ec7aa73b55d5746/win32/x64/"
+            "url": "http://minio.bm.bwoilmarine.com/nucleus/my-awesome-app/36545cd21295b745e13e5b03840f7d0c/win32/x64/"
         }
     ]
 }
