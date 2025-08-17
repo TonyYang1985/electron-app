@@ -9,7 +9,8 @@
     "GITHUB_TOKEN",
     "GITHUB_TOKEN_DEMO",
     "GITHUB_RELEASE_TYPE",
-    "PUBLISH_AUTO_UPDATE"
+    "PUBLISH_AUTO_UPDATE",
+    "MO_GITHUB_TOKEN"
   ],
   "FEATURES": {
     "ELECTRON_BUILDER": "支持 Electron Builder 构建配置",
