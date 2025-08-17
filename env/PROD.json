@@ -10,7 +10,7 @@
     "IS_PRERELEASE": "true",
     "GITHUB_OWNER": "TonyYang1985",
     "GITHUB_REPO": "electron-app",
-    "GITHUB_TOKEN": "${MO_GITHUB_TOKEN}",
+    "GITHUB_TOKEN": "xxxx",
     "GITHUB_RELEASE_TYPE": "prerelease",
     "PUBLISH_AUTO_UPDATE": "false",
     "CERTIFICATE_FILE": "",
