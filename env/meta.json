@@ -1,0 +1,64 @@
+{
+  "CONFIG_VERSION": "2.0.0",
+  "LAST_UPDATED": "2025-01-20T12:00:00.000Z",
+  "DESCRIPTION": "Middle Office Platform - Environment Configuration (Modular)",
+  "ENVIRONMENTS": ["LOCAL", "DEV", "SIT", "UAT", "PROD", "DEMO"],
+  "REQUIRED_ENV_VARS": [
+    "GITHUB_OWNER",
+    "GITHUB_REPO", 
+    "GITHUB_TOKEN",
+    "GITHUB_TOKEN_DEMO",
+    "GITHUB_RELEASE_TYPE",
+    "PUBLISH_AUTO_UPDATE"
+  ],
+  "FEATURES": {
+    "ELECTRON_BUILDER": "支持 Electron Builder 构建配置",
+    "MULTI_ENVIRONMENT": "支持开发、预发布、生产三个环境",
+    "CODE_SIGNING": "支持 Windows 和 macOS 代码签名",
+    "AUTO_UPDATE": "支持应用自动更新",
+    "NUCLEUS_ANALYTICS": "集成 Nucleus 分析服务",
+    "GITHUB_RELEASES": "支持 GitHub Releases 发布",
+    "S3_PUBLISHING": "支持 AWS S3 文件发布",
+    "MULTI_PLATFORM": "支持 Windows、macOS、Linux 多平台构建"
+  },
+  "VALIDATION_RULES": {
+    "REQUIRED_FIELDS": [
+      "PRODUCT_NAME",
+      "NAME",
+      "APP_BUNDLE_ID",
+      "VERSION",
+      "BUILD_IDENTIFIER"
+    ],
+    "BOOLEAN_FIELDS": [
+      "IS_PRERELEASE",
+      "ENABLE_CODE_SIGNING",
+      "ENABLE_DEBUG",
+      "ENABLE_DEVTOOLS",
+      "ANALYTICS_ENABLED",
+      "AUTO_UPDATER_ENABLED"
+    ],
+    "URL_FIELDS": [
+      "APP_HOMEPAGE",
+      "API_BASE_URL",
+      "UPDATE_SERVER_DARWIN",
+      "UPDATE_SERVER_WIN32",
+      "CRASH_REPORTER_ENDPOINT",
+      "NUCLEUS_ENDPOINT"
+    ],
+    "FILE_PATH_FIELDS": [
+      "CERTIFICATE_FILE",
+      "ICON_WINDOWS",
+      "ICON_MACOS",
+      "ICON_LINUX",
+      "LOG_FILE_PATH"
+    ]
+  },
+  "NOTES": {
+    "SECURITY": "所有以 ${} 包围的变量需要在系统环境变量中设置",
+    "CERTIFICATES": "代码签名证书文件需要放在 ./certs/ 目录下",
+    "ICONS": "图标文件需要放在 ./assets/ 目录下",
+    "LOGS": "日志目录 ./logs/ 需要确保存在且有写入权限",
+    "VARIABLES": "使用大写命名约定以保持一致性",
+    "ELECTRON_BUILDER": "内置变量 ${os}、${arch}、${ext} 由 Electron Builder 自动提供"
+  }
+}

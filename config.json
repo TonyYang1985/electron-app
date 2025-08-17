@@ -1,8 +1,0 @@
-{
-  "name": "bmo-mo-app-demo",
-  "CHANNEL_ID": "46002ce4c8d0c2058ec7aa73b55d5746",
-  "PRODUCT_NAME": "Middle Office - DEMO",
-  "appBundleId": "com.emarineonline.mo.demo",
-  "proxy": "https://www.demo.emarineonline.com",
-  "API_ENV": "DEMO"
-}

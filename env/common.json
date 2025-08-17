@@ -1,1 +1,30 @@
-{}
+{
+    "PROTOCOL_NAME": "Middle Office Protocol",
+    "PROTOCOL_SCHEMES": "mo",
+    "PLATFORM_WINDOWS_LOADING_GIF": "./assets/loading.gif",
+    "PLATFORM_MACOS_DMG_ICON_SIZE": "80",
+    "PLATFORM_MACOS_DMG_WINDOW_WIDTH": "600",
+    "PLATFORM_MACOS_DMG_WINDOW_HEIGHT": "400",
+    "PLATFORM_LINUX_CATEGORIES": "Office,Finance,Utility",
+    "PLATFORM_LINUX_SECTION": "utils",
+    "PLATFORM_LINUX_PRIORITY": "optional",
+    "PLATFORM_LINUX_LICENSE": "Commercial",
+    "PLATFORM_LINUX_DEB_DEPS": "gconf2,gconf-service,libnotify4,libappindicator1,libxtst6,libnss3",
+    "PLATFORM_LINUX_RPM_DEPS": "gconf2,libnotify,libappindicator-gtk3,libXtst,nss",
+
+    "COMPANY_NAME": "Marine Online Pte Ltd.",
+    "GITHUB_TAG_PREFIX_DEV": "dev-v",
+    "GITHUB_TAG_PREFIX_STAGING": "rc-v",
+    "GITHUB_TAG_PREFIX_PROD": "v",
+    "S3_FOLDER_DEV": "releases/dev/",
+    "S3_FOLDER_STAGING": "releases/staging/",
+    "S3_FOLDER_PROD": "releases/production/",
+    "FUSES_VERSION": "1.0.0",
+    "FUSES_STRICTLY_REQUIRE_ALL": "true",
+    "FUSES_RUN_AS_NODE": "false",
+    "FUSES_ENABLE_COOKIE_ENCRYPTION": "true",
+    "FUSES_ENABLE_NODE_OPTIONS_ENV": "false",
+    "FUSES_ENABLE_NODE_CLI_INSPECT": "false",
+    "FUSES_ENABLE_EMBEDDED_ASAR_INTEGRITY": "true",
+    "FUSES_ONLY_LOAD_APP_FROM_ASAR": "true"
+  }

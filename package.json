@@ -16,10 +16,8 @@
     "type": "git",
     "url": "https://github.com/TonyYang1985/electron-app.git"
   },
-  "config": {
-    "forge": "./config/forge.config.ts"
-  },
   "scripts": {
+    
     "config:ts:LOCAL": "cross-env API_ENV=LOCAL tsx src/scripts/start.ts",
     "config:ts:DEV": "cross-env API_ENV=DEV tsx src/scripts/start.ts",
     "config:ts:SIT": "cross-env API_ENV=SIT tsx src/scripts/start.ts",
@@ -27,17 +25,16 @@
     "config:ts:PROD": "cross-env API_ENV=PROD tsx src/scripts/start.ts",
     "config:ts:DEMO": "cross-env API_ENV=DEMO tsx src/scripts/start.ts",
     
-    "config:forge": "tsx src/scripts/forge.ts",
-
     "start": "npm run build && electron .",
     "dev": "npm run build && electron . --dev",
     "compile": "tsc",
     "copy": "shx mkdir -p release && shx cp src/index.html release/index.html",
-    "build": "npm run compile && npm run copy",
     "clean": "shx rm -rf release",
-    "build:win": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --config build/electron-builder.config.js",
-    "build:mac": "npm run build && electron-builder --mac --config build/electron-builder.config.js",
-    "build:linux": "npm run build && electron-builder --linux --config build/electron-builder.config.js"
+
+    "build": "npm run compile && npm run copy",
+    "build:win": "npm run config:ts:PROD && npm run build && electron-builder --win",
+    "build:mac": "npm run config:ts:PROD && npm run build && electron-builder --mac",
+    "build:linux": "npm run config:ts:PROD && npm run build && electron-builder --linux"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",

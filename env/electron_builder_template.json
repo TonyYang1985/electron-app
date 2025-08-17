@@ -1,9 +1,10 @@
 {
   "// ================== 基础应用信息 ==================": "",
-  "appId": "com.emarineonline.mo.dev",
-  "productName": "Middle Office (Dev)",
-  "copyright": "Copyright © 2025 Marine Online Pte Ltd.",
-  "artifactName": "bmo-mo-app-dev-1.0.18-${os}-${arch}.${ext}",
+  "appId": "${APP_BUNDLE_ID}",
+  "productName": "${PRODUCT_NAME}",
+  "copyright": "Copyright \u00a9 ${YEAR} ${COMPANY_NAME}",
+  "artifactName": "${NAME}-${VERSION}-${os}-${arch}.${ext}",
+  
   "// ================== 代码签名配置 ==================": "",
   "forceCodeSigning": false,
   "codesign": {
@@ -11,12 +12,13 @@
     "autoDiscoverSign": false
   },
   "// ================== 版本和构建信息 ==================": "",
-  "buildVersion": "1",
+  "buildVersion": "${BUILD_NUMBER}",
   "electronVersion": "latest",
+  
   "// ================== 目录和文件配置 ==================": "",
   "directories": {
     "app": "./",
-    "output": "../BMO-MO-APP-RELEASES/DEV",
+    "output": "./dist",
     "buildResources": "./build"
   },
   "files": [
@@ -46,7 +48,7 @@
     "!**/*.tsx",
     "!**/*.map",
     "!test/**/*",
-    "!tests/**/*",
+    "!tests/**/*", 
     "!docs/**/*",
     "!coverage/**/*",
     "!**/*.md",
@@ -86,66 +88,60 @@
     {
       "from": "./assets/",
       "to": "assets/",
-      "filter": [
-        "**/*"
-      ]
+      "filter": ["**/*"]
     },
     {
       "from": "./config/runtime/",
       "to": "config/",
-      "filter": [
-        "**/*.json",
-        "!**/*.template.*"
-      ]
+      "filter": ["**/*.json", "!**/*.template.*"]
     }
   ],
+  
   "// ================== 发布配置 ==================": "",
   "publish": [
     {
       "provider": "github",
-      "owner": "TonyYang1985",
-      "repo": "electron-app",
-      "token": "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",
-      "releaseType": "prerelease",
-      "publishAutoUpdate": "false",
+      "owner": "${GITHUB_OWNER}",
+      "repo": "${GITHUB_REPO}",
+      "token": "${GITHUB_TOKEN}",
+      "releaseType": "${GITHUB_RELEASE_TYPE}",
+      "publishAutoUpdate": "${PUBLISH_AUTO_UPDATE}",
       "vPrefixedTagName": true
     }
   ],
+  
   "// ================== Windows 平台配置 ==================": "",
   "win": {
     "target": [
       {
         "target": "nsis",
-        "arch": [
-          "x64",
-          "ia32"
-        ]
+        "arch": ["x64", "ia32"]
       },
       {
         "target": "portable",
-        "arch": [
-          "x64"
-        ]
+        "arch": ["x64"]
       },
       {
         "target": "msi",
-        "arch": [
-          "x64"
-        ]
+        "arch": ["x64"]
       }
     ],
-    "icon": "./assets/mol-DEV.ico",
+    "icon": "${ICON_WINDOWS}",
     "requestedExecutionLevel": "asInvoker",
-    "signingHashAlgorithms": [
-      "sha256"
-    ],
-    "publisherName": "Marine Online Pte Ltd.",
+    "signAndEditExecutable": "${WIN_SIGN_AND_EDIT}",
+    "signingHashAlgorithms": ["sha256"],
+    "certificateFile": "${CERTIFICATE_FILE}",
+    "certificatePassword": "${CERTIFICATE_PASSWORD}",
+    "publisherName": "${COMPANY_NAME}",
+    "verifyUpdateCodeSignature": "${VERIFY_UPDATE_SIGNATURE}",
+    "rfc3161TimeStampServer": "http://timestamp.digicert.com",
+    "timeStampServer": "http://timestamp.digicert.com",
     "fileAssociations": [
       {
         "ext": "mol",
         "name": "Middle Office Data",
         "description": "Middle Office Data File",
-        "icon": "./assets/mol-DEV.ico"
+        "icon": "${ICON_WINDOWS}"
       }
     ]
   },
@@ -153,21 +149,17 @@
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
     "allowElevation": true,
-    "installerIcon": "./assets/mol-DEV.ico",
-    "uninstallerIcon": "./assets/mol-DEV.ico",
-    "installerHeaderIcon": "./assets/mol-DEV.ico",
+    "installerIcon": "${ICON_WINDOWS}",
+    "uninstallerIcon": "${ICON_WINDOWS}",
+    "installerHeaderIcon": "${ICON_WINDOWS}",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Middle Office (Dev)",
-    "artifactName": "bmo-mo-app-dev-setup-1.0.18.${ext}",
+    "shortcutName": "${PRODUCT_NAME}",
+    "artifactName": "${NAME}-setup-${VERSION}.${ext}",
     "runAfterFinish": true,
     "menuCategory": "Office\\Finance",
     "displayLanguageSelector": true,
-    "installerLanguages": [
-      "en_US",
-      "zh_CN",
-      "zh_TW"
-    ],
+    "installerLanguages": ["en_US", "zh_CN", "zh_TW"],
     "language": "2052",
     "perMachine": false,
     "differentialPackage": true,
@@ -176,48 +168,37 @@
     "deleteAppDataOnUninstall": false
   },
   "portable": {
-    "artifactName": "bmo-mo-app-dev-portable-1.0.18.${ext}",
+    "artifactName": "${NAME}-portable-${VERSION}.${ext}",
     "requestExecutionLevel": "user",
     "splashImage": "./assets/splash.bmp"
   },
   "msi": {
-    "artifactName": "bmo-mo-app-dev-1.0.18.${ext}",
+    "artifactName": "${NAME}-${VERSION}.${ext}",
     "oneClick": false,
-    "upgradeCode": "{D41B5B2D-9F42-9DFE-F27F-E37C93A90F43}",
+    "upgradeCode": "${MSI_UPGRADE_CODE}",
     "warningsAsErrors": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "menuCategory": "Office\\Finance"
   },
+  
   "// ================== macOS 平台配置 ==================": "",
   "mac": {
     "target": [
       {
         "target": "dmg",
-        "arch": [
-          "x64",
-          "arm64",
-          "universal"
-        ]
+        "arch": ["x64", "arm64", "universal"]
       },
       {
         "target": "zip",
-        "arch": [
-          "x64",
-          "arm64",
-          "universal"
-        ]
+        "arch": ["x64", "arm64", "universal"]
       },
       {
         "target": "mas",
-        "arch": [
-          "x64",
-          "arm64",
-          "universal"
-        ]
+        "arch": ["x64", "arm64", "universal"]
       }
     ],
-    "icon": "./assets/mol-DEV.icns",
+    "icon": "${ICON_MACOS}",
     "category": "public.app-category.finance",
     "minimumSystemVersion": "10.15.0",
     "hardenedRuntime": true,
@@ -225,11 +206,11 @@
     "entitlements": "./build/entitlements.mac.plist",
     "entitlementsInherit": "./build/entitlements.mac.plist",
     "provisioningProfile": "./build/embedded.provisionprofile",
-    "bundleVersion": "1",
-    "bundleShortVersion": "1.0.18",
-    "helperBundleId": "com.emarineonline.mo.dev.helper",
+    "bundleVersion": "${BUILD_NUMBER}",
+    "bundleShortVersion": "${VERSION}",
+    "helperBundleId": "${APP_BUNDLE_ID}.helper",
     "type": "distribution",
-    "identity": "Developer ID Application: FOT Company (XXXXXXXXXX)",
+    "identity": "${MAC_IDENTITY}",
     "darkModeSupport": true,
     "mergeASARs": true,
     "fileAssociations": [
@@ -237,19 +218,19 @@
         "ext": "mol",
         "name": "Middle Office Data",
         "description": "Middle Office Data File",
-        "icon": "./assets/mol-DEV.icns",
+        "icon": "${ICON_MACOS}",
         "role": "Editor"
       }
     ]
   },
   "dmg": {
-    "title": "Middle Office (Dev) 1.0.18",
-    "artifactName": "bmo-mo-app-dev-1.0.18.${ext}",
-    "icon": "./assets/mol-DEV.icns",
-    "iconSize": "80",
+    "title": "${PRODUCT_NAME} ${VERSION}",
+    "artifactName": "${NAME}-${VERSION}.${ext}",
+    "icon": "${ICON_MACOS}",
+    "iconSize": "${PLATFORM_MACOS_DMG_ICON_SIZE}",
     "window": {
-      "width": "600",
-      "height": "400"
+      "width": "${PLATFORM_MACOS_DMG_WINDOW_WIDTH}",
+      "height": "${PLATFORM_MACOS_DMG_WINDOW_HEIGHT}"
     },
     "contents": [
       {
@@ -274,58 +255,45 @@
     "entitlementsInherit": "./build/entitlements.mas.inherit.plist",
     "provisioningProfile": "./build/embedded.mas.provisionprofile",
     "binaries": [],
-    "artifactName": "bmo-mo-app-dev-mas-1.0.18.${ext}"
+    "artifactName": "${NAME}-mas-${VERSION}.${ext}"
   },
+  
   "// ================== Linux 平台配置 ==================": "",
   "linux": {
     "target": [
       {
         "target": "AppImage",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
+        "arch": ["x64", "arm64"]
       },
       {
         "target": "deb",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
+        "arch": ["x64", "arm64"]
       },
       {
         "target": "rpm",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
+        "arch": ["x64", "arm64"]
       },
       {
         "target": "snap",
-        "arch": [
-          "x64"
-        ]
+        "arch": ["x64"]
       },
       {
         "target": "tar.xz",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
+        "arch": ["x64", "arm64"]
       }
     ],
-    "icon": "./assets/mol-DEV.png",
-    "category": "Office,Finance,Utility",
-    "maintainer": "Dev@fotcompany.com",
-    "vendor": "Marine Online Pte Ltd.",
-    "synopsis": "A comprehensive middle office solution for financial operations (Dev Version)",
-    "description": "A comprehensive middle office solution for financial operations (Dev Version)",
+    "icon": "${ICON_LINUX}",
+    "category": "${PLATFORM_LINUX_CATEGORIES}",
+    "maintainer": "${AUTHOR_EMAIL}",
+    "vendor": "${COMPANY_NAME}",
+    "synopsis": "${APP_DESCRIPTION}",
+    "description": "${APP_DESCRIPTION}",
     "desktop": {
-      "Name": "Middle Office (Dev)",
-      "Comment": "A comprehensive middle office solution for financial operations (Dev Version)",
+      "Name": "${PRODUCT_NAME}",
+      "Comment": "${APP_DESCRIPTION}",
       "Keywords": "office;finance;middle-office;trading;financial;",
-      "StartupWMClass": "bmo-mo-app-dev",
-      "MimeType": "x-scheme-handler/mo;application/x-middle-office-data;",
+      "StartupWMClass": "${NAME}",
+      "MimeType": "x-scheme-handler/${PROTOCOL_SCHEMES};application/x-middle-office-data;",
       "Categories": "Office;Finance;",
       "StartupNotify": "true"
     },
@@ -339,11 +307,11 @@
     ]
   },
   "deb": {
-    "packageCategory": "utils",
-    "priority": "optional",
-    "depends": "gconf2,gconf-service,libnotify4,libappindicator1,libxtst6,libnss3",
+    "packageCategory": "${PLATFORM_LINUX_SECTION}",
+    "priority": "${PLATFORM_LINUX_PRIORITY}",
+    "depends": "${PLATFORM_LINUX_DEB_DEPS_ARRAY}",
     "compression": "xz",
-    "artifactName": "bmo-mo-app-dev_1.0.18_${arch}.${ext}",
+    "artifactName": "${NAME}_${VERSION}_${arch}.${ext}",
     "fpm": [
       "--deb-user=root",
       "--deb-group=root",
@@ -351,28 +319,28 @@
     ]
   },
   "rpm": {
-    "packageCategory": "Office,Finance,Utility",
-    "license": "Commercial",
-    "requires": "gconf2,libnotify,libappindicator-gtk3,libXtst,nss",
+    "packageCategory": "${PLATFORM_LINUX_CATEGORIES}",
+    "license": "${PLATFORM_LINUX_LICENSE}",
+    "requires": "${PLATFORM_LINUX_RPM_DEPS_ARRAY}",
     "compression": "xz",
-    "artifactName": "bmo-mo-app-dev-1.0.18.${arch}.${ext}",
+    "artifactName": "${NAME}-${VERSION}.${arch}.${ext}",
     "fpm": [
       "--rpm-user=root",
       "--rpm-group=root",
       "--rpm-changelog=CHANGELOG.md",
-      "--rpm-summary=A comprehensive middle office solution for financial operations (Dev Version)"
+      "--rpm-summary=${APP_DESCRIPTION}"
     ]
   },
   "appImage": {
-    "artifactName": "bmo-mo-app-dev-1.0.18.${ext}",
-    "synopsis": "A comprehensive middle office solution for financial operations (Dev Version)",
-    "description": "A comprehensive middle office solution for financial operations (Dev Version)",
-    "category": "Office,Finance,Utility",
-    "license": "Commercial"
+    "artifactName": "${NAME}-${VERSION}.${ext}",
+    "synopsis": "${APP_DESCRIPTION}",
+    "description": "${APP_DESCRIPTION}",
+    "category": "${PLATFORM_LINUX_CATEGORIES}",
+    "license": "${PLATFORM_LINUX_LICENSE}"
   },
   "snap": {
-    "summary": "A comprehensive middle office solution for financial operations (Dev Version)",
-    "description": "A comprehensive middle office solution for financial operations (Dev Version)",
+    "summary": "${APP_DESCRIPTION}",
+    "description": "${APP_DESCRIPTION}",
     "category": "office",
     "grade": "stable",
     "confinement": "strict",
@@ -396,19 +364,19 @@
       "DISABLE_WAYLAND": "1",
       "TMPDIR": "$XDG_RUNTIME_DIR"
     },
-    "artifactName": "bmo-mo-app-dev_1.0.18_${arch}.${ext}",
+    "artifactName": "${NAME}_${VERSION}_${arch}.${ext}",
     "autoStart": true,
     "allowNativeWayland": false
   },
+  
   "// ================== 协议和关联 ==================": "",
   "protocols": [
     {
-      "name": "Middle Office Protocol",
-      "schemes": [
-        "mo"
-      ]
+      "name": "${PROTOCOL_NAME}",
+      "schemes": ["${PROTOCOL_SCHEMES}"]
     }
   ],
+  
   "// ================== 打包和压缩设置 ==================": "",
   "asar": true,
   "asarUnpack": [
@@ -420,18 +388,21 @@
   "compression": "maximum",
   "removePackageScripts": true,
   "nodeGypRebuild": false,
+  
   "// ================== 构建钩子 ==================": "",
   "afterSign": "./scripts/notarize.js",
   "afterPack": "./scripts/after-pack.js",
   "beforeBuild": "./scripts/before-build.js",
   "afterAllArtifactBuild": "./scripts/after-all-artifact-build.js",
+  
   "// ================== 更新和发布设置 ==================": "",
   "detectUpdateChannel": true,
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
     "releaseNotesFile": "CHANGELOG.md",
-    "releaseName": "Middle Office (Dev) v1.0.18"
+    "releaseName": "${PRODUCT_NAME} v${VERSION}"
   },
+  
   "// ================== Electron 配置 ==================": "",
   "electronDownload": {
     "mirror": "https://npmmirror.com/mirrors/electron/",
@@ -441,23 +412,24 @@
   "npmRebuild": true,
   "electronCompile": false,
   "extends": null,
+  
   "// ================== 应用元数据 ==================": "",
   "extraMetadata": {
-    "name": "bmo-mo-app-dev",
-    "version": "1.0.18",
-    "description": "A comprehensive middle office solution for financial operations (Dev Version)",
+    "name": "${NAME}",
+    "version": "${VERSION}",
+    "description": "${APP_DESCRIPTION}",
     "author": {
-      "name": "FOT Company",
-      "email": "Dev@fotcompany.com",
-      "url": "https://Dev.your-domain.com"
+      "name": "${AUTHOR_NAME}",
+      "email": "${AUTHOR_EMAIL}",
+      "url": "${APP_HOMEPAGE}"
     },
-    "homepage": "https://Dev.your-domain.com",
+    "homepage": "${APP_HOMEPAGE}",
     "repository": {
       "type": "git",
-      "url": "https://github.com/TonyYang1985/electron-app.git"
+      "url": "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}.git"
     },
     "bugs": {
-      "url": "https://github.com/TonyYang1985/electron-app/issues"
+      "url": "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/issues"
     },
     "keywords": [
       "electron",
@@ -470,15 +442,15 @@
     "license": "Commercial",
     "main": "./dist/main/main.js",
     "buildInfo": {
-      "buildIdentifier": "Dev",
-      "buildNumber": "1",
-      "buildTimestamp": "2025-08-17T17:08:12.655Z",
-      "gitCommit": "unknown",
-      "gitBranch": "unknown",
-      "environment": "DEV",
-      "isPrerelease": "true",
-      "electronVersion": "latest",
-      "nodeVersion": "v20.17.0"
+      "buildIdentifier": "${BUILD_IDENTIFIER}",
+      "buildNumber": "${BUILD_NUMBER}",
+      "buildTimestamp": "${BUILD_TIMESTAMP}",
+      "gitCommit": "${GIT_COMMIT}",
+      "gitBranch": "${GIT_BRANCH}",
+      "environment": "${NODE_ENV}",
+      "isPrerelease": "${IS_PRERELEASE}",
+      "electronVersion": "${ELECTRON_VERSION}",
+      "nodeVersion": "${NODE_VERSION}"
     },
     "nucleus": {
       "appId": "${NUCLEUS_APP_ID}",
@@ -492,18 +464,18 @@
       "deviceIdEnabled": "${NUCLEUS_DEVICE_ID_ENABLED}"
     },
     "features": {
-      "autoUpdater": "false",
+      "autoUpdater": "${AUTO_UPDATER_ENABLED}",
       "crashReporter": "${CRASH_REPORTER_ENABLED}",
-      "analytics": "true",
-      "codeSigning": "false",
-      "devtools": "true",
-      "debug": "true"
+      "analytics": "${ANALYTICS_ENABLED}",
+      "codeSigning": "${ENABLE_CODE_SIGNING}",
+      "devtools": "${ENABLE_DEVTOOLS}",
+      "debug": "${ENABLE_DEBUG}"
     },
     "urls": {
-      "homepage": "https://Dev.your-domain.com",
-      "support": "https://Dev.your-domain.com/support",
-      "privacy": "https://Dev.your-domain.com/privacy",
-      "terms": "https://Dev.your-domain.com/terms",
+      "homepage": "${APP_HOMEPAGE}",
+      "support": "${APP_HOMEPAGE}/support",
+      "privacy": "${APP_HOMEPAGE}/privacy",
+      "terms": "${APP_HOMEPAGE}/terms",
       "api": "${API_BASE_URL}",
       "updates": {
         "darwin": "${UPDATE_SERVER_DARWIN}",
@@ -511,48 +483,46 @@
       }
     }
   },
+  
   "// ================== 扩展配置 (较少使用) ==================": "",
   "squirrelWindows": {
     "iconUrl": "${ICON_URL}",
-    "loadingGif": "./assets/loading.gif",
+    "loadingGif": "${PLATFORM_WINDOWS_LOADING_GIF}",
     "msi": true,
-    "remoteReleases": "",
+    "remoteReleases": "${SQUIRREL_REMOTE_RELEASES}",
     "useAppIdAsId": true,
-    "artifactName": "bmo-mo-app-dev-setup-1.0.18.${ext}"
+    "artifactName": "${NAME}-setup-${VERSION}.${ext}"
   },
   "nsisWeb": {
-    "appPackageUrl": "",
-    "artifactName": "bmo-mo-app-dev-web-setup-1.0.18.${ext}",
+    "appPackageUrl": "${NSIS_WEB_APP_PACKAGE_URL}",
+    "artifactName": "${NAME}-web-setup-${VERSION}.${ext}",
     "allowElevation": true,
     "oneClick": false
   },
   "appx": {
-    "applicationId": "bmo-mo-app-dev",
-    "artifactName": "bmo-mo-app-dev-1.0.18.${ext}",
-    "displayName": "Middle Office (Dev)",
-    "publisherDisplayName": "Marine Online Pte Ltd.",
-    "identityName": "com.emarineonline.mo.dev",
+    "applicationId": "${NAME}",
+    "artifactName": "${NAME}-${VERSION}.${ext}",
+    "displayName": "${PRODUCT_NAME}",
+    "publisherDisplayName": "${COMPANY_NAME}",
+    "identityName": "${APP_BUNDLE_ID}",
     "backgroundColor": "#ffffff",
     "showNameOnTiles": true,
-    "languages": [
-      "en-US",
-      "zh-CN"
-    ]
+    "languages": ["en-US", "zh-CN"]
   },
   "pkg": {
-    "artifactName": "bmo-mo-app-dev-1.0.18.${ext}",
-    "identity": "Developer ID Installer",
+    "artifactName": "${NAME}-${VERSION}.${ext}",
+    "identity": "${MAC_INSTALLER_IDENTITY}",
     "allowAnywhere": false,
     "allowCurrentUserHome": false,
     "allowRootDirectory": false
   },
   "pacman": {
-    "artifactName": "bmo-mo-app-dev-1.0.18-${arch}.${ext}",
-    "license": "Commercial",
-    "depends": "gconf2,libnotify,libappindicator-gtk3,libXtst,nss"
+    "artifactName": "${NAME}-${VERSION}-${arch}.${ext}",
+    "license": "${PLATFORM_LINUX_LICENSE}",
+    "depends": "${PLATFORM_LINUX_RPM_DEPS_ARRAY}"
   },
   "freebsd": {
-    "artifactName": "bmo-mo-app-dev-1.0.18-${arch}.${ext}",
-    "license": "Commercial"
+    "artifactName": "${NAME}-${VERSION}-${arch}.${ext}",
+    "license": "${PLATFORM_LINUX_LICENSE}"
   }
 }
