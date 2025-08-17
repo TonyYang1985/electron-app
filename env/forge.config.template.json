@@ -1,0 +1,98 @@
+{
+    "$schema": "https://raw.githubusercontent.com/electron/forge/main/packages/shared-types/src/config-schema.json",
+    "packagerConfig": {
+      "asar": true,
+      "name": "${PRODUCT_NAME}",
+      "executableName": "${name}",
+      "appBundleId": "${appBundleId}",
+      "icon": "./assets/mol",
+      "protocols": [
+        {
+          "name": "Middle Office Protocol",
+          "schemes": ["mo"]
+        }
+      ],
+      "ignore": [
+        "^/src/",
+        "^\\.git",
+        "^\\.vscode",
+        "/node_modules/\\.cache",
+        "\\.ts$",
+        "\\.map$",
+        "tsconfig.*\\.json$",
+        "^/config/env/",
+        "generate-.*\\.ts$"
+      ]
+    },
+    "rebuildConfig": {},
+    "makers": [
+      {
+        "name": "@electron-forge/maker-squirrel",
+        "platforms": ["win32"],
+        "config": {
+          "name": "${name}",
+          "authors": "FOT Company",
+          "description": "${PRODUCT_NAME}",
+          "setupIcon": "./assets/mol.ico"
+        }
+      },
+      {
+        "name": "@electron-forge/maker-zip",
+        "platforms": ["darwin"],
+        "config": {
+          "name": "${PRODUCT_NAME}"
+        }
+      },
+      {
+        "name": "@electron-forge/maker-dmg",
+        "platforms": ["darwin"],
+        "config": {
+          "name": "${PRODUCT_NAME}",
+          "icon": "./assets/mol.icns"
+        }
+      },
+      {
+        "name": "@electron-forge/maker-deb",
+        "platforms": ["linux"],
+        "config": {
+          "options": {
+            "maintainer": "FOT Company",
+            "description": "${PRODUCT_NAME}",
+            "icon": "./assets/mol.png",
+            "categories": ["Office", "Finance"]
+          }
+        }
+      },
+      {
+        "name": "@electron-forge/maker-rpm",
+        "platforms": ["linux"],
+        "config": {
+          "options": {
+            "maintainer": "FOT Company",
+            "description": "${PRODUCT_NAME}",
+            "icon": "./assets/mol.png",
+            "categories": ["Office", "Finance"]
+          }
+        }
+      }
+    ],
+    "plugins": [
+      {
+        "name": "@electron-forge/plugin-auto-unpack-natives",
+        "config": {}
+      }
+    ],
+    "publishers": [
+      {
+        "name": "@electron-forge/publisher-github",
+        "config": {
+          "repository": {
+            "owner": "your-username",
+            "name": "your-repo"
+          },
+          "prerelease": false,
+          "draft": true
+        }
+      }
+    ]
+  }

@@ -35,7 +35,6 @@ export class ConfigurationGenerator {
       // 加载配置文件
       const commonConfig = await this.loadCommonConfig();
       const envConfig = await this.loadEnvironmentConfig(environment);
-
       // 生成 electron-builder 配置（仅 Windows）
      // if (process.platform === "win32") {
         await this.generateElectronBuilderConfig(envConfig);
@@ -45,7 +44,6 @@ export class ConfigurationGenerator {
         commonConfig,
         envConfig
       );
-
       console.log(`✅ ${environment} 环境配置生成完成!`);
       return configContent;
     } catch (error) {
@@ -75,7 +73,7 @@ export class ConfigurationGenerator {
    */
   private async loadCommonConfig(): Promise<CommonConfig> {
     try {
-      const configPath = join(process.cwd(), "config/env/common.json");
+      const configPath = join(process.cwd(), "env/common.json");
       const content = await fs.readFile(configPath, "utf8");
       return JSON.parse(content) as CommonConfig;
     } catch (error) {
@@ -92,7 +90,7 @@ export class ConfigurationGenerator {
     environment: Environment
   ): Promise<EnvironmentConfig> {
     try {
-      const configPath = join(process.cwd(), `config/env/${environment}.json`);
+      const configPath = join(process.cwd(), `env/${environment}.json`);
       const content = await fs.readFile(configPath, "utf8");
       return JSON.parse(content) as EnvironmentConfig;
     } catch (error) {
@@ -110,9 +108,8 @@ export class ConfigurationGenerator {
     envConfig: EnvironmentConfig
   ): Promise<string> {
     try {
-      const outputFile = "./config/config.json";
+      const outputFile = "./config.json";
       const mergedConfig = { ...commonConfig, ...envConfig };
-     // const configContent = JSON.stringify(mergedConfig);
       const configContent = JSON.stringify(mergedConfig, null, 2)
 
       await fs.writeFile(outputFile, configContent, "utf8");
@@ -134,23 +131,98 @@ export class ConfigurationGenerator {
   ): Promise<void> {
     try {
       const builderConfig: ElectronBuilderConfig = {
-        extraMetadata: {
-          name: envConfig.name,
-        },
-        directories: {
-          output: `../BMO-MO-APP-RELEASES/${envConfig.API_ENV}`,
-        },
         appId: envConfig.appBundleId,
         productName: envConfig.PRODUCT_NAME,
         copyright: "Copyright 2018 Marine Online Pte. Ltd.",
+        directories: {
+          output: `../BMO-MO-APP-RELEASES/${envConfig.API_ENV}`,
+        },
+        files: [
+          "release/**/*",
+          "node_modules/**/*",
+          "package.json"
+        ],
+        extraResources: [
+          {
+            from: "resources",
+            to: "resources",
+            filter: [
+              "**/*"
+            ]
+          }
+        ],
+        extraMetadata: {
+          name: envConfig.name,
+        },
+
         win: {
           target: [
             {
               target: "nsis",
-              arch: ["x64", "ia32"],
+              arch: ["x64","ia32"]
             },
+            {
+              target: "portable",
+              arch: ["x64"]
+            }
           ],
+          icon: "resources/icon.png",
+          forceCodeSigning: false,
+          verifyUpdateCodeSignature: false,
+          requestedExecutionLevel: "asInvoker"
         },
+
+        mac: {
+          target: [
+            {
+              target: "dmg",
+              arch: ["x64", "arm64"]
+            },
+            {
+              target: "zip",
+              arch: ["x64", "arm64"]
+            }
+          ],
+          icon: "resources/icon.png",
+          category: "public.app-category.productivity"
+        },
+
+        linux: {
+          target: [
+            {
+              target: "AppImage",
+              arch: ["x64"]
+            },
+            {
+              target: "deb",
+              arch: ["x64"]
+            },
+            {
+              target: "rpm",
+              arch: ["x64"]
+            }
+          ],
+          icon: "resources/icon.png",
+          category: "Utility",
+          maintainer: "TonyYang1985 <yangxindev@gmail.com>",
+          vendor: "TonyYang1985",
+          synopsis: "基于Electron构建的现代化桌面应用",
+          description: "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。"
+        },
+        nsis: {
+          oneClick: false,
+          perMachine: false,
+          allowToChangeInstallationDirectory: true,
+          createDesktopShortcut: "always",
+          createStartMenuShortcut: true,
+          shortcutName: "${productName}",
+          deleteAppDataOnUninstall: false,
+          runAfterFinish: true,
+          menuCategory: "应用程序",
+          installerIcon: "resources/icon.ico",
+          uninstallerIcon: "resources/icon.ico"
+        },
+        
         publish: [
           {
             provider: "generic",

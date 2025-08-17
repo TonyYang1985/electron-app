@@ -26,6 +26,9 @@
     "config:ts:UAT": "cross-env API_ENV=UAT tsx src/scripts/start.ts",
     "config:ts:PROD": "cross-env API_ENV=PROD tsx src/scripts/start.ts",
     "config:ts:DEMO": "cross-env API_ENV=DEMO tsx src/scripts/start.ts",
+    
+    "config:forge": "tsx src/scripts/forge.ts",
+
     "start": "npm run build && electron .",
     "dev": "npm run build && electron . --dev",
     "compile": "tsc",
