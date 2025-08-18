@@ -407,7 +407,7 @@
       "financial-platform"
     ],
     "license": "Commercial",
-    "main": "dist/main.js",
+    "main": "release/main.js",
     "buildInfo": {
       "buildIdentifier": "${BUILD_IDENTIFIER}",
       "buildNumber": "${BUILD_NUMBER}",
