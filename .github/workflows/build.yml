@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '发布版本号 (例如: 1.0.15)'
+        description: '发布版本号 (例如: 1.0.18)'
         required: true
-        default: '1.0.15'
+        default: '1.0.18'
 
 permissions:
   contents: write
@@ -51,7 +51,7 @@ jobs:
       - name: 安装依赖
         run: npm ci
       
-      # 编译 TypeScript 代码
+      # 编译 TypeScript 代码和准备文件
       - name: 编译和准备文件
         run: npm run build
         
@@ -176,7 +176,7 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           else
-            VERSION="${{ github.event.inputs.version || '1.0.15' }}"
+            VERSION="${{ github.event.inputs.version || '1.0.18' }}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
@@ -257,7 +257,7 @@ jobs:
           - 便携版本 - 绿色版，无需安装
           
           **🍎 macOS**
-          - Intel Mac (x64) - 支持macOS 10.12+
+          - Intel Mac (x64) - 支持macOS 10.15+
           - Apple Silicon (ARM64) - 原生M系列芯片支持
           
           **🐧 Linux (x64)**
@@ -268,7 +268,7 @@ jobs:
           ### 📝 安装指南
           
           **Windows:**
-          1. 下载 `My-Awesome-App-*-win-x64.exe` (NSIS安装程序)
+          1. 下载 `my-awesome-app-*-win-x64.exe` (NSIS安装程序)
           2. 双击运行，按向导安装
           3. 如遇安全提示，点击"更多信息" → "仍要运行"
           
@@ -290,8 +290,8 @@ jobs:
           
           ### 🛠️ 技术信息
           
-          - **Electron**: 28.3.3
-          - **Node.js**: 18.x  
+          - **Electron**: 28.0.0
+          - **Node.js**: 20.x  
           - **构建平台**: GitHub Actions
           - **构建时间**: $(date)
           
