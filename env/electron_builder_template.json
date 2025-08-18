@@ -1,7 +1,7 @@
 {
   "appId": "${APP_BUNDLE_ID}",
   "productName": "${PRODUCT_NAME}",
-  "copyright": "Copyright © ${YEAR} ${COMPANY_NAME}",
+  "copyright": "Copyright \u00A9 ${YEAR} ${COMPANY_NAME}",
   "artifactName": "${NAME}-${VERSION}-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
   "buildVersion": "${BUILD_NUMBER}",
