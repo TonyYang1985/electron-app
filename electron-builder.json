@@ -1,19 +1,15 @@
 {
-  "// ================== 基础应用信息 ==================": "",
   "appId": "com.emarineonline.mo.dev",
   "productName": "Middle Office (Dev)",
-  "copyright": "Copyright © 2025 Marine Online Pte Ltd.",
+  "copyright": "Copyright 2025 Marine Online Pte Ltd.",
   "artifactName": "bmo-mo-app-dev-1.0.18-${os}-${arch}.${ext}",
-  "// ================== 代码签名配置 ==================": "",
   "forceCodeSigning": false,
   "codesign": {
     "mode": "gateway",
     "autoDiscoverSign": false
   },
-  "// ================== 版本和构建信息 ==================": "",
   "buildVersion": "1",
   "electronVersion": "latest",
-  "// ================== 目录和文件配置 ==================": "",
   "directories": {
     "app": "./",
     "output": "../BMO-MO-APP-RELEASES/DEV",
@@ -99,7 +95,6 @@
       ]
     }
   ],
-  "// ================== 发布配置 ==================": "",
   "publish": [
     {
       "provider": "github",
@@ -111,7 +106,6 @@
       "vPrefixedTagName": true
     }
   ],
-  "// ================== Windows 平台配置 ==================": "",
   "win": {
     "target": [
       {
@@ -189,7 +183,6 @@
     "createStartMenuShortcut": true,
     "menuCategory": "Office\\Finance"
   },
-  "// ================== macOS 平台配置 ==================": "",
   "mac": {
     "target": [
       {
@@ -276,7 +269,6 @@
     "binaries": [],
     "artifactName": "bmo-mo-app-dev-mas-1.0.18.${ext}"
   },
-  "// ================== Linux 平台配置 ==================": "",
   "linux": {
     "target": [
       {
@@ -400,7 +392,6 @@
     "autoStart": true,
     "allowNativeWayland": false
   },
-  "// ================== 协议和关联 ==================": "",
   "protocols": [
     {
       "name": "Middle Office Protocol",
@@ -409,7 +400,6 @@
       ]
     }
   ],
-  "// ================== 打包和压缩设置 ==================": "",
   "asar": true,
   "asarUnpack": [
     "node_modules/ffmpeg-static/**/*",
@@ -420,19 +410,16 @@
   "compression": "maximum",
   "removePackageScripts": true,
   "nodeGypRebuild": false,
-  "// ================== 构建钩子 ==================": "",
   "afterSign": "./scripts/notarize.js",
   "afterPack": "./scripts/after-pack.js",
   "beforeBuild": "./scripts/before-build.js",
   "afterAllArtifactBuild": "./scripts/after-all-artifact-build.js",
-  "// ================== 更新和发布设置 ==================": "",
   "detectUpdateChannel": true,
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
     "releaseNotesFile": "CHANGELOG.md",
     "releaseName": "Middle Office (Dev) v1.0.18"
   },
-  "// ================== Electron 配置 ==================": "",
   "electronDownload": {
     "mirror": "https://npmmirror.com/mirrors/electron/",
     "cache": "./electron-cache"
@@ -441,7 +428,6 @@
   "npmRebuild": true,
   "electronCompile": false,
   "extends": null,
-  "// ================== 应用元数据 ==================": "",
   "extraMetadata": {
     "name": "bmo-mo-app-dev",
     "version": "1.0.18",
@@ -511,7 +497,6 @@
       }
     }
   },
-  "// ================== 扩展配置 (较少使用) ==================": "",
   "squirrelWindows": {
     "iconUrl": "${ICON_URL}",
     "loadingGif": "./assets/loading.gif",

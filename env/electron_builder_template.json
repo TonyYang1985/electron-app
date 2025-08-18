@@ -1,21 +1,15 @@
 {
-  "// ================== 基础应用信息 ==================": "",
   "appId": "${APP_BUNDLE_ID}",
   "productName": "${PRODUCT_NAME}",
   "copyright": "Copyright \u00a9 ${YEAR} ${COMPANY_NAME}",
   "artifactName": "${NAME}-${VERSION}-${os}-${arch}.${ext}",
-  
-  "// ================== 代码签名配置 ==================": "",
   "forceCodeSigning": false,
   "codesign": {
     "mode": "gateway",
     "autoDiscoverSign": false
   },
-  "// ================== 版本和构建信息 ==================": "",
   "buildVersion": "${BUILD_NUMBER}",
   "electronVersion": "latest",
-  
-  "// ================== 目录和文件配置 ==================": "",
   "directories": {
     "app": "./",
     "output": "./dist",
@@ -96,8 +90,6 @@
       "filter": ["**/*.json", "!**/*.template.*"]
     }
   ],
-  
-  "// ================== 发布配置 ==================": "",
   "publish": [
     {
       "provider": "github",
@@ -109,8 +101,6 @@
       "vPrefixedTagName": true
     }
   ],
-  
-  "// ================== Windows 平台配置 ==================": "",
   "win": {
     "target": [
       {
@@ -181,8 +171,6 @@
     "createStartMenuShortcut": true,
     "menuCategory": "Office\\Finance"
   },
-  
-  "// ================== macOS 平台配置 ==================": "",
   "mac": {
     "target": [
       {
@@ -257,8 +245,6 @@
     "binaries": [],
     "artifactName": "${NAME}-mas-${VERSION}.${ext}"
   },
-  
-  "// ================== Linux 平台配置 ==================": "",
   "linux": {
     "target": [
       {
@@ -368,16 +354,12 @@
     "autoStart": true,
     "allowNativeWayland": false
   },
-  
-  "// ================== 协议和关联 ==================": "",
   "protocols": [
     {
       "name": "${PROTOCOL_NAME}",
       "schemes": ["${PROTOCOL_SCHEMES}"]
     }
   ],
-  
-  "// ================== 打包和压缩设置 ==================": "",
   "asar": true,
   "asarUnpack": [
     "node_modules/ffmpeg-static/**/*",
@@ -388,22 +370,16 @@
   "compression": "maximum",
   "removePackageScripts": true,
   "nodeGypRebuild": false,
-  
-  "// ================== 构建钩子 ==================": "",
   "afterSign": "./scripts/notarize.js",
   "afterPack": "./scripts/after-pack.js",
   "beforeBuild": "./scripts/before-build.js",
   "afterAllArtifactBuild": "./scripts/after-all-artifact-build.js",
-  
-  "// ================== 更新和发布设置 ==================": "",
   "detectUpdateChannel": true,
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
     "releaseNotesFile": "CHANGELOG.md",
     "releaseName": "${PRODUCT_NAME} v${VERSION}"
   },
-  
-  "// ================== Electron 配置 ==================": "",
   "electronDownload": {
     "mirror": "https://npmmirror.com/mirrors/electron/",
     "cache": "./electron-cache"
@@ -412,8 +388,6 @@
   "npmRebuild": true,
   "electronCompile": false,
   "extends": null,
-  
-  "// ================== 应用元数据 ==================": "",
   "extraMetadata": {
     "name": "${NAME}",
     "version": "${VERSION}",
@@ -483,8 +457,6 @@
       }
     }
   },
-  
-  "// ================== 扩展配置 (较少使用) ==================": "",
   "squirrelWindows": {
     "iconUrl": "${ICON_URL}",
     "loadingGif": "${PLATFORM_WINDOWS_LOADING_GIF}",
