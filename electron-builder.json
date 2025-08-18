@@ -333,7 +333,7 @@
   "deb": {
     "packageCategory": "utils",
     "priority": "optional",
-    "depends": "gconf2,gconf-service,libnotify4,libappindicator1,libxtst6,libnss3",
+    "depends": ["libnotify4", "libxtst6", "libnss3"],
     "compression": "xz",
     "artifactName": "bmo-mo-app-dev_1.0.18_${arch}.${ext}",
     "fpm": [
@@ -345,7 +345,7 @@
   "rpm": {
     "packageCategory": "Office,Finance,Utility",
     "license": "Commercial",
-    "requires": "gconf2,libnotify,libappindicator-gtk3,libXtst,nss",
+    "depends": ["libnotify", "libXtst", "nss"],
     "compression": "xz",
     "artifactName": "bmo-mo-app-dev-1.0.18.${arch}.${ext}",
     "fpm": [
@@ -534,7 +534,7 @@
   "pacman": {
     "artifactName": "bmo-mo-app-dev-1.0.18-${arch}.${ext}",
     "license": "Commercial",
-    "depends": "gconf2,libnotify,libappindicator-gtk3,libXtst,nss"
+    "depends": ["libnotify", "libxtst", "nss"]
   },
   "freebsd": {
     "artifactName": "bmo-mo-app-dev-1.0.18-${arch}.${ext}",

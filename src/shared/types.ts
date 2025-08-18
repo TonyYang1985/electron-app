@@ -66,6 +66,8 @@ export interface CommonConfig {
   PLATFORM_LINUX_LICENSE: string;
   PLATFORM_LINUX_DEB_DEPS: string;
   PLATFORM_LINUX_RPM_DEPS: string;
+  PLATFORM_LINUX_DEB_DEPS_ARRAY: string[];
+  PLATFORM_LINUX_RPM_DEPS_ARRAY: string[];
 
   // 公司信息
   COMPANY_NAME: string;
@@ -147,6 +149,10 @@ export interface EnvironmentConfig {
 
   // 兼容旧版本字段 (可选)
   API_ENV?: Environment;
+
+  // Linux 依赖配置
+  LINUX_DEB_DEPS_ARRAY: string[];
+  LINUX_RPM_DEPS_ARRAY: string[];
 }
 
 // Package.json 接口

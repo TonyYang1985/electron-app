@@ -31,5 +31,10 @@
   "NSIS_WEB_APP_PACKAGE_URL": "",
   "ANALYTICS_ENABLED": "true",
   "AUTO_UPDATER_ENABLED": "false",
-  "LOG_FILE_PATH": "./logs/app-demo.log"
+  "LOG_FILE_PATH": "./logs/app-demo.log",
+  "PLATFORM_LINUX_DEB_DEPS_ARRAY": ["libnotify4", "libxtst6", "libnss3"],
+  "PLATFORM_LINUX_RPM_DEPS_ARRAY": ["libnotify", "libXtst", "nss"],
+  "PLATFORM_LINUX_SECTION": "utils",
+  "PLATFORM_LINUX_PRIORITY": "optional",
+  "PLATFORM_LINUX_CATEGORIES": "Office,Finance,Utility"
 }

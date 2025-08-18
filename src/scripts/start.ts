@@ -207,8 +207,8 @@ export class ModularElectronBuilderGenerator {
       API_ENV: environment,
       
       // 处理数组类型的依赖
-      PLATFORM_LINUX_DEB_DEPS_ARRAY: this.convertDepsToArray(config.PLATFORM_LINUX_DEB_DEPS),
-      PLATFORM_LINUX_RPM_DEPS_ARRAY: this.convertDepsToArray(config.PLATFORM_LINUX_RPM_DEPS),
+      PLATFORM_LINUX_DEB_DEPS_ARRAY: this.convertDepsToArray(config.PLATFORM_LINUX_DEB_DEPS_ARRAY || config.PLATFORM_LINUX_DEB_DEPS),
+      PLATFORM_LINUX_RPM_DEPS_ARRAY: this.convertDepsToArray(config.PLATFORM_LINUX_RPM_DEPS_ARRAY || config.PLATFORM_LINUX_RPM_DEPS),
       
       // Windows 签名相关
       WIN_SIGN_AND_EDIT: config.ENABLE_CODE_SIGNING === 'true' ? 'true' : 'false',
@@ -373,9 +373,13 @@ export class ModularElectronBuilderGenerator {
   /**
    * 工具函数
    */
-  private convertDepsToArray(depsString?: string): string[] {
-    if (!depsString) return [];
-    return depsString.split(',').map(dep => dep.trim()).filter(dep => dep);
+  private convertDepsToArray(deps?: string | string[]): string[] {
+    if (!deps) return [];
+    if (Array.isArray(deps)) return deps;
+    if (typeof deps === 'string') {
+      return deps.split(',').map(dep => dep.trim()).filter(dep => dep);
+    }
+    return [];
   }
 
   private generateUpgradeCode(appBundleId?: string): string {
