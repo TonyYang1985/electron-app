@@ -1,13 +1,9 @@
 {
   "appId": "${APP_BUNDLE_ID}",
   "productName": "${PRODUCT_NAME}",
-  "copyright": "Copyright \u00a9 ${YEAR} ${COMPANY_NAME}",
+  "copyright": "Copyright © ${YEAR} ${COMPANY_NAME}",
   "artifactName": "${NAME}-${VERSION}-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
-  "codesign": {
-    "mode": "gateway",
-    "autoDiscoverSign": false
-  },
   "buildVersion": "${BUILD_NUMBER}",
   "electronVersion": "latest",
   "directories": {
@@ -119,13 +115,7 @@
     "icon": "${ICON_WINDOWS}",
     "requestedExecutionLevel": "asInvoker",
     "signAndEditExecutable": "${WIN_SIGN_AND_EDIT}",
-    "signingHashAlgorithms": ["sha256"],
-    "certificateFile": "${CERTIFICATE_FILE}",
-    "certificatePassword": "${CERTIFICATE_PASSWORD}",
-    "publisherName": "${COMPANY_NAME}",
     "verifyUpdateCodeSignature": "${VERIFY_UPDATE_SIGNATURE}",
-    "rfc3161TimeStampServer": "http://timestamp.digicert.com",
-    "timeStampServer": "http://timestamp.digicert.com",
     "fileAssociations": [
       {
         "ext": "mol",
@@ -275,13 +265,15 @@
     "synopsis": "${APP_DESCRIPTION}",
     "description": "${APP_DESCRIPTION}",
     "desktop": {
-      "Name": "${PRODUCT_NAME}",
-      "Comment": "${APP_DESCRIPTION}",
-      "Keywords": "office;finance;middle-office;trading;financial;",
-      "StartupWMClass": "${NAME}",
-      "MimeType": "x-scheme-handler/${PROTOCOL_SCHEMES};application/x-middle-office-data;",
-      "Categories": "Office;Finance;",
-      "StartupNotify": "true"
+      "entry": {
+        "Name": "${PRODUCT_NAME}",
+        "Comment": "${APP_DESCRIPTION}",
+        "Keywords": "office;finance;middle-office;trading;financial;",
+        "StartupWMClass": "${NAME}",
+        "MimeType": "x-scheme-handler/${PROTOCOL_SCHEMES};application/x-middle-office-data;",
+        "Categories": "Office;Finance;",
+        "StartupNotify": "true"
+      }
     },
     "fileAssociations": [
       {
@@ -306,8 +298,7 @@
   },
   "rpm": {
     "packageCategory": "${PLATFORM_LINUX_CATEGORIES}",
-    "license": "${PLATFORM_LINUX_LICENSE}",
-    "requires": "${PLATFORM_LINUX_RPM_DEPS_ARRAY}",
+    "depends": "${PLATFORM_LINUX_RPM_DEPS_ARRAY}",
     "compression": "xz",
     "artifactName": "${NAME}-${VERSION}.${arch}.${ext}",
     "fpm": [
@@ -321,8 +312,7 @@
     "artifactName": "${NAME}-${VERSION}.${ext}",
     "synopsis": "${APP_DESCRIPTION}",
     "description": "${APP_DESCRIPTION}",
-    "category": "${PLATFORM_LINUX_CATEGORIES}",
-    "license": "${PLATFORM_LINUX_LICENSE}"
+    "category": "${PLATFORM_LINUX_CATEGORIES}"
   },
   "snap": {
     "summary": "${APP_DESCRIPTION}",
@@ -490,11 +480,9 @@
   },
   "pacman": {
     "artifactName": "${NAME}-${VERSION}-${arch}.${ext}",
-    "license": "${PLATFORM_LINUX_LICENSE}",
     "depends": "${PLATFORM_LINUX_RPM_DEPS_ARRAY}"
   },
   "freebsd": {
-    "artifactName": "${NAME}-${VERSION}-${arch}.${ext}",
-    "license": "${PLATFORM_LINUX_LICENSE}"
+    "artifactName": "${NAME}-${VERSION}-${arch}.${ext}"
   }
 }
