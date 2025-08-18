@@ -1,10 +1,10 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "staticVersion": "1.7.16",
   "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",
-  "main": "./dist/main.js",
+  "main": "release/main.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
   "author": {
     "name": "TonyYang1985",
@@ -17,22 +17,23 @@
     "url": "https://github.com/TonyYang1985/electron-app.git"
   },
   "scripts": {
-    "start": "electron .",
-    "dev": "cross-env NODE_ENV=development tsx src/main/main.ts",
-    "build": "tsc && vite build",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:win": "npm run build && electron-builder --win",
-    "build:linux": "npm run build && electron-builder --linux",
-    "pack": "npm run build && electron-builder",
+    "config:ts:LOCAL": "cross-env API_ENV=LOCAL tsx src/scripts/start.ts",
     "config:ts:DEV": "cross-env API_ENV=DEV tsx src/scripts/start.ts",
+    "config:ts:SIT": "cross-env API_ENV=SIT tsx src/scripts/start.ts",
+    "config:ts:UAT": "cross-env API_ENV=UAT tsx src/scripts/start.ts",
     "config:ts:PROD": "cross-env API_ENV=PROD tsx src/scripts/start.ts",
     "config:ts:DEMO": "cross-env API_ENV=DEMO tsx src/scripts/start.ts",
-    "release": "npm run pack -- --publish always",
-    "postinstall": "electron-builder install-app-deps",
-    "copy": "shx mkdir -p release && shx cp src/index.html release/index.html"
-  },
-  "build": {
-    "appId": "com.emarineonline.mo"
+
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron . --dev",
+    "compile": "tsc",
+    "copy": "shx mkdir -p release && shx cp src/index.html release/index.html",
+    "clean": "shx rm -rf release",
+    
+    "build": "npm run compile && npm run copy",
+    "build:win": "npm run config:ts:PROD && npm run build && electron-builder --win",
+    "build:mac": "npm run config:ts:PROD && npm run build && electron-builder --mac",
+    "build:linux": "npm run config:ts:PROD && npm run build && electron-builder --linux"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",
@@ -46,8 +47,7 @@
     "fs-extra": "^11.3.1",
     "shx": "^0.3.4",
     "tsx": "^4.20.4",
-    "typescript": "^5.9.2",
-    "vite": "^6.3.5"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "app-builder-lib": "^26.0.12",
