@@ -69,7 +69,7 @@ export class ModularElectronBuilderGenerator {
 
       console.log(`✅ Electron Builder 配置生成完成: ${this.outputPath}`);
       console.log(`📦 应用名称: ${processedConfig.PRODUCT_NAME}`);
-      console.log(`🔢 版本号: ${processedConfig.VERSION}`);
+      console.log(`🔢 版本号: ${this.packageInfo.version}`);
       console.log(`🏗️ 构建环境: ${environment}`);
 
     } catch (error) {
@@ -250,13 +250,31 @@ export class ModularElectronBuilderGenerator {
       // 替换模板中的变量
       Object.entries(config).forEach(([key, value]) => {
         const placeholder = `\${${key}}`;
+        
         // 跳过 electron-builder 内置变量
         if (['os', 'arch', 'ext'].includes(key)) {
           return;
         }
-        // 使用简单的字符串替换，避免正则表达式转义问题
+        
+        // 处理数组类型 - 只替换普通占位符，不处理数组占位符
+        if (Array.isArray(value)) {
+          return;
+        }
+        
+        // 处理普通字符串占位符
         template = template.split(placeholder).join(String(value || ''));
       });
+
+      // 单独处理数组占位符，避免被字符串替换覆盖
+      Object.entries(config).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          const arrayPlaceholder = `__ARRAY_${key}__`;
+          template = template.split(arrayPlaceholder).join(JSON.stringify(value));
+        }
+      });
+
+      // 后处理：修复被引号包围的 JSON 数组
+      template = template.replace(/"(\[.*?\])"/g, '$1');
 
       // 验证并解析 JSON
       const builderConfig = JSON.parse(template);
@@ -266,7 +284,6 @@ export class ModularElectronBuilderGenerator {
 
       // 写入配置文件
       await fs.writeFile(this.outputPath, JSON.stringify(builderConfig, null, 2), 'utf8');
-
     } catch (error) {
       throw new Error(
         `从模板生成配置失败: ${error instanceof Error ? error.message : String(error)}`

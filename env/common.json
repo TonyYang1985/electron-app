@@ -9,8 +9,8 @@
     "PLATFORM_LINUX_SECTION": "utils",
     "PLATFORM_LINUX_PRIORITY": "optional",
     "PLATFORM_LINUX_LICENSE": "Commercial",
-    "PLATFORM_LINUX_DEB_DEPS": "gconf2,gconf-service,libnotify4,libappindicator1,libxtst6,libnss3",
-    "PLATFORM_LINUX_RPM_DEPS": "gconf2,libnotify,libappindicator-gtk3,libXtst,nss",
+    "PLATFORM_LINUX_DEB_DEPS": ["libnotify4", "libxtst6", "libnss3"],
+    "PLATFORM_LINUX_RPM_DEPS": ["libnotify", "libXtst", "nss"],
 
     "COMPANY_NAME": "Marine Online Pte Ltd.",
     "GITHUB_TAG_PREFIX_DEV": "dev-v",
