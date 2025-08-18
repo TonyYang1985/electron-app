@@ -26,7 +26,7 @@
   "ICON_MACOS": "./assets/mol-DEMO.icns",
   "ICON_LINUX": "./assets/mol-DEMO.png",
   "MSI_UPGRADE_CODE": "",
-  "MAC_IDENTITY": "Developer ID Application: FOT Company (XXXXXXXXXX)",
+  "MAC_IDENTITY": "FOT Company (XXXXXXXXXX)",
   "SQUIRREL_REMOTE_RELEASES": "",
   "NSIS_WEB_APP_PACKAGE_URL": "",
   "ANALYTICS_ENABLED": "true",

@@ -82,11 +82,6 @@
       "from": "./assets/",
       "to": "assets/",
       "filter": ["**/*"]
-    },
-    {
-      "from": "./config/runtime/",
-      "to": "config/",
-      "filter": ["**/*.json", "!**/*.template.*"]
     }
   ],
   "publish": [
@@ -148,7 +143,7 @@
     "differentialPackage": true,
     "include": "./build/installer.nsh",
     "script": "./build/installer.nsi",
-    "deleteAppDataOnUninstall": false
+    "deleteAppDataOnUninstall": true
   },
   "portable": {
     "artifactName": "${NAME}-portable-${VERSION}.${ext}",
@@ -294,8 +289,6 @@
     "compression": "xz",
     "artifactName": "${NAME}_${VERSION}_${arch}.${ext}",
     "fpm": [
-      "--deb-user=root",
-      "--deb-group=root",
       "--deb-changelog=CHANGELOG.md"
     ]
   },
@@ -305,8 +298,6 @@
     "compression": "xz",
     "artifactName": "${NAME}-${VERSION}.${arch}.${ext}",
     "fpm": [
-      "--rpm-user=root",
-      "--rpm-group=root",
       "--rpm-changelog=CHANGELOG.md",
       "--rpm-summary=${APP_DESCRIPTION}"
     ]
