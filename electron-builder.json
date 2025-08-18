@@ -5,7 +5,7 @@
   "artifactName": "bmo-mo-app-1.0.27-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
   "buildVersion": "1",
-  "electronVersion": "latest",
+  "electronVersion": "28.0.0",
   "directories": {
     "app": "./",
     "output": "../BMO-MO-APP-RELEASES/PROD",
@@ -458,7 +458,7 @@
     "buildInfo": {
       "buildIdentifier": "PROD",
       "buildNumber": "1",
-      "buildTimestamp": "2025-08-18T16:34:15.829Z",
+      "buildTimestamp": "2025-08-18T16:39:27.148Z",
       "gitCommit": "unknown",
       "gitBranch": "unknown",
       "environment": "PROD",
