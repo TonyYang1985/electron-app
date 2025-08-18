@@ -410,10 +410,10 @@
   "compression": "maximum",
   "removePackageScripts": true,
   "nodeGypRebuild": false,
-  "afterSign": "./scripts/notarize.ts",
-  "afterPack": "./scripts/after-pack.ts",
-  "beforeBuild": "./scripts/before-build.ts",
-  "afterAllArtifactBuild": "./scripts/after-all-artifact-build.ts",
+  "afterSign": "tsx ./scripts/notarize.ts",
+  "afterPack": "tsx ./scripts/after-pack.ts",
+  "beforeBuild": "tsx ./scripts/before-build.ts",
+  "afterAllArtifactBuild": "tsx ./scripts/after-all-artifact-build.ts",
   "detectUpdateChannel": true,
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
@@ -458,7 +458,7 @@
     "buildInfo": {
       "buildIdentifier": "PROD",
       "buildNumber": "1",
-      "buildTimestamp": "2025-08-18T15:56:39.677Z",
+      "buildTimestamp": "2025-08-18T16:23:02.669Z",
       "gitCommit": "unknown",
       "gitBranch": "unknown",
       "environment": "PROD",

@@ -1,48 +1,24 @@
-import * as fs from 'fs-extra';
-import * as path from 'path';
-
-interface AfterPackContext {
-  electronPlatformName: string;
-  appOutDir: string;
-  packager: {
-    appInfo: {
-      productFilename: string;
-    };
-  };
-}
+// scripts/after-pack.ts
+import { AfterPackContext } from 'electron-builder';
 
 export default async function afterPack(context: AfterPackContext): Promise<void> {
-  const { electronPlatformName, appOutDir, packager } = context;
+  console.log('📦 After pack hook executed');
+  console.log(`Platform: ${context.packager.platform.name}`);
+  console.log(`Architecture: ${context.arch}`);
+  console.log(`Output directory: ${context.appOutDir}`);
   
-  console.log(`🔧 After pack hook executed for ${electronPlatformName}`);
-  console.log(`📁 App output directory: ${appOutDir}`);
-  console.log(`📦 App name: ${packager.appInfo.productFilename}`);
+  // 在这里添加你的自定义逻辑
+  // 例如：
+  // - 复制额外的文件
+  // - 修改文件权限
+  // - 创建符号链接
   
-  // Add any post-packaging logic here
   try {
-    // Example: Copy additional resources
-    const assetsPath = path.join(appOutDir, '..', '..', 'assets');
-    if (await fs.pathExists(assetsPath)) {
-      console.log('📋 Copying additional assets...');
-      // Add copy logic here if needed
-    }
-    
-    // Example: Platform-specific operations
-    switch (electronPlatformName) {
-      case 'darwin':
-        console.log('🍎 macOS-specific post-pack operations');
-        break;
-      case 'win32':
-        console.log('🪟 Windows-specific post-pack operations');
-        break;
-      case 'linux':
-        console.log('🐧 Linux-specific post-pack operations');
-        break;
-    }
-    
-    console.log('✅ After pack operations completed successfully');
+    // 示例：输出构建信息
+    const packageJson = require('../package.json');
+    console.log(`📋 Application: ${packageJson.name} v${packageJson.version}`);
+    console.log(`🏗️ Build completed for ${context.packager.platform.name}`);
   } catch (error) {
-    console.error('❌ After pack operations failed:', error);
-    throw error;
+    console.error('❌ After pack hook error:', error);
   }
 }

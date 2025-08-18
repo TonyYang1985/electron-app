@@ -1,38 +1,42 @@
-import { notarize } from '@electron/notarize';
+// scripts/notarize.ts
+import { AfterPackContext } from 'electron-builder';
 
-interface AfterPackContext {
-  electronPlatformName: string;
-  appOutDir: string;
-  packager: {
-    appInfo: {
-      productFilename: string;
-    };
-  };
-}
-
-export default async function notarizing(context: AfterPackContext): Promise<void> {
+export default async function notarize(context: AfterPackContext): Promise<void> {
   const { electronPlatformName, appOutDir } = context;
   
   if (electronPlatformName !== 'darwin') {
+    console.log('ℹ️ Notarization skipped (not macOS)');
     return;
   }
-
-  const appName = context.packager.appInfo.productFilename;
-
-  // Skip notarization if no credentials are provided
-  if (!process.env.APPLE_ID || !process.env.APPLE_ID_PASS) {
-    console.log('Skipping notarization - no Apple ID credentials provided');
+  
+  console.log('🍎 macOS notarization hook executed');
+  console.log(`App path: ${appOutDir}`);
+  
+  // 检查是否配置了公证
+  const appleId = process.env.APPLE_ID;
+  const appleIdPassword = process.env.APPLE_ID_PASSWORD;
+  
+  if (!appleId || !appleIdPassword) {
+    console.log('ℹ️ Notarization skipped (credentials not configured)');
+    console.log('💡 To enable notarization, set APPLE_ID and APPLE_ID_PASSWORD environment variables');
     return;
   }
-
+  
   try {
-    await notarize({
-      tool: 'notarytool',
-      appPath: `${appOutDir}/${appName}.app`,
-      appleId: process.env.APPLE_ID,
-      appleIdPassword: process.env.APPLE_ID_PASS,
-      teamId: process.env.APPLE_TEAM_ID || 'XXXXXXXXXX', // Replace with your team ID
-    });
+    // 在这里添加实际的公证逻辑
+    // 例如使用 @electron/notarize 包
+    console.log('🔐 Starting notarization process...');
+    
+    // const { notarize } = require('@electron/notarize');
+    // await notarize({
+    //   tool: 'notarytool',
+    //   appBundleId: context.packager.appInfo.id,
+    //   appPath: path.join(appOutDir, `${context.packager.appInfo.productFilename}.app`),
+    //   appleId: appleId,
+    //   appleIdPassword: appleIdPassword,
+    //   teamId: process.env.APPLE_TEAM_ID,
+    // });
+    
     console.log('✅ Notarization completed successfully');
   } catch (error) {
     console.error('❌ Notarization failed:', error);

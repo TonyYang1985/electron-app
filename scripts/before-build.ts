@@ -1,63 +1,36 @@
-import * as fs from 'fs-extra';
-import * as path from 'path';
-
-interface BeforeBuildContext {
-  electronPlatformName: string;
-  arch: string;
-  appDir: string;
-}
+// scripts/before-build.ts
+import { BeforeBuildContext } from 'electron-builder';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
 export default async function beforeBuild(context: BeforeBuildContext): Promise<void> {
-  const { electronPlatformName, arch, appDir } = context;
-  
-  console.log(`🚀 Before build hook executed for ${electronPlatformName}-${arch}`);
-  console.log(`📁 App directory: ${appDir}`);
+  console.log('🔨 Before build hook executed');
+  console.log(`Platform: ${context.platform.name}`);
+  console.log(`Architecture: ${context.arch}`);
   
   try {
-    // Environment validation
-    console.log('🔍 Validating build environment...');
+    // 示例：确保必要的目录存在
+    const buildDir = join(process.cwd(), 'build');
+    await fs.mkdir(buildDir, { recursive: true });
+    console.log(`📁 Build directory ensured: ${buildDir}`);
     
-    // Check if required directories exist
-    const requiredDirs = ['dist', 'assets'];
-    for (const dir of requiredDirs) {
-      const dirPath = path.join(appDir, dir);
-      if (!(await fs.pathExists(dirPath))) {
-        console.log(`📁 Creating missing directory: ${dir}`);
-        await fs.ensureDir(dirPath);
-      }
+    // 示例：检查必要的资源文件
+    const assetsDir = join(process.cwd(), 'assets');
+    try {
+      await fs.access(assetsDir);
+      console.log('✅ Assets directory found');
+    } catch {
+      console.warn('⚠️ Assets directory not found');
     }
     
-    // Platform-specific pre-build operations
-    switch (electronPlatformName) {
-      case 'darwin':
-        console.log('🍎 macOS pre-build setup');
-        // Add macOS-specific setup here
-        break;
-      case 'win32':
-        console.log('🪟 Windows pre-build setup');
-        // Add Windows-specific setup here
-        break;
-      case 'linux':
-        console.log('🐧 Linux pre-build setup');
-        // Add Linux-specific setup here
-        break;
-    }
+    // 在这里添加你的预构建逻辑
+    // 例如：
+    // - 清理临时文件
+    // - 预处理资源
+    // - 生成配置文件
     
-    // Generate build info
-    const buildInfo = {
-      platform: electronPlatformName,
-      arch,
-      timestamp: new Date().toISOString(),
-      nodeVersion: process.version,
-    };
-    
-    const buildInfoPath = path.join(appDir, 'build-info.json');
-    await fs.writeJson(buildInfoPath, buildInfo, { spaces: 2 });
-    console.log('📝 Build info generated');
-    
-    console.log('✅ Before build operations completed successfully');
   } catch (error) {
-    console.error('❌ Before build operations failed:', error);
-    throw error;
+    console.error('❌ Before build hook error:', error);
+    throw error; // 如果预构建失败，停止构建过程
   }
 }

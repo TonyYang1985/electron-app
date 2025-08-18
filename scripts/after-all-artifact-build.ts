@@ -1,92 +1,60 @@
-import * as fs from 'fs-extra';
-import * as path from 'path';
-import * as crypto from 'crypto';
+// scripts/after-all-artifact-build.ts
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
-interface AfterAllArtifactBuildContext {
-  outDir: string;
-  artifactPaths: string[];
+interface BuildResult {
+  configuration?: {
+    productName?: string;
+  };
   platformToTargets: Map<any, any>;
-  configuration: any;
+  artifactPaths?: string[];
+  outDir: string;
 }
 
-interface ArtifactInfo {
-  name: string;
-  path: string;
-  size: number;
-  checksum: string;
-  platform: string;
-  arch: string;
-}
-
-export default async function afterAllArtifactBuild(context: AfterAllArtifactBuildContext): Promise<void> {
-  const { outDir, artifactPaths, platformToTargets } = context;
-  
-  console.log(`🎉 After all artifact build hook executed`);
-  console.log(`📁 Output directory: ${outDir}`);
-  console.log(`📦 Built artifacts count: ${artifactPaths.length}`);
+export default async function afterAllArtifactBuild(buildResult: BuildResult): Promise<void> {
+  console.log('🎯 After all artifacts build hook executed');
   
   try {
-    const artifactInfos: ArtifactInfo[] = [];
+    // 输出构建结果信息
+    console.log('📊 Build Summary:');
+    console.log(`Configuration: ${buildResult.configuration?.productName}`);
+    console.log(`Output directory: ${buildResult.outDir}`);
     
-    // Process each artifact
-    for (const artifactPath of artifactPaths) {
-      console.log(`🔍 Processing artifact: ${path.basename(artifactPath)}`);
-      
-      const stats = await fs.stat(artifactPath);
-      const fileBuffer = await fs.readFile(artifactPath);
-      const checksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
-      
-      // Extract platform and arch from filename or path
-      const fileName = path.basename(artifactPath);
-      let platform = 'unknown';
-      let arch = 'unknown';
-      
-      if (fileName.includes('darwin') || fileName.includes('mac')) platform = 'darwin';
-      else if (fileName.includes('win') || fileName.includes('.exe')) platform = 'win32';
-      else if (fileName.includes('linux') || fileName.includes('.deb') || fileName.includes('.rpm')) platform = 'linux';
-      
-      if (fileName.includes('x64') || fileName.includes('amd64')) arch = 'x64';
-      else if (fileName.includes('arm64')) arch = 'arm64';
-      else if (fileName.includes('ia32') || fileName.includes('i386')) arch = 'ia32';
-      
-      const artifactInfo: ArtifactInfo = {
-        name: fileName,
-        path: artifactPath,
-        size: stats.size,
-        checksum,
-        platform,
-        arch
-      };
-      
-      artifactInfos.push(artifactInfo);
-      console.log(`  ✅ ${fileName} (${(stats.size / 1024 / 1024).toFixed(2)} MB)`);
+    // 遍历所有平台和目标
+    for (const [platform, targets] of buildResult.platformToTargets) {
+      console.log(`📱 Platform: ${platform}`);
+      if (Array.isArray(targets)) {
+        targets.forEach((target, index) => {
+          console.log(`  🎯 Target ${index + 1}: ${target.name || target.toString()}`);
+        });
+      } else {
+        console.log(`  🎯 Target: ${targets.toString()}`);
+      }
     }
     
-    // Generate build report
-    const buildReport = {
-      buildTime: new Date().toISOString(),
-      totalArtifacts: artifactInfos.length,
-      totalSize: artifactInfos.reduce((sum, info) => sum + info.size, 0),
-      platforms: [...new Set(artifactInfos.map(info => info.platform))],
-      architectures: [...new Set(artifactInfos.map(info => info.arch))],
-      artifacts: artifactInfos
+    // 示例：生成构建报告
+    const reportPath = join(process.cwd(), 'build-report.json');
+    const report = {
+      timestamp: new Date().toISOString(),
+      platforms: Array.from(buildResult.platformToTargets.keys()),
+      targets: Array.from(buildResult.platformToTargets.entries()).map(([platform, targets]) => ({
+        platform,
+        targets: Array.isArray(targets) ? targets.map(t => t.toString()) : [targets.toString()]
+      })),
+      artifactPaths: buildResult.artifactPaths || [],
+      outDir: buildResult.outDir
     };
     
-    const reportPath = path.join(outDir, 'build-report.json');
-    await fs.writeJson(reportPath, buildReport, { spaces: 2 });
-    console.log(`📊 Build report generated: ${reportPath}`);
+    await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
+    console.log(`📄 Build report saved: ${reportPath}`);
     
-    // Generate checksums file
-    const checksumsPath = path.join(outDir, 'checksums.txt');
-    const checksumLines = artifactInfos.map(info => `${info.checksum}  ${info.name}`);
-    await fs.writeFile(checksumsPath, checksumLines.join('\n'));
-    console.log(`🔐 Checksums file generated: ${checksumsPath}`);
-    
-    console.log(`✅ After all artifact build operations completed successfully`);
-    console.log(`📈 Total build size: ${(buildReport.totalSize / 1024 / 1024).toFixed(2)} MB`);
+    // 在这里添加你的后处理逻辑
+    // 例如：
+    // - 上传构建产物
+    // - 发送通知
+    // - 更新版本记录
     
   } catch (error) {
-    console.error('❌ After all artifact build operations failed:', error);
-    throw error;
+    console.error('❌ After all artifacts build hook error:', error);
   }
 }
