@@ -1,7 +1,7 @@
 {
   "appId": "com.emarineonline.mo",
   "productName": "BMO Middle Office",
-  "copyright": "Copyright © 2025 Marine Online Pte Ltd.",
+  "copyright": "Copyright 2025 Marine Online Pte Ltd.",
   "artifactName": "bmo-mo-app-1.0.38-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
   "buildVersion": "1",
@@ -162,27 +162,13 @@
   },
   "msi": {
     "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "allowElevation": true,
-    "installerIcon": "./assets/mol.ico",
-    "uninstallerIcon": "./assets/mol.ico",
-    "installerHeaderIcon": "./assets/mol.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "BMO Middle Office",
     "artifactName": "bmo-mo-app-setup-1.0.38.${ext}",
     "runAfterFinish": true,
     "menuCategory": "Office\\Finance",
-    "displayLanguageSelector": true,
-    "installerLanguages": [
-      "en_US",
-      "zh_CN",
-      "zh_TW"
-    ],
-    "language": "2052",
-    "perMachine": false,
-    "differentialPackage": true,
-    "deleteAppDataOnUninstall": true
+    "perMachine": false
   },
   "mac": {
     "target": [
