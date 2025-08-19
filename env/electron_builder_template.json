@@ -141,8 +141,7 @@
     "perMachine": false,
     "differentialPackage": true,
     "include": "./build/installer.nsh",
-    "script": "./build/installer.nsi",
-    "deleteAppDataOnUninstall": true
+    "script": "./build/installer.nsi"
   },
   "portable": {
     "artifactName": "${NAME}-portable-${VERSION}.${ext}",
@@ -474,7 +473,7 @@
   },
   "pacman": {
     "artifactName": "${NAME}-${VERSION}-${arch}.${ext}",
-    "depends": "__ARRAY_PLATFORM_LINUX_RPM_DEPS_ARRAY__"
+    "depends": "__ARRAY_PLATFORM_LINUX_PACMAN_DEPS_ARRAY__"
   },
   "freebsd": {
     "artifactName": "${NAME}-${VERSION}-${arch}.${ext}"
