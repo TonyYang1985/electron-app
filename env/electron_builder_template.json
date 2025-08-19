@@ -150,14 +150,24 @@
     "splashImage": "./assets/splash.bmp"
   },
   "msi": {
-    "artifactName": "${NAME}-${VERSION}.${ext}",
     "oneClick": false,
-    "upgradeCode": "${MSI_UPGRADE_CODE}",
-    "warningsAsErrors": false,
+    "allowToChangeInstallationDirectory": true,
+    "allowElevation": true,
+    "installerIcon": "${ICON_WINDOWS}",
+    "uninstallerIcon": "${ICON_WINDOWS}",
+    "installerHeaderIcon": "${ICON_WINDOWS}",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
+    "shortcutName": "${PRODUCT_NAME}",
+    "artifactName": "${NAME}-setup-${VERSION}.${ext}",
+    "runAfterFinish": true,
     "menuCategory": "Office\\Finance",
-    "additionalWixArgs": ["-sice:ICE64"]
+    "displayLanguageSelector": true,
+    "installerLanguages": ["en_US", "zh_CN", "zh_TW"],
+    "language": "2052",
+    "perMachine": false,
+    "differentialPackage": true,
+    "deleteAppDataOnUninstall": true
   },
   "mac": {
     "target": [
