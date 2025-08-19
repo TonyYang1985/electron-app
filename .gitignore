@@ -7,9 +7,6 @@ jspm_packages/
 electron-cache/
 dist/
 build/
-!build/installer.nsh
-!build/installer.nsi
-!build/LICENSE_*.md
 out/
 
 # 系统文件
