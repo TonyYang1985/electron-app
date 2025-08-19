@@ -157,7 +157,6 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "menuCategory": "Office\\Finance",
-    "deleteAppDataOnUninstall": true,
     "additionalWixArgs": ["-sice:ICE64"]
   },
   "mac": {
