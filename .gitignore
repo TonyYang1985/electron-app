@@ -6,7 +6,6 @@ jspm_packages/
 # 构建输出
 electron-cache/
 dist/
-build/
 out/
 
 # 系统文件
