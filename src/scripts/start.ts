@@ -239,12 +239,23 @@ export class ModularElectronBuilderGenerator {
       // 读取模板文件
       let template: string;
       if (await this.fileExists(this.templatePath)) {
-        template = await fs.readFile(this.templatePath, 'utf8');
+        template = await fs.readFile(this.templatePath, 'utf-8');
         console.log(`📄 已加载模板: electron_builder_template.json`);
       } else {
         // 如果模板不存在，使用内置模板
         template = this.getBuiltinTemplate();
         console.log(`📄 使用内置模板生成配置`);
+      }
+
+      // 根据环境调整发布配置
+      if (config.publish && Array.isArray(config.publish)) {
+        config.publish.forEach(publishConfig => {
+          if (publishConfig.provider === 'github') {
+            // 移除 token，因为它不应该在这里设置
+            delete (publishConfig as any).token;
+            console.log('🔑 GitHub token removed from publish config for security best practices.');
+          }
+        });
       }
 
       // 替换模板中的变量
@@ -305,6 +316,11 @@ export class ModularElectronBuilderGenerator {
         delete builderConfig.win.rfc3161TimeStampServer;
         delete builderConfig.win.timeStampServer;
         console.log('🔒 Windows 代码签名已禁用');
+      }
+      if (builderConfig.mac) {
+        // 设置为 null 来禁用签名
+        builderConfig.mac.identity = null;
+        console.log('🔒 macOS 代码签名已禁用');
       }
     }
 

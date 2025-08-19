@@ -89,10 +89,9 @@
       "provider": "github",
       "owner": "${GITHUB_OWNER}",
       "repo": "${GITHUB_REPO}",
-      "token": "${GITHUB_TOKEN}",
-      "releaseType": "${GITHUB_RELEASE_TYPE}",
-      "publishAutoUpdate": "${PUBLISH_AUTO_UPDATE}",
-      "vPrefixedTagName": true
+      "releaseType": "__STRING_GITHUB_RELEASE_TYPE__",
+      "publishAutoUpdate": true,
+      "channel": "latest"
     }
   ],
   "win": {
@@ -157,7 +156,9 @@
     "warningsAsErrors": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "menuCategory": "Office\\Finance"
+    "menuCategory": "Office\\Finance",
+    "deleteAppDataOnUninstall": true,
+    "additionalWixArgs": ["-sice:ICE64"]
   },
   "mac": {
     "target": [
