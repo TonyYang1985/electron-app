@@ -28,8 +28,8 @@ assets/
 ├── mol-SIT.icns                    # macOS 图标 (SIT环境)
 ├── mol-UAT.ico                     # Windows 图标 (UAT环境)
 ├── mol-UAT.icns                    # macOS 图标 (UAT环境)
-├── loading.gif                     # Windows 加载动画
-└── splash.bmp                      # 便携版启动画面
+├── loading.gif                     # Windows 加载动画（缺少）
+└── splash.png                      # 便携版启动画面
 ```
 
 ### scripts/ 目录

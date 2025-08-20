@@ -1,5 +1,5 @@
 !include "MUI2.nsh"
-
+!include "LogicLib.nsh"
 
 ; Language strings for custom dialogs
 LangString AppRunning ${LANG_ENGLISH} "${PRODUCT_NAME} is currently running. Please close it before continuing."
@@ -21,7 +21,7 @@ LangString ConfirmDelete ${LANG_TRADCHINESE} "您要刪除所有應用程式資�
     MessageBox MB_OK|MB_ICONEXCLAMATION "$(AppRunning)"
     Abort
   ${EndIf}
-  !system "echo 'Running custom NSIS installation tasks'"
+  ; Custom installation tasks completed
 !macroend
 
 !macro customUnInstall
@@ -40,5 +40,17 @@ LangString ConfirmDelete ${LANG_TRADCHINESE} "您要刪除所有應用程式資�
     RMDir /r "$APPDATA\${PRODUCT_NAME}"
     
   skipDeleteData:
-  !system "echo 'Running custom NSIS uninstallation tasks'"
+  ; Custom uninstallation tasks completed
 !macroend
+
+; REQUIRED: Main installation section
+Section "MainSection" SEC01
+  ; This section will be populated by electron-builder
+  ; The customInstall macro will be called automatically
+SectionEnd
+
+; REQUIRED: Uninstaller section
+Section "Uninstall"
+  ; This section will be populated by electron-builder
+  ; The customUnInstall macro will be called automatically
+SectionEnd

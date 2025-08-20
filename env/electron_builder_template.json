@@ -8,69 +8,18 @@
   "electronVersion": "28.0.0",
   "files": [
     "release/**/*",
-    "node_modules/**/*",
     "package.json",
-    "**/*",
-    "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-    "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}/**",
-    "!**/node_modules/*.d.ts",
-    "!**/node_modules/.bin/**",
-    "!**/node_modules/*/docs/**",
-    "!**/node_modules/*/coverage/**",
-    "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-    "!.editorconfig",
-    "!**/._*",
-    "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
-    "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
-    "!**/.vscode/**",
-    "!**/.history/**",
-    "!**/{appveyor.yml,.travis.yml,circle.yml,.github}/**",
-    "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
-    "!**/package-lock.json",
-    "!**/.npmrc",
-    "!**/.yarnrc*",
+    "!node_modules/**/*",
     "!src/**/*",
-    "!**/tsconfig.json",
-    "!**/tsconfig.*.json",
-    "!**/*.ts",
-    "!**/*.tsx",
-    "!**/*.map",
     "!test/**/*",
-    "!tests/**/*", 
+    "!tests/**/*",
     "!docs/**/*",
     "!coverage/**/*",
-    "!**/*.md",
-    "!**/LICENSE*",
-    "!**/CHANGELOG*",
-    "!forge.config.*",
-    "!electron-builder.*",
-    "!env.config.json",
-    "!config/**/*.json",
-    "!scripts/build/**/*",
-    "!webpack.*.js",
-    "!rollup.*.js",
-    "!vite.*.js",
-    "!jest.config.*",
-    "!vitest.config.*",
-    "!playwright.config.*",
-    "!.eslintrc*",
-    "!.prettierrc*",
-    "!.stylelintrc*",
-    "!.commitlintrc*",
-    "!.huskyrc*",
-    "!.lintstagedrc*",
-    "!**/.eslintcache",
-    "!.env*",
-    "!.dockerignore",
-    "!Dockerfile*",
-    "!docker-compose*",
-    "!.gitlab-ci.yml",
-    "!**/tmp/**",
-    "!**/temp/**",
-    "!**/.cache/**",
-    "!**/node_modules/.cache/**",
-    "!**/*.log",
-    "!**/*.tmp"
+    "!**/*.{ts,tsx,md,map,log}",
+    "!**/{.git,.vscode,.cache,tmp,temp}/**",
+    "!**/.*rc*",
+    "!**/*config.*",
+    "!**/*.config.*"
   ],
   "directories": {
     "app": "./",
@@ -88,17 +37,14 @@
     {
       "provider": "github",
       "owner": "${GITHUB_OWNER}",
-      "repo": "${GITHUB_REPO}",
-      "releaseType": "__STRING_GITHUB_RELEASE_TYPE__",
-      "publishAutoUpdate": true,
-      "channel": "latest"
+      "repo": "${GITHUB_REPO}"
     }
   ],
   "win": {
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64", "ia32"]
+        "arch": ["x64"]
       },
       {
         "target": "portable",
@@ -137,16 +83,17 @@
     "menuCategory": "Office\\Finance",
     "displayLanguageSelector": true,
     "installerLanguages": ["en_US", "zh_CN", "zh_TW"],
-    "language": "2052",
+    "language": "1033",
     "perMachine": false,
     "differentialPackage": true,
     "include": "./build/installer.nsh",
-    "script": "./build/installer.nsi"
+    "script": "./build/installer.nsi",
+    "warningsAsErrors": false
   },
   "portable": {
     "artifactName": "${NAME}-portable-${VERSION}.${ext}",
     "requestExecutionLevel": "user",
-    "splashImage": "./assets/splash.bmp"
+    "splashImage": "./assets/splash.png"
   },
   "msi": {
     "artifactName": "${NAME}-${VERSION}.${ext}",
