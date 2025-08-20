@@ -1,7 +1,7 @@
 {
   "appId": "com.emarineonline.mo",
   "productName": "BMO Middle Office",
-  "copyright": "Copyright © 2025 Marine Online Pte Ltd.",
+  "copyright": "Copyright 2025 Marine Online Pte Ltd.",
   "artifactName": "bmo-mo-app-1.0.46-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
   "buildVersion": "1",
@@ -211,12 +211,6 @@
         ]
       },
       {
-        "target": "snap",
-        "arch": [
-          "x64"
-        ]
-      },
-      {
         "target": "tar.xz",
         "arch": [
           "x64",
@@ -283,36 +277,6 @@
     "synopsis": "A comprehensive middle office solution for financial operations (PROD Version)",
     "description": "A comprehensive middle office solution for financial operations (PROD Version)",
     "category": "Office,Finance,Utility"
-  },
-  "snap": {
-    "summary": "A comprehensive middle office solution for financial operations (PROD Version)",
-    "description": "A comprehensive middle office solution for financial operations (PROD Version)",
-    "category": "office",
-    "grade": "stable",
-    "confinement": "strict",
-    "base": "core20",
-    "plugs": [
-      "default",
-      "home",
-      "network",
-      "network-bind",
-      "removable-media",
-      "screen-inhibit-control",
-      "x11",
-      "unity7",
-      "browser-support",
-      "gsettings",
-      "audio-playback",
-      "desktop",
-      "desktop-legacy"
-    ],
-    "environment": {
-      "DISABLE_WAYLAND": "1",
-      "TMPDIR": "$XDG_RUNTIME_DIR"
-    },
-    "artifactName": "bmo-mo-app_1.0.46_${arch}.${ext}",
-    "autoStart": true,
-    "allowNativeWayland": false
   },
   "protocols": [
     {

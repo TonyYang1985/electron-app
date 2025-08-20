@@ -183,10 +183,6 @@
         "arch": ["x64", "arm64"]
       },
       {
-        "target": "snap",
-        "arch": ["x64"]
-      },
-      {
         "target": "tar.xz",
         "arch": ["x64", "arm64"]
       }
@@ -242,36 +238,6 @@
     "synopsis": "${APP_DESCRIPTION}",
     "description": "${APP_DESCRIPTION}",
     "category": "${PLATFORM_LINUX_CATEGORIES}"
-  },
-  "snap": {
-    "summary": "${APP_DESCRIPTION}",
-    "description": "${APP_DESCRIPTION}",
-    "category": "office",
-    "grade": "stable",
-    "confinement": "strict",
-    "base": "core20",
-    "plugs": [
-      "default",
-      "home",
-      "network",
-      "network-bind",
-      "removable-media",
-      "screen-inhibit-control",
-      "x11",
-      "unity7",
-      "browser-support",
-      "gsettings",
-      "audio-playback",
-      "desktop",
-      "desktop-legacy"
-    ],
-    "environment": {
-      "DISABLE_WAYLAND": "1",
-      "TMPDIR": "$XDG_RUNTIME_DIR"
-    },
-    "artifactName": "${NAME}_${VERSION}_${arch}.${ext}",
-    "autoStart": true,
-    "allowNativeWayland": false
   },
   "protocols": [
     {
