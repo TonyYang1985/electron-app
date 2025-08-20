@@ -2,7 +2,7 @@
   "appId": "com.emarineonline.mo",
   "productName": "BMO Middle Office",
   "copyright": "Copyright © 2025 Marine Online Pte Ltd.",
-  "artifactName": "bmo-mo-app-1.0.44-${os}-${arch}.${ext}",
+  "artifactName": "bmo-mo-app-1.0.46-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
   "buildVersion": "1",
   "electronVersion": "28.0.0",
@@ -85,7 +85,7 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "BMO Middle Office",
-    "artifactName": "bmo-mo-app-setup-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-setup-1.0.46.${ext}",
     "runAfterFinish": true,
     "menuCategory": "Office\\Finance",
     "displayLanguageSelector": true,
@@ -102,12 +102,12 @@
     "warningsAsErrors": false
   },
   "portable": {
-    "artifactName": "bmo-mo-app-portable-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-portable-1.0.46.${ext}",
     "requestExecutionLevel": "user",
     "splashImage": "./assets/splash.png"
   },
   "msi": {
-    "artifactName": "bmo-mo-app-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-1.0.46.${ext}",
     "oneClick": false,
     "upgradeCode": "{447A4DE8-3ACA-972C-A94B-5E7CC2B752CB}",
     "warningsAsErrors": false,
@@ -124,24 +124,14 @@
         "target": "dmg",
         "arch": [
           "x64",
-          "arm64",
-          "universal"
+          "arm64"
         ]
       },
       {
         "target": "zip",
         "arch": [
           "x64",
-          "arm64",
-          "universal"
-        ]
-      },
-      {
-        "target": "mas",
-        "arch": [
-          "x64",
-          "arm64",
-          "universal"
+          "arm64"
         ]
       }
     ],
@@ -154,12 +144,12 @@
     "entitlementsInherit": "./build/entitlements.mac.plist",
     "provisioningProfile": "./build/embedded.provisionprofile",
     "bundleVersion": "1",
-    "bundleShortVersion": "1.0.44",
+    "bundleShortVersion": "1.0.46",
     "helperBundleId": "com.emarineonline.mo.helper",
     "type": "distribution",
     "identity": null,
     "darkModeSupport": true,
-    "mergeASARs": true,
+    "mergeASARs": false,
     "fileAssociations": [
       {
         "ext": "mol",
@@ -171,8 +161,8 @@
     ]
   },
   "dmg": {
-    "title": "BMO Middle Office 1.0.44",
-    "artifactName": "bmo-mo-app-1.0.44.${ext}",
+    "title": "BMO Middle Office 1.0.46",
+    "artifactName": "bmo-mo-app-1.0.46.${ext}",
     "icon": "./assets/mol.icns",
     "iconSize": "80",
     "window": {
@@ -192,17 +182,10 @@
       }
     ],
     "backgroundColor": "#ffffff",
-    "format": "ULFO",
+    "format": "UDBZ",
     "writeUpdateInfo": true,
-    "sign": true
-  },
-  "mas": {
-    "category": "public.app-category.finance",
-    "entitlements": "./build/entitlements.mas.plist",
-    "entitlementsInherit": "./build/entitlements.mas.inherit.plist",
-    "provisioningProfile": "./build/embedded.mas.provisionprofile",
-    "binaries": [],
-    "artifactName": "bmo-mo-app-mas-1.0.44.${ext}"
+    "sign": false,
+    "internetEnabled": false
   },
   "linux": {
     "target": [
@@ -276,7 +259,7 @@
       "libnss3"
     ],
     "compression": "xz",
-    "artifactName": "bmo-mo-app_1.0.44_${arch}.${ext}",
+    "artifactName": "bmo-mo-app_1.0.46_${arch}.${ext}",
     "fpm": [
       "--deb-changelog=CHANGELOG.md"
     ]
@@ -289,14 +272,14 @@
       "nss"
     ],
     "compression": "xz",
-    "artifactName": "bmo-mo-app-1.0.44.${arch}.${ext}",
+    "artifactName": "bmo-mo-app-1.0.46.${arch}.${ext}",
     "fpm": [
       "--rpm-changelog=CHANGELOG.md",
       "--rpm-summary=A comprehensive middle office solution for financial operations (PROD Version)"
     ]
   },
   "appImage": {
-    "artifactName": "bmo-mo-app-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-1.0.46.${ext}",
     "synopsis": "A comprehensive middle office solution for financial operations (PROD Version)",
     "description": "A comprehensive middle office solution for financial operations (PROD Version)",
     "category": "Office,Finance,Utility"
@@ -327,7 +310,7 @@
       "DISABLE_WAYLAND": "1",
       "TMPDIR": "$XDG_RUNTIME_DIR"
     },
-    "artifactName": "bmo-mo-app_1.0.44_${arch}.${ext}",
+    "artifactName": "bmo-mo-app_1.0.46_${arch}.${ext}",
     "autoStart": true,
     "allowNativeWayland": false
   },
@@ -357,7 +340,7 @@
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
     "releaseNotesFile": "CHANGELOG.md",
-    "releaseName": "BMO Middle Office v1.0.44"
+    "releaseName": "BMO Middle Office v1.0.46"
   },
   "electronDownload": {
     "mirror": "https://npmmirror.com/mirrors/electron/",
@@ -369,7 +352,7 @@
   "extends": null,
   "extraMetadata": {
     "name": "bmo-mo-app",
-    "version": "1.0.44",
+    "version": "1.0.46",
     "description": "A comprehensive middle office solution for financial operations (PROD Version)",
     "author": {
       "name": "FOT Company",
@@ -397,7 +380,7 @@
     "buildInfo": {
       "buildIdentifier": "PROD",
       "buildNumber": "1",
-      "buildTimestamp": "2025-08-20T13:17:31.927Z",
+      "buildTimestamp": "2025-08-20T14:14:10.691Z",
       "gitCommit": "unknown",
       "gitBranch": "unknown",
       "environment": "PROD",
@@ -442,17 +425,17 @@
     "msi": true,
     "remoteReleases": "",
     "useAppIdAsId": true,
-    "artifactName": "bmo-mo-app-setup-1.0.44.${ext}"
+    "artifactName": "bmo-mo-app-setup-1.0.46.${ext}"
   },
   "nsisWeb": {
     "appPackageUrl": "",
-    "artifactName": "bmo-mo-app-web-setup-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-web-setup-1.0.46.${ext}",
     "allowElevation": true,
     "oneClick": false
   },
   "appx": {
     "applicationId": "bmo-mo-app",
-    "artifactName": "bmo-mo-app-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-1.0.46.${ext}",
     "displayName": "BMO Middle Office",
     "publisherDisplayName": "Marine Online Pte Ltd.",
     "identityName": "com.emarineonline.mo",
@@ -464,14 +447,14 @@
     ]
   },
   "pkg": {
-    "artifactName": "bmo-mo-app-1.0.44.${ext}",
+    "artifactName": "bmo-mo-app-1.0.46.${ext}",
     "identity": "Developer ID Installer",
     "allowAnywhere": false,
     "allowCurrentUserHome": false,
     "allowRootDirectory": false
   },
   "pacman": {
-    "artifactName": "bmo-mo-app-1.0.44-${arch}.${ext}",
+    "artifactName": "bmo-mo-app-1.0.46-${arch}.${ext}",
     "depends": [
       "c-ares",
       "ffmpeg",
@@ -490,6 +473,6 @@
     ]
   },
   "freebsd": {
-    "artifactName": "bmo-mo-app-1.0.44-${arch}.${ext}"
+    "artifactName": "bmo-mo-app-1.0.46-${arch}.${ext}"
   }
 }

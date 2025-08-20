@@ -109,15 +109,11 @@
     "target": [
       {
         "target": "dmg",
-        "arch": ["x64", "arm64", "universal"]
+        "arch": ["x64", "arm64"]
       },
       {
         "target": "zip",
-        "arch": ["x64", "arm64", "universal"]
-      },
-      {
-        "target": "mas",
-        "arch": ["x64", "arm64", "universal"]
+        "arch": ["x64", "arm64"]
       }
     ],
     "icon": "${ICON_MACOS}",
@@ -134,7 +130,7 @@
     "type": "distribution",
     "identity": "${MAC_IDENTITY}",
     "darkModeSupport": true,
-    "mergeASARs": true,
+    "mergeASARs": false,
     "fileAssociations": [
       {
         "ext": "mol",
@@ -167,17 +163,10 @@
       }
     ],
     "backgroundColor": "#ffffff",
-    "format": "ULFO",
+    "format": "UDBZ",
     "writeUpdateInfo": true,
-    "sign": true
-  },
-  "mas": {
-    "category": "public.app-category.finance",
-    "entitlements": "./build/entitlements.mas.plist",
-    "entitlementsInherit": "./build/entitlements.mas.inherit.plist",
-    "provisioningProfile": "./build/embedded.mas.provisionprofile",
-    "binaries": [],
-    "artifactName": "${NAME}-mas-${VERSION}.${ext}"
+    "sign": false,
+    "internetEnabled": false
   },
   "linux": {
     "target": [
