@@ -359,9 +359,9 @@ export class ModularElectronBuilderGenerator {
     }
 
     // 设置输出目录（兼容原有逻辑）
-    if (builderConfig.directories) {
-      builderConfig.directories.output = `../BMO-MO-APP-RELEASES/${config.API_ENV}`;
-    }
+    // if (builderConfig.directories) {
+    //   builderConfig.directories.output = `../BMO-MO-APP-RELEASES/${config.API_ENV}`;
+    // }
   }
 
   /**

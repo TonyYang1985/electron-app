@@ -110,31 +110,52 @@ jobs:
         shell: bash
         run: |
           echo "=== ${{ matrix.name }} 构建验证 ==="
-          if [ -d "dist" ]; then
-            echo "📁 构建文件:"
-            find dist/ -type f \( \
-              -name "*.exe" -o \
-              -name "*.dmg" -o \
-              -name "*.zip" -o \
-              -name "*.deb" -o \
-              -name "*.rpm" -o \
-              -name "*.AppImage" -o \
-              -name "*.yml" -o \
-              -name "*.blockmap" \
-            \) -exec ls -lh {} \;
-            
-            file_count=$(find dist/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" \) | wc -l)
-            echo ""
-            echo "📊 构建统计: 找到 $file_count 个主要文件"
-            
-            if [ $file_count -gt 0 ]; then
-              echo "✅ ${{ matrix.name }} 构建成功"
-            else
-              echo "❌ ${{ matrix.name }} 构建失败: 未找到预期文件"
-              exit 1
+          
+          # 检查所有可能的环境输出目录
+          POSSIBLE_DIRS=(
+            "../BMO-MO-APP-RELEASES/PROD"
+            "../BMO-MO-APP-RELEASES/DEV"
+            "../BMO-MO-APP-RELEASES/SIT"
+            "../BMO-MO-APP-RELEASES/DEMO"
+            "dist"
+          )
+          
+          BUILD_DIR=""
+          for dir in "${POSSIBLE_DIRS[@]}"; do
+            if [ -d "$dir" ]; then
+              BUILD_DIR="$dir"
+              echo "📁 找到构建目录: $BUILD_DIR"
+              break
             fi
+          done
+          
+          if [ -z "$BUILD_DIR" ]; then
+            echo "❌ ${{ matrix.name }} 构建失败: 未找到构建输出目录"
+            echo "检查的目录: ${POSSIBLE_DIRS[*]}"
+            exit 1
+          fi
+          
+          echo "📁 使用构建目录: $BUILD_DIR"
+          echo "📁 构建文件:"
+          find "$BUILD_DIR/" -type f \( \
+            -name "*.exe" -o \
+            -name "*.dmg" -o \
+            -name "*.zip" -o \
+            -name "*.deb" -o \
+            -name "*.rpm" -o \
+            -name "*.AppImage" -o \
+            -name "*.yml" -o \
+            -name "*.blockmap" \
+          \) -exec ls -lh {} \;
+          
+          file_count=$(find "$BUILD_DIR/" -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" \) | wc -l)
+          echo ""
+          echo "📊 构建统计: 找到 $file_count 个主要文件"
+          
+          if [ $file_count -gt 0 ]; then
+            echo "✅ ${{ matrix.name }} 构建成功"
           else
-            echo "❌ ${{ matrix.name }} 构建失败: dist目录不存在"
+            echo "❌ ${{ matrix.name }} 构建失败: 未找到预期文件"
             exit 1
           fi
       

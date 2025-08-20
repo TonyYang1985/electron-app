@@ -23,7 +23,7 @@
   ],
   "directories": {
     "app": "./",
-    "output": "dist",
+    "output": "/BMO-MO-APP-RELEASES/${BUILD_IDENTIFIER}",
     "buildResources": "./build"
   },
   "extraFiles": [

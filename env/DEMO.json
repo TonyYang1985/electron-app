@@ -6,7 +6,7 @@
   "STATIC_VERSION": "1.7.16",
   "BUILD_NUMBER": "1",
   "YEAR": "2025",
-  "BUILD_IDENTIFIER": "demo",
+  "BUILD_IDENTIFIER": "DEMO",
   "IS_PRERELEASE": "true",
   "GITHUB_OWNER": "TonyYang1985",
   "GITHUB_REPO": "electron-app",
