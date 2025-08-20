@@ -989,21 +989,98 @@ create_other_files() {
     
     # 创建.gitignore
     cat > .gitignore << 'EOF'
+# Dependencies
 node_modules/
-dist/
 npm-debug.log*
-.DS_Store
-Thumbs.db
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+release/
+*.tsbuildinfo
+
+# Environment files
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Temporary folders
 tmp/
 temp/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Electron specific
+app/dist/
+app/release/
+app/node_modules/
+*.asar
+
+# MacOS specific for Electron
+*.dmg
+*.pkg
+
+# Windows specific for Electron
+*.exe
+*.msi
+
+# Linux specific for Electron
+*.AppImage
+*.deb
+*.rpm
+*.snap
+
+# Auto-generated files
+*.d.ts.map
+*.js.map
 EOF
 
     # 创建README.md
