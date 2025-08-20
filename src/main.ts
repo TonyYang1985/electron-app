@@ -7,9 +7,9 @@ const isDev: boolean = process.env.NODE_ENV === 'development';
 let mainWindow: BrowserWindow | null = null;
 
 // 自动更新配置
-if (!isDev) {
-  autoUpdater.checkForUpdatesAndNotify();
-}
+// if (!isDev) {
+//   autoUpdater.checkForUpdatesAndNotify();
+// }
 
 autoUpdater.on('update-available', (info: UpdateInfo) => {
   if (mainWindow) {
@@ -61,6 +61,10 @@ app.whenReady().then(() => {
   });
   
   if (!isDev) {
+    // 立即检查更新
+    autoUpdater.checkForUpdatesAndNotify();
+    
+    // 5秒后再次检查
     setTimeout(() => {
       autoUpdater.checkForUpdatesAndNotify();
     }, 5000);
