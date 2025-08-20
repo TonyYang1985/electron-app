@@ -83,6 +83,24 @@ git push origin v1.0.1
 
 git tag -d v1.0.13
 git push origin --delete v1.0.13
+
+
+# 开发环境（忽略大小写）
+git tag v1.0.44-dev    # ✅
+git tag v1.0.44-DEV    # ✅
+git tag v1.0.44-Dev    # ✅
+
+# 测试环境
+git tag v1.0.44-sit    # ✅
+git tag v1.0.44-SIT    # ✅
+
+# 演示环境
+git tag v1.0.44-demo   # ✅
+git tag v1.0.44-DEMO   # ✅
+
+# 生产环境
+git tag v1.0.44-prod   # ✅
+git tag v1.0.44        # ✅ (默认PROD)
 ```
 
  4. 方法二：手动触发发布:
