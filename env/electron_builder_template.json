@@ -220,7 +220,7 @@
     "compression": "xz",
     "artifactName": "${NAME}_${VERSION}_${arch}.${ext}",
     "fpm": [
-      "--deb-changelog=CHANGELOG.md"
+      "--deb-changelog=build/CHANGELOG.md"
     ]
   },
   "rpm": {
@@ -229,7 +229,7 @@
     "compression": "xz",
     "artifactName": "${NAME}-${VERSION}.${arch}.${ext}",
     "fpm": [
-      "--rpm-changelog=CHANGELOG.md",
+      "--rpm-changelog=build/CHANGELOG.md",
       "--rpm-summary=${APP_DESCRIPTION}"
     ]
   },
@@ -262,7 +262,7 @@
   "detectUpdateChannel": true,
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
-    "releaseNotesFile": "CHANGELOG.md",
+    "releaseNotesFile": "build/CHANGELOG.md",
     "releaseName": "${PRODUCT_NAME} v${VERSION}"
   },
   "electronDownload": {

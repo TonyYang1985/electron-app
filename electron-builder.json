@@ -255,7 +255,7 @@
     "compression": "xz",
     "artifactName": "bmo-mo-app_1.0.46_${arch}.${ext}",
     "fpm": [
-      "--deb-changelog=CHANGELOG.md"
+      "--deb-changelog=build/CHANGELOG.md"
     ]
   },
   "rpm": {
@@ -268,7 +268,7 @@
     "compression": "xz",
     "artifactName": "bmo-mo-app-1.0.46.${arch}.${ext}",
     "fpm": [
-      "--rpm-changelog=CHANGELOG.md",
+      "--rpm-changelog=build/CHANGELOG.md",
       "--rpm-summary=A comprehensive middle office solution for financial operations (PROD Version)"
     ]
   },
@@ -303,7 +303,7 @@
   "detectUpdateChannel": true,
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
-    "releaseNotesFile": "CHANGELOG.md",
+    "releaseNotesFile": "build/CHANGELOG.md",
     "releaseName": "BMO Middle Office v1.0.46"
   },
   "electronDownload": {
