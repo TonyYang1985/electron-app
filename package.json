@@ -1,6 +1,6 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.49",
+  "version": "1.0.50",
   "staticVersion": "1.7.16",
   "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",
@@ -42,7 +42,7 @@
     "@types/node": "^20.19.11",
     "cpy-cli": "^5.0.0",
     "cross-env": "^7.0.3",
-    "electron": "^28.0.0",
+    "electron": "^37.2.0",
     "electron-builder": "^26.0.12",
     "fs-extra": "^11.3.1",
     "shx": "^0.3.4",
@@ -51,6 +51,17 @@
   },
   "dependencies": {
     "app-builder-lib": "^26.0.12",
-    "electron-updater": "^6.6.2"
+    "electron-updater": "^6.6.2",
+    "extract-zip": "^2.0.1",
+    "underscore": "^1.13.7",
+    "cross-env": "^7.0.3",
+    "crypto": "^1.0.1",
+    "electron-compile": "^3.3.6",
+    "electron-fetch": "^1.9.1",
+    "electron-log": "^5.4.1",
+    "electron-osx-sign": "^0.6.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^8.1.0",
+    "fs-extra": "^11.3.1"
   }
 }
