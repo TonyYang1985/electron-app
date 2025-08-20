@@ -165,6 +165,38 @@ jobs:
         with:
           name: ${{ matrix.name }}-v${{ github.run_number }}
           path: |
+            ../BMO-MO-APP-RELEASES/PROD/*.exe
+            ../BMO-MO-APP-RELEASES/PROD/*.dmg
+            ../BMO-MO-APP-RELEASES/PROD/*.zip
+            ../BMO-MO-APP-RELEASES/PROD/*.deb
+            ../BMO-MO-APP-RELEASES/PROD/*.rpm
+            ../BMO-MO-APP-RELEASES/PROD/*.AppImage
+            ../BMO-MO-APP-RELEASES/PROD/*.yml
+            ../BMO-MO-APP-RELEASES/PROD/*.blockmap
+            ../BMO-MO-APP-RELEASES/DEV/*.exe
+            ../BMO-MO-APP-RELEASES/DEV/*.dmg
+            ../BMO-MO-APP-RELEASES/DEV/*.zip
+            ../BMO-MO-APP-RELEASES/DEV/*.deb
+            ../BMO-MO-APP-RELEASES/DEV/*.rpm
+            ../BMO-MO-APP-RELEASES/DEV/*.AppImage
+            ../BMO-MO-APP-RELEASES/DEV/*.yml
+            ../BMO-MO-APP-RELEASES/DEV/*.blockmap
+            ../BMO-MO-APP-RELEASES/SIT/*.exe
+            ../BMO-MO-APP-RELEASES/SIT/*.dmg
+            ../BMO-MO-APP-RELEASES/SIT/*.zip
+            ../BMO-MO-APP-RELEASES/SIT/*.deb
+            ../BMO-MO-APP-RELEASES/SIT/*.rpm
+            ../BMO-MO-APP-RELEASES/SIT/*.AppImage
+            ../BMO-MO-APP-RELEASES/SIT/*.yml
+            ../BMO-MO-APP-RELEASES/SIT/*.blockmap
+            ../BMO-MO-APP-RELEASES/DEMO/*.exe
+            ../BMO-MO-APP-RELEASES/DEMO/*.dmg
+            ../BMO-MO-APP-RELEASES/DEMO/*.zip
+            ../BMO-MO-APP-RELEASES/DEMO/*.deb
+            ../BMO-MO-APP-RELEASES/DEMO/*.rpm
+            ../BMO-MO-APP-RELEASES/DEMO/*.AppImage
+            ../BMO-MO-APP-RELEASES/DEMO/*.yml
+            ../BMO-MO-APP-RELEASES/DEMO/*.blockmap
             dist/*.exe
             dist/*.dmg
             dist/*.zip
