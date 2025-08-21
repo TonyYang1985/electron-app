@@ -132,6 +132,7 @@
   },
   "dmg": {
     "title": "${PRODUCT_NAME} ${VERSION}",
+    "background": "assets/splash.png",
     "artifactName": "${NAME}-${VERSION}.${ext}",
     "icon": "${ICON_MACOS}",
     "iconSize": "${PLATFORM_MACOS_DMG_ICON_SIZE}",
