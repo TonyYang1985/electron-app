@@ -192,7 +192,7 @@
       }
     ],
     "backgroundColor": "#ffffff",
-    "format": "UDBZ",
+    "format": "UDZO",
     "writeUpdateInfo": true,
     "sign": false,
     "internetEnabled": false
