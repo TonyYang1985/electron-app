@@ -1,6 +1,6 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.54",
+  "version": "1.0.55",
   "staticVersion": "1.7.16",
   "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",
@@ -29,9 +29,9 @@
     "copy": "shx mkdir -p release && shx cp src/index.html release/index.html",
     "clean": "shx rm -rf release",
     "build": "npm run compile && npm run copy",
-    "build:win": "npm run config:ts:PROD && npm run build && electron-builder --win",
-    "build:mac": "npm run config:ts:PROD && npm run build && electron-builder --mac",
-    "build:linux": "npm run config:ts:PROD && npm run build && electron-builder --linux"
+    "build:win": "npm run config:ts:PROD && npm run clean && npm run build && electron-builder --win",
+    "build:mac": "npm run config:ts:PROD && npm run clean &&  npm run build && electron-builder --mac",
+    "build:linux": "npm run config:ts:PROD && npm run clean && npm run build && electron-builder --linux"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.3",
