@@ -130,7 +130,7 @@ init_npm() {
     "@types/node": "^20.19.11",
     "cpy-cli": "^5.0.0",
     "cross-env": "^7.0.3",
-    "electron": "^28.0.0",
+    "electron": "^28.2.4",
     "electron-builder": "^26.0.12",
     "fs-extra": "^11.3.1",
     "shx": "^0.3.4",
@@ -929,7 +929,7 @@ jobs:
 
           ### 🛠️ 技术信息
 
-          - **Electron**: 28.0.0
+          - **Electron**: 28.2.4
           - **TypeScript**: 5.9.2
           - **Node.js**: 20.x  
           - **构建平台**: GitHub Actions
