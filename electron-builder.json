@@ -2,14 +2,33 @@
   "appId": "com.emarineonline.mo",
   "productName": "BMO Middle Office",
   "copyright": "Copyright © 2025 Marine Online Pte Ltd.",
-  "artifactName": "bmo-mo-app-1.0.51-${os}-${arch}.${ext}",
+  "artifactName": "bmo-mo-app-1.0.52-${os}-${arch}.${ext}",
   "forceCodeSigning": false,
   "buildVersion": "1",
   "electronVersion": "28.0.0",
   "files": [
     "release/**/*",
     "package.json",
-    "!node_modules/**/*",
+    "node_modules/electron-updater/**/*",
+    "node_modules/electron-log/**/*",
+    "node_modules/electron-store/**/*",
+    "node_modules/fs-extra/**/*",
+    "node_modules/extract-zip/**/*",
+    "node_modules/underscore/**/*",
+    "node_modules/app-builder-lib/**/*",
+    "node_modules/cross-env/**/*",
+    "node_modules/crypto/**/*",
+    "node_modules/electron-compile/**/*",
+    "node_modules/electron-fetch/**/*",
+    "node_modules/electron-osx-sign/**/*",
+    "node_modules/electron-squirrel-startup/**/*",
+    "!node_modules/**/test/**",
+    "!node_modules/**/tests/**",
+    "!node_modules/**/*.md",
+    "!node_modules/**/*.map",
+    "!node_modules/**/*.d.ts",
+    "!node_modules/**/docs/**",
+    "!node_modules/**/coverage/**",
     "!src/**/*",
     "!test/**/*",
     "!tests/**/*",
@@ -85,7 +104,7 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "BMO Middle Office",
-    "artifactName": "bmo-mo-app-setup-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-setup-1.0.52.${ext}",
     "runAfterFinish": true,
     "menuCategory": "Office\\Finance",
     "displayLanguageSelector": true,
@@ -102,12 +121,12 @@
     "warningsAsErrors": false
   },
   "portable": {
-    "artifactName": "bmo-mo-app-portable-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-portable-1.0.52.${ext}",
     "requestExecutionLevel": "user",
     "splashImage": "./assets/splash.png"
   },
   "msi": {
-    "artifactName": "bmo-mo-app-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-1.0.52.${ext}",
     "oneClick": false,
     "upgradeCode": "{447A4DE8-3ACA-972C-A94B-5E7CC2B752CB}",
     "warningsAsErrors": false,
@@ -144,7 +163,7 @@
     "entitlementsInherit": "./build/entitlements.mac.plist",
     "provisioningProfile": "./build/embedded.provisionprofile",
     "bundleVersion": "1",
-    "bundleShortVersion": "1.0.51",
+    "bundleShortVersion": "1.0.52",
     "helperBundleId": "com.emarineonline.mo.helper",
     "type": "distribution",
     "identity": null,
@@ -161,8 +180,8 @@
     ]
   },
   "dmg": {
-    "title": "BMO Middle Office 1.0.51",
-    "artifactName": "bmo-mo-app-1.0.51.${ext}",
+    "title": "BMO Middle Office 1.0.52",
+    "artifactName": "bmo-mo-app-1.0.52.${ext}",
     "icon": "./assets/mol.icns",
     "iconSize": "80",
     "window": {
@@ -253,7 +272,7 @@
       "libnss3"
     ],
     "compression": "xz",
-    "artifactName": "bmo-mo-app_1.0.51_${arch}.${ext}",
+    "artifactName": "bmo-mo-app_1.0.52_${arch}.${ext}",
     "fpm": [
       "--deb-changelog=build/CHANGELOG.md"
     ]
@@ -266,14 +285,14 @@
       "nss"
     ],
     "compression": "xz",
-    "artifactName": "bmo-mo-app-1.0.51.${arch}.${ext}",
+    "artifactName": "bmo-mo-app-1.0.52.${arch}.${ext}",
     "fpm": [
       "--rpm-changelog=build/CHANGELOG.md",
       "--rpm-summary=A comprehensive middle office solution for financial operations (PROD Version)"
     ]
   },
   "appImage": {
-    "artifactName": "bmo-mo-app-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-1.0.52.${ext}",
     "synopsis": "A comprehensive middle office solution for financial operations (PROD Version)",
     "description": "A comprehensive middle office solution for financial operations (PROD Version)",
     "category": "Office,Finance,Utility"
@@ -304,7 +323,7 @@
   "generateUpdatesFilesForAllChannels": true,
   "releaseInfo": {
     "releaseNotesFile": "build/CHANGELOG.md",
-    "releaseName": "BMO Middle Office v1.0.51"
+    "releaseName": "BMO Middle Office v1.0.52"
   },
   "electronDownload": {
     "mirror": "https://npmmirror.com/mirrors/electron/",
@@ -316,7 +335,7 @@
   "extends": null,
   "extraMetadata": {
     "name": "bmo-mo-app",
-    "version": "1.0.51",
+    "version": "1.0.52",
     "description": "A comprehensive middle office solution for financial operations (PROD Version)",
     "author": {
       "name": "FOT Company",
@@ -344,7 +363,7 @@
     "buildInfo": {
       "buildIdentifier": "PROD",
       "buildNumber": "1",
-      "buildTimestamp": "2025-08-20T16:22:03.672Z",
+      "buildTimestamp": "2025-08-21T16:47:07.212Z",
       "gitCommit": "unknown",
       "gitBranch": "unknown",
       "environment": "PROD",
@@ -389,17 +408,17 @@
     "msi": true,
     "remoteReleases": "",
     "useAppIdAsId": true,
-    "artifactName": "bmo-mo-app-setup-1.0.51.${ext}"
+    "artifactName": "bmo-mo-app-setup-1.0.52.${ext}"
   },
   "nsisWeb": {
     "appPackageUrl": "",
-    "artifactName": "bmo-mo-app-web-setup-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-web-setup-1.0.52.${ext}",
     "allowElevation": true,
     "oneClick": false
   },
   "appx": {
     "applicationId": "bmo-mo-app",
-    "artifactName": "bmo-mo-app-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-1.0.52.${ext}",
     "displayName": "BMO Middle Office",
     "publisherDisplayName": "Marine Online Pte Ltd.",
     "identityName": "com.emarineonline.mo",
@@ -411,14 +430,14 @@
     ]
   },
   "pkg": {
-    "artifactName": "bmo-mo-app-1.0.51.${ext}",
+    "artifactName": "bmo-mo-app-1.0.52.${ext}",
     "identity": "Developer ID Installer",
     "allowAnywhere": false,
     "allowCurrentUserHome": false,
     "allowRootDirectory": false
   },
   "pacman": {
-    "artifactName": "bmo-mo-app-1.0.51-${arch}.${ext}",
+    "artifactName": "bmo-mo-app-1.0.52-${arch}.${ext}",
     "depends": [
       "c-ares",
       "ffmpeg",
@@ -437,6 +456,6 @@
     ]
   },
   "freebsd": {
-    "artifactName": "bmo-mo-app-1.0.51-${arch}.${ext}"
+    "artifactName": "bmo-mo-app-1.0.52-${arch}.${ext}"
   }
 }
