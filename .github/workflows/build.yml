@@ -177,7 +177,7 @@ jobs:
       - name: Generate electron-builder config
         run: |
           echo "➡️ Deleting old config file..."
-          rm -f electron-builder.json
+          npx shx rm -f electron-builder.json
           echo "➡️ Generating new config for ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}..."
           npm run config:ts:${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
           echo "✅ Config generated. Contents:"

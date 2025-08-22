@@ -1,32 +1,22 @@
-{
-  "appId": "${APP_BUNDLE_ID}",
-  "productName": "${PRODUCT_NAME}",
-  "copyright": "Copyright \u00A9 ${YEAR} ${COMPANY_NAME}",
-  "artifactName": "${NAME}-${VERSION}-${os}-${arch}.${ext}",
-  "forceCodeSigning": false,
-  "buildVersion": "1",
+ {
+  "appId": "com.tonyyang1985.myawesomeapp",
+  "productName": "My Awesome App",
+  "copyright": "Copyright 2025 TonyYang1985",
+  "directories": {
+    "output": "dist"
+  },
   "files": [
     "release/**/*",
-    "package.json",
-    "node_modules/**/*"
+    "node_modules/**/*",
+    "package.json"
   ],
-  "directories": {
-    "app": "./",
-    "output": "BMO-MO-APP-RELEASES/${BUILD_IDENTIFIER}",
-    "buildResources": "./build"
-  },
-  "extraFiles": [
+  "extraResources": [
     {
-      "from": "./assets/",
-      "to": "assets/",
-      "filter": ["**/*"]
-    }
-  ],
-  "publish": [
-    {
-      "provider": "github",
-      "owner": "${GITHUB_OWNER}",
-      "repo": "${GITHUB_REPO}"
+      "from": "resources",
+      "to": "resources",
+      "filter": [
+        "**/*"
+      ]
     }
   ],
   "win": {
@@ -38,336 +28,67 @@
       {
         "target": "portable",
         "arch": ["x64"]
-      },
-      {
-        "target": "msi",
-        "arch": ["x64"]
       }
     ],
-    "icon": "${ICON_WINDOWS}",
-    "requestedExecutionLevel": "asInvoker",
-    "signAndEditExecutable": "${WIN_SIGN_AND_EDIT}",
-    "verifyUpdateCodeSignature": "${VERIFY_UPDATE_SIGNATURE}",
-    "fileAssociations": [
-      {
-        "ext": "mol",
-        "name": "Middle Office Data",
-        "description": "Middle Office Data File",
-        "icon": "${ICON_WINDOWS}"
-      }
-    ]
-  },
-  "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "allowElevation": true,
-    "installerIcon": "${ICON_WINDOWS}",
-    "uninstallerIcon": "${ICON_WINDOWS}",
-    "installerHeaderIcon": "${ICON_WINDOWS}",
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "shortcutName": "${PRODUCT_NAME}",
-    "artifactName": "${NAME}-setup-${VERSION}.${ext}",
-    "runAfterFinish": true,
-    "menuCategory": "Office\\Finance",
-    "displayLanguageSelector": true,
-    "installerLanguages": ["en_US", "zh_CN", "zh_TW"],
-    "language": "1033",
-    "perMachine": false,
-    "differentialPackage": true,
-    "include": "./build/installer.nsh",
-    "script": "./build/installer.nsi",
-    "warningsAsErrors": false
-  },
-  "portable": {
-    "artifactName": "${NAME}-portable-${VERSION}.${ext}",
-    "requestExecutionLevel": "user",
-    "splashImage": "./assets/splash.png"
-  },
-  "msi": {
-    "artifactName": "${NAME}-${VERSION}.${ext}",
-    "oneClick": false,
-    "upgradeCode": "${MSI_UPGRADE_CODE}",
-    "warningsAsErrors": false,
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "menuCategory": "Office\\Finance",
-    "additionalWixArgs": ["-sice:ICE64"]
+    "icon": "resources/icon.png",
+    "forceCodeSigning": false,
+    "verifyUpdateCodeSignature": false,
+    "requestedExecutionLevel": "asInvoker"
   },
   "mac": {
     "target": [
       {
         "target": "dmg",
-        "arch": ["arm64", "x64"]
+        "arch": ["x64", "arm64"]
       },
       {
         "target": "zip",
-        "arch": ["arm64", "x64"]
+        "arch": ["x64", "arm64"]
       }
     ],
-    "icon": "${ICON_MACOS}",
-    "category": "public.app-category.developer-tools",
-    "minimumSystemVersion": "10.15.0",
-    "hardenedRuntime": true,
-    "gatekeeperAssess": false,
-    "entitlements": "./build/entitlements.mac.plist",
-    "entitlementsInherit": "./build/entitlements.mac.plist",
-    "provisioningProfile": "./build/embedded.provisionprofile",
-    "bundleVersion": "${BUILD_NUMBER}",
-    "bundleShortVersion": "${VERSION}",
-    "helperBundleId": "${APP_BUNDLE_ID}.helper",
-    "type": "distribution",
-    "identity": "${MAC_IDENTITY}",
-    "darkModeSupport": true,
-    "mergeASARs": false,
-    "fileAssociations": [
-      {
-        "ext": "mol",
-        "name": "Middle Office Data",
-        "description": "Middle Office Data File",
-        "icon": "${ICON_MACOS}",
-        "role": "Editor"
-      }
-    ]
-  },
-  "dmg": {
-    "title": "${PRODUCT_NAME} ${VERSION}",
-    "artifactName": "${NAME}-${VERSION}.${ext}",
-    "icon": "${ICON_MACOS}",
-    "iconSize": "${PLATFORM_MACOS_DMG_ICON_SIZE}",
-    "contents": [
-      {
-        "x": 200,
-        "y": 150,
-        "type": "file"
-      },
-      {
-        "x": 450,
-        "y": 150,
-        "type": "link",
-        "path": "/Applications"
-      }
-    ],
-    "format": "ULFO",
-    "writeUpdateInfo": false,
-    "background": null,
-    "window": {
-      "width": 540,
-      "height": 380
-    },
-    "sign": false,
-    "internetEnabled": false
+    "icon": "resources/icon.png",
+    "category": "public.app-category.productivity"
   },
   "linux": {
     "target": [
       {
         "target": "AppImage",
-        "arch": ["x64", "arm64"]
+        "arch": ["x64"]
       },
       {
         "target": "deb",
-        "arch": ["x64", "arm64"]
+        "arch": ["x64"]
       },
       {
         "target": "rpm",
-        "arch": ["x64", "arm64"]
-      },
-      {
-        "target": "tar.xz",
-        "arch": ["x64", "arm64"]
+        "arch": ["x64"]
       }
     ],
-    "icon": "${ICON_LINUX}",
-    "category": "${PLATFORM_LINUX_CATEGORIES}",
-    "maintainer": "${AUTHOR_EMAIL}",
-    "vendor": "${COMPANY_NAME}",
-    "synopsis": "${APP_DESCRIPTION}",
-    "description": "${APP_DESCRIPTION}",
-    "desktop": {
-      "entry": {
-        "Name": "${PRODUCT_NAME}",
-        "Comment": "${APP_DESCRIPTION}",
-        "Keywords": "office;finance;middle-office;trading;financial;",
-        "StartupWMClass": "${NAME}",
-        "MimeType": "x-scheme-handler/${PROTOCOL_SCHEMES};application/x-middle-office-data;",
-        "Categories": "Office;Finance;",
-        "StartupNotify": "true"
-      }
-    },
-    "fileAssociations": [
-      {
-        "ext": "mol",
-        "name": "Middle Office Data",
-        "description": "Middle Office Data File",
-        "mimeType": "application/x-middle-office-data"
-      }
-    ]
+    "icon": "resources/icon.png",
+    "category": "Utility",
+    "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
+    "vendor": "TonyYang1985",
+    "synopsis": "",
+    "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。"
   },
-  "deb": {
-    "packageCategory": "${PLATFORM_LINUX_SECTION}",
-    "priority": "${PLATFORM_LINUX_PRIORITY}",
-    "depends": "__ARRAY_PLATFORM_LINUX_DEB_DEPS_ARRAY__",
-    "compression": "xz",
-    "artifactName": "${NAME}_${VERSION}_${arch}.${ext}",
-    "fpm": [
-      "--deb-changelog=build/CHANGELOG.md"
-    ]
-  },
-  "rpm": {
-    "packageCategory": "${PLATFORM_LINUX_CATEGORIES}",
-    "depends": "__ARRAY_PLATFORM_LINUX_RPM_DEPS_ARRAY__",
-    "compression": "xz",
-    "artifactName": "${NAME}-${VERSION}.${arch}.${ext}",
-    "fpm": [
-      "--rpm-changelog=build/CHANGELOG.md",
-      "--rpm-summary=${APP_DESCRIPTION}"
-    ]
-  },
-  "appImage": {
-    "artifactName": "${NAME}-${VERSION}.${ext}",
-    "synopsis": "${APP_DESCRIPTION}",
-    "description": "${APP_DESCRIPTION}",
-    "category": "${PLATFORM_LINUX_CATEGORIES}"
-  },
-  "protocols": [
+  "publish": [
     {
-      "name": "${PROTOCOL_NAME}",
-      "schemes": ["${PROTOCOL_SCHEMES}"]
+      "provider": "github",
+      "owner": "TonyYang1985",
+      "repo": "electron-app"
     }
   ],
-  "asar": true,
-  "asarUnpack": [
-    "node_modules/ffmpeg-static/**/*",
-    "node_modules/node-notifier/vendor/**",
-    "node_modules/better-sqlite3/**",
-    "assets/**"
-  ],
-  "compression": "maximum",
-  "removePackageScripts": true,
-  "nodeGypRebuild": false,
-  "afterSign": "./scripts/notarize.js",
-  "afterPack": "./scripts/after-pack.js",
-  "beforeBuild": "./scripts/before-build.js",
-  "afterAllArtifactBuild": "./scripts/after-all-artifact-build.js",
-  "detectUpdateChannel": true,
-  "generateUpdatesFilesForAllChannels": true,
-  "releaseInfo": {
-    "releaseNotesFile": "build/CHANGELOG.md",
-    "releaseName": "${PRODUCT_NAME} v${VERSION}"
-  },
-  "electronDownload": {
-    "mirror": "https://npmmirror.com/mirrors/electron/",
-    "cache": "./electron-cache"
-  },
-  "buildDependenciesFromSource": false,
-  "npmRebuild": true,
-  "electronCompile": false,
-  "extends": null,
-  "extraMetadata": {
-    "name": "${NAME}",
-    "version": "${VERSION}",
-    "description": "${APP_DESCRIPTION}",
-    "author": {
-      "name": "${AUTHOR_NAME}",
-      "email": "${AUTHOR_EMAIL}",
-      "url": "${APP_HOMEPAGE}"
-    },
-    "homepage": "${APP_HOMEPAGE}",
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}.git"
-    },
-    "bugs": {
-      "url": "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/issues"
-    },
-    "keywords": [
-      "electron",
-      "finance",
-      "middle-office",
-      "trading",
-      "desktop-app",
-      "financial-platform"
-    ],
-    "license": "Commercial",
-    "main": "release/main.js",
-    "buildInfo": {
-      "buildIdentifier": "${BUILD_IDENTIFIER}",
-      "buildNumber": "${BUILD_NUMBER}",
-      "buildTimestamp": "${BUILD_TIMESTAMP}",
-      "gitCommit": "${GIT_COMMIT}",
-      "gitBranch": "${GIT_BRANCH}",
-      "environment": "${NODE_ENV}",
-      "isPrerelease": "${IS_PRERELEASE}",
-      "electronVersion": "${ELECTRON_VERSION}",
-      "nodeVersion": "${NODE_VERSION}"
-    },
-    "nucleus": {
-      "appId": "${NUCLEUS_APP_ID}",
-      "appToken": "${NUCLEUS_APP_TOKEN}",
-      "endpoint": "${NUCLEUS_ENDPOINT}",
-      "enabled": "${NUCLEUS_ENABLED}",
-      "autoCapture": "${NUCLEUS_AUTO_CAPTURE}",
-      "trackEvents": "${NUCLEUS_TRACK_EVENTS}",
-      "trackErrors": "${NUCLEUS_TRACK_ERRORS}",
-      "userIdEnabled": "${NUCLEUS_USER_ID_ENABLED}",
-      "deviceIdEnabled": "${NUCLEUS_DEVICE_ID_ENABLED}"
-    },
-    "features": {
-      "autoUpdater": "${AUTO_UPDATER_ENABLED}",
-      "crashReporter": "${CRASH_REPORTER_ENABLED}",
-      "analytics": "${ANALYTICS_ENABLED}",
-      "codeSigning": "${ENABLE_CODE_SIGNING}",
-      "devtools": "${ENABLE_DEVTOOLS}",
-      "debug": "${ENABLE_DEBUG}"
-    },
-    "urls": {
-      "homepage": "${APP_HOMEPAGE}",
-      "support": "${APP_HOMEPAGE}/support",
-      "privacy": "${APP_HOMEPAGE}/privacy",
-      "terms": "${APP_HOMEPAGE}/terms",
-      "api": "${API_BASE_URL}",
-      "updates": {
-        "darwin": "${UPDATE_SERVER_DARWIN}",
-        "win32": "${UPDATE_SERVER_WIN32}"
-      }
-    }
-  },
-  "squirrelWindows": {
-    "iconUrl": "${ICON_URL}",
-    "loadingGif": "${PLATFORM_WINDOWS_LOADING_GIF}",
-    "msi": true,
-    "remoteReleases": "${SQUIRREL_REMOTE_RELEASES}",
-    "useAppIdAsId": true,
-    "artifactName": "${NAME}-setup-${VERSION}.${ext}"
-  },
-  "nsisWeb": {
-    "appPackageUrl": "${NSIS_WEB_APP_PACKAGE_URL}",
-    "artifactName": "${NAME}-web-setup-${VERSION}.${ext}",
-    "allowElevation": true,
-    "oneClick": false
-  },
-  "appx": {
-    "applicationId": "${NAME}",
-    "artifactName": "${NAME}-${VERSION}.${ext}",
-    "displayName": "${PRODUCT_NAME}",
-    "publisherDisplayName": "${COMPANY_NAME}",
-    "identityName": "${APP_BUNDLE_ID}",
-    "backgroundColor": "#ffffff",
-    "showNameOnTiles": true,
-    "languages": ["en-US", "zh-CN"]
-  },
-  "pkg": {
-    "artifactName": "${NAME}-${VERSION}.${ext}",
-    "identity": "${MAC_INSTALLER_IDENTITY}",
-    "allowAnywhere": false,
-    "allowCurrentUserHome": false,
-    "allowRootDirectory": false
-  },
-  "pacman": {
-    "artifactName": "${NAME}-${VERSION}-${arch}.${ext}",
-    "depends": "__ARRAY_PLATFORM_LINUX_PACMAN_DEPS_ARRAY__"
-  },
-  "freebsd": {
-    "artifactName": "${NAME}-${VERSION}-${arch}.${ext}"
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "${productName}",
+    "deleteAppDataOnUninstall": false,
+    "runAfterFinish": true,
+    "menuCategory": "",
+    "installerIcon": "resources/icon.ico",
+    "uninstallerIcon": "resources/icon.ico"
   }
 }
