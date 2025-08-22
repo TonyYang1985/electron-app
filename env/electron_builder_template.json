@@ -12,8 +12,8 @@
   ],
   "extraResources": [
     {
-      "from": "resources",
-      "to": "resources",
+      "from": "assets",
+      "to": "assets",
       "filter": [
         "**/*"
       ]
@@ -30,7 +30,7 @@
         "arch": ["x64"]
       }
     ],
-    "icon": "resources/icon.png",
+    "icon": "assets/icon.png",
     "forceCodeSigning": false,
     "verifyUpdateCodeSignature": false,
     "requestedExecutionLevel": "asInvoker"
@@ -46,7 +46,7 @@
         "arch": ["x64", "arm64"]
       }
     ],
-    "icon": "resources/icon.png",
+    "icon": "assets/icon.png",
     "category": "public.app-category.productivity"
   },
   "linux": {
@@ -64,7 +64,7 @@
         "arch": ["x64"]
       }
     ],
-    "icon": "resources/icon.png",
+    "icon": "assets/icon.png",
     "category": "Utility",
     "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
     "vendor": "TonyYang1985",
@@ -88,7 +88,7 @@
     "deleteAppDataOnUninstall": false,
     "runAfterFinish": true,
     "menuCategory": "",
-    "installerIcon": "resources/icon.ico",
-    "uninstallerIcon": "resources/icon.ico"
+    "installerIcon": "assets/icon.ico",
+    "uninstallerIcon": "assets/icon.ico"
   }
 }
