@@ -167,7 +167,7 @@
         "path": "/Applications"
       }
     ],
-    "format": "APFS",
+    "format": "ULFO",
     "writeUpdateInfo": false,
     "background": null,
     "window": {
@@ -334,7 +334,7 @@
     "buildInfo": {
       "buildIdentifier": "PROD",
       "buildNumber": "1",
-      "buildTimestamp": "2025-08-22T15:44:43.850Z",
+      "buildTimestamp": "2025-08-22T15:52:59.585Z",
       "gitCommit": "unknown",
       "gitBranch": "unknown",
       "environment": "PROD",

@@ -148,7 +148,7 @@
         "path": "/Applications"
       }
     ],
-    "format": "APFS",
+    "format": "ULFO",
     "writeUpdateInfo": false,
     "background": null,
     "window": {

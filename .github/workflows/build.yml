@@ -173,6 +173,16 @@ jobs:
           sudo sysctl -w kern.maxfiles=65536
           sudo sysctl -w kern.maxfilesperproc=65536
 
+      # 生成构建配置
+      - name: Generate electron-builder config
+        run: |
+          echo "➡️ Deleting old config file..."
+          rm -f electron-builder.json
+          echo "➡️ Generating new config for ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}..."
+          npm run config:ts:${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
+          echo "✅ Config generated. Contents:"
+          cat electron-builder.json
+
       # 构建
       - name: 构建 ${{ matrix.name }}
         run: |
