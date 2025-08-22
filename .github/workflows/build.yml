@@ -164,6 +164,15 @@ jobs:
 
           echo "✅ Git环境已清理，electron-builder不会检测到发布条件"
 
+      - name: Setup macOS for DMG creation
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Clean up any hanging disk images
+          hdiutil detach /dev/disk* 2>/dev/null || true
+          # Increase system limits for disk operations
+          sudo sysctl -w kern.maxfiles=65536
+          sudo sysctl -w kern.maxfilesperproc=65536
+
       # 构建
       - name: 构建 ${{ matrix.name }}
         run: |
