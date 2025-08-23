@@ -64,7 +64,7 @@
         "arch": ["x64"]
       }
     ],
-    "icon": "assets/icon.png",
+    "icon": "build/icons",
     "category": "Utility",
     "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
     "vendor": "TonyYang1985",
@@ -89,6 +89,7 @@
     "runAfterFinish": true,
     "menuCategory": "",
     "installerIcon": "assets/icon.ico",
-    "uninstallerIcon": "assets/icon.ico"
+    "uninstallerIcon": "assets/icon.ico",
+    "languages": [ "en_US", "zh_CN"]
   }
 }
