@@ -90,6 +90,9 @@
     "menuCategory": "",
     "installerIcon": "assets/icon.ico",
     "uninstallerIcon": "assets/icon.ico",
-    "language": "1066"
+    "multiLanguageInstaller": true,
+    "installerLanguages": ["en_US", "zh_CN"],
+    "displayLanguageSelector": false,
+    "warningsAsErrors": false
   }
 }
