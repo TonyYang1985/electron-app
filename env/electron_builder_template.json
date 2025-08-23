@@ -90,6 +90,6 @@
     "menuCategory": "",
     "installerIcon": "assets/icon.ico",
     "uninstallerIcon": "assets/icon.ico",
-    "installerLanguage": "2052" 
+    "language": "2052"
   }
 }
