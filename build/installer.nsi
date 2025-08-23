@@ -1,14 +1,19 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 
-; Language strings for custom dialogs
-LangString AppRunning ${LANG_ENGLISH} "${PRODUCT_NAME} is currently running. Please close it before continuing."
-LangString AppRunning ${LANG_SIMPCHINESE} "${PRODUCT_NAME} 正在运行。请在继续前关闭它。"
-LangString AppRunning ${LANG_TRADCHINESE} "${PRODUCT_NAME} 正在運行。請在繼續前關閉它。"
+; Define languages
+!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "SimpChinese" 
+!insertmacro MUI_LANGUAGE "TradChinese"
 
-LangString ConfirmDelete ${LANG_ENGLISH} "Do you want to remove all application data?"
-LangString ConfirmDelete ${LANG_SIMPCHINESE} "您要删除所有应用程序数据吗？"
-LangString ConfirmDelete ${LANG_TRADCHINESE} "您要刪除所有應用程式資料嗎？"
+; Language strings for custom dialogs
+LangString AppRunning 1033 "${PRODUCT_NAME} is currently running. Please close it before continuing."
+LangString AppRunning 2052 "${PRODUCT_NAME} 正在运行。请在继续前关闭它。"
+LangString AppRunning 1028 "${PRODUCT_NAME} 正在運行。請在繼續前關閉它。"
+
+LangString ConfirmDelete 1033 "Do you want to remove all application data?"
+LangString ConfirmDelete 2052 "您要删除所有应用程序数据吗？"
+LangString ConfirmDelete 1028 "您要刪除所有應用程式資料嗎？"
 
 !macro customInit
   !insertmacro MUI_LANGDLL_DISPLAY
@@ -41,6 +46,17 @@ LangString ConfirmDelete ${LANG_TRADCHINESE} "您要刪除所有應用程式資�
     
   skipDeleteData:
   ; Custom uninstallation tasks completed
+!macroend
+
+; Custom license page macro
+!macro customHeader
+  ${If} $LANGUAGE == 2052 ; Simp. Chinese
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_zh-CN.md"
+  ${ElseIf} $LANGUAGE == 1028 ; Trad. Chinese
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_zh-TW.md"
+  ${Else} ; Default to English
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_en-US.md"
+  ${EndIf}
 !macroend
 
 ; REQUIRED: Main installation section

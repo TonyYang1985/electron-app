@@ -78,11 +78,11 @@ npm run publish
 3. 方法一：推送标签触发自动发布:
 
 ```bash
-git tag v1.0.73
-git push origin v1.0.73
+git tag v1.0.74
+git push origin v1.0.74
 
-git tag -d v1.0.72
-git push origin --delete v1.0.72
+git tag -d v1.0.73
+git push origin --delete v1.0.73
 
 
 # 开发环境（忽略大小写）
