@@ -1,10 +1,17 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
+!include "x64.nsh"
 
 ; Define languages
-!insertmacro MUI_LANGUAGE "English"
-!insertmacro MUI_LANGUAGE "SimpChinese" 
-!insertmacro MUI_LANGUAGE "TradChinese"
+!ifndef MUI_LANG_ENGLISH
+  !insertmacro MUI_LANGUAGE "English"
+!endif
+!ifndef MUI_LANG_SIMPCHINESE
+  !insertmacro MUI_LANGUAGE "SimpChinese"
+!endif
+!ifndef MUI_LANG_TRADCHINESE
+  !insertmacro MUI_LANGUAGE "TradChinese"
+!endif
 
 ; Language strings for custom dialogs
 LangString AppRunning 1033 "${PRODUCT_NAME} is currently running. Please close it before continuing."
