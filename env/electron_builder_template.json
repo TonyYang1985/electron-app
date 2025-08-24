@@ -1,22 +1,16 @@
- {
+{
   "appId": "com.tonyyang1985.myawesomeapp",
   "productName": "My Awesome App",
   "copyright": "Copyright 2025 TonyYang1985",
   "directories": {
-    "output": "BMO-MO-APP-RELEASES/${BUILD_IDENTIFIER}" 
+    "output": "BMO-MO-APP-RELEASES/${BUILD_IDENTIFIER}"
   },
-  "files": [
-    "release/**/*",
-    "node_modules/**/*",
-    "package.json"
-  ],
+  "files": ["release/**/*", "node_modules/**/*", "package.json"],
   "extraResources": [
     {
       "from": "assets",
       "to": "assets",
-      "filter": [
-        "**/*"
-      ]
+      "filter": ["**/*"]
     }
   ],
   "win": {
@@ -57,24 +51,13 @@
       },
       {
         "target": "deb",
-        "arch": ["x64"],
-        "depends": [
-          "gconf2",
-          "gconf-service",
-          "libnotify4",
-          "libappindicator1",
-          "libxtst6",
-          "libnss3"
-        ],
-        "afterInstall": "build/linux-after-install.sh",
-        "afterRemove": "build/linux-after-remove.sh"
+        "arch": ["x64"]
       },
       {
         "target": "rpm",
         "arch": ["x64"]
       }
     ],
-    
     "icon": "assets/icon.png",
     "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.deb",
     "category": "Utility",
@@ -83,15 +66,27 @@
     "synopsis": "A lightweight",
     "compression": "maximum",
     "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。",
-    "desktop": { 
-       "entry": {
+    "desktop": {
+      "entry": {
         "Name": "My Awesome App",
-        "Comment": "A lightweight productivity application", 
+        "Comment": "A lightweight productivity application",
         "Categories": ["Utility"],
         "Keywords": ["productivity", "utility"],
         "StartupNotify": "true",
         "MimeType": ["text/plain", "application/json"]
       }
+    },
+    "deb": {
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxtst6",
+        "libnss3"
+      ],
+      "afterInstall": "build/linux-after-install.sh",
+      "afterRemove": "build/linux-after-remove.sh"
     }
   },
   "publish": [
