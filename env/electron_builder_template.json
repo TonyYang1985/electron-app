@@ -59,7 +59,6 @@
       }
     ],
     "icon": "assets/icon.png",
-    "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.deb",
     "category": "Utility",
     "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
     "vendor": "TonyYang1985",
