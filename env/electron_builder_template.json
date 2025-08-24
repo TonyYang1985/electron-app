@@ -64,7 +64,7 @@
         "arch": ["x64"]
       }
     ],
-    "icon": "build/icons",
+    "icon": "assets/icon.png",
     "category": "Utility",
     "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
     "vendor": "TonyYang1985",
