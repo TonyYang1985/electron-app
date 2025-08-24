@@ -63,7 +63,6 @@
     "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
     "vendor": "TonyYang1985",
     "synopsis": "A lightweight",
-    "compression": "maximum",
     "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。",
     "desktop": {
       "entry": {
@@ -78,6 +77,7 @@
   },
   "deb": {
     "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.deb",
+    "compression": "xz",
     "depends": [
       "gconf2",
       "gconf-service",
