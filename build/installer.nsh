@@ -1,16 +1,15 @@
-; installer.nsh with license page for electron-builder 26.x
+; installer.nsh with license page for electron-builder 26.x - FIXED VERSION
 !include "LogicLib.nsh"
 
-; 添加许可证页面
+; 修复的许可证页面宏 - 使用编译时检查而不是运行时检查
 !macro customHeader
-  !ifdef PROJECT_DIR
-    ${If} ${FileExists} "${PROJECT_DIR}\build\LICENSE_en-US.md"
-      !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_en-US.md"
-    ${ElseIf} ${FileExists} "${PROJECT_DIR}\build\LICENSE.txt"
-      !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE.txt"
-    ${ElseIf} ${FileExists} "${PROJECT_DIR}\LICENSE"
-      !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\LICENSE"
-    ${EndIf}
+  ; 使用编译时文件存在检查，避免运行时 IfFileExists 错误
+  !if /FileExists "${PROJECT_DIR}\build\LICENSE_en-US.md"
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_en-US.md"
+  !else if /FileExists "${PROJECT_DIR}\build\LICENSE.txt"
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE.txt"
+  !else if /FileExists "${PROJECT_DIR}\LICENSE"
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\LICENSE"
   !endif
 !macroend
 
