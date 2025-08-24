@@ -69,7 +69,25 @@
     "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
     "vendor": "TonyYang1985",
     "synopsis": "",
-    "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。"
+    "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。",
+    "desktop": {
+      "Name": "My Awesome App",
+      "Comment": "Cross-platform desktop application",
+      "Categories": "Utility;Development;",
+      "Keywords": "electron;desktop;app;",
+      "StartupNotify": "true",
+      "MimeType": "x-scheme-handler/myawesomeapp;"
+    },
+    "depends": [
+      "gconf2",
+      "gconf-service",
+      "libnotify4",
+      "libappindicator1",
+      "libxtst6",
+      "libnss3"
+    ],
+    "afterInstall": "build/linux-after-install.sh",
+    "afterRemove": "build/linux-after-remove.sh"
   },
   "publish": [
     {
