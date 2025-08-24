@@ -90,9 +90,12 @@
     "menuCategory": "",
     "installerIcon": "assets/icon.ico",
     "uninstallerIcon": "assets/icon.ico",
-    "include": "build/installer.nsi",
-    "script": "build/installer.nsi",
+    "include": "build/installer.nsh",
     "warningsAsErrors": false,
-    "unicode": true
+    "unicode": true,
+    "multiLanguageInstaller": true,
+    "installerLanguages": ["en_US", "zh_CN", "zh_TW"],
+    "language": "2052",
+    "differentialPackage": false
   }
 }
