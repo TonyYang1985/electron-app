@@ -93,6 +93,7 @@
     "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.AppImage"
   },
   "rpm": {
+    "compression": "xz", 
     "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.rpm"
   },
   "publish": [
