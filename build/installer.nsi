@@ -1,7 +1,17 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "x64.nsh"
-!include "installer.nsh"
+
+; Define languages
+!ifndef MUI_LANG_ENGLISH
+  !insertmacro MUI_LANGUAGE "English"
+!endif
+!ifndef MUI_LANG_SIMPCHINESE
+  !insertmacro MUI_LANGUAGE "SimpChinese"
+!endif
+!ifndef MUI_LANG_TRADCHINESE
+  !insertmacro MUI_LANGUAGE "TradChinese"
+!endif
 
 ; Language strings for custom dialogs
 LangString AppRunning 1033 "${PRODUCT_NAME} is currently running. Please close it before continuing."
@@ -43,6 +53,17 @@ LangString ConfirmDelete 1028 "您要刪除所有應用程式資料嗎？"
     
   skipDeleteData:
   ; Custom uninstallation tasks completed
+!macroend
+
+; Custom license page macro
+!macro customHeader
+  ${If} $LANGUAGE == 2052 ; Simp. Chinese
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_zh-CN.md"
+  ${ElseIf} $LANGUAGE == 1028 ; Trad. Chinese
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_zh-TW.md"
+  ${Else} ; Default to English
+    !insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}\build\LICENSE_en-US.md"
+  ${EndIf}
 !macroend
 
 ; REQUIRED: Main installation section
