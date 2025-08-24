@@ -3,7 +3,7 @@
   "productName": "My Awesome App",
   "copyright": "Copyright 2025 TonyYang1985",
   "directories": {
-    "output": "dist"
+    "output": "BMO-MO-APP-RELEASES/${BUILD_IDENTIFIER}" 
   },
   "files": [
     "release/**/*",
