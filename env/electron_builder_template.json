@@ -43,6 +43,34 @@
     "icon": "assets/icon.png",
     "category": "public.app-category.productivity"
   },
+  "dmg": {
+    "title": "${PRODUCT_NAME} ${VERSION}",
+    "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.dmg",
+    "backgroundColor": "#ffffff",
+    "format": "UDZO",
+    "icon": "${ICON_MACOS}",
+    "iconSize": "${PLATFORM_MACOS_DMG_ICON_SIZE}",
+    "window": {
+      "width": "${PLATFORM_MACOS_DMG_WINDOW_WIDTH}",
+      "height": "${PLATFORM_MACOS_DMG_WINDOW_HEIGHT}"
+    },
+    "contents": [
+      {
+        "x": 200,
+        "y": 100
+      },
+      {
+        "x": 400,
+        "y": 100,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ],
+
+    "writeUpdateInfo": true,
+    "sign": false,
+    "internetEnabled": false
+  },
   "linux": {
     "target": [
       {
@@ -96,6 +124,12 @@
     "compression": "xz", 
     "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.rpm"
   },
+  "protocols": [
+    {
+      "name": "${PROTOCOL_NAME}",
+      "schemes": ["${PROTOCOL_SCHEMES}"]
+    }
+  ],
   "publish": [
     {
       "provider": "github",
