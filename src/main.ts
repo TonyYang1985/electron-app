@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, MessageBoxOptions } from 'electron';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
 import * as path from 'path';
+import * as utils from './main/utils';
 
 const isDev: boolean = process.env.NODE_ENV === 'development';
 
@@ -16,7 +17,7 @@ autoUpdater.on('update-available', (info: UpdateInfo) => {
     const options: MessageBoxOptions = {
       type: 'info',
       title: '发现更新',
-      message: `发现新版本 ${info.version}`,
+      message: `发现新版本 ${info.version} ${utils.getCurrentVersion()}`,
       buttons: ['立即更新', '稍后提醒']
     };
     dialog.showMessageBox(mainWindow, options);

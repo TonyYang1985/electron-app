@@ -1,6 +1,6 @@
 {
   "name": "my-awesome-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "staticVersion": "1.7.16",
   "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",
@@ -38,6 +38,8 @@
     "@electron-forge/shared-types": "^7.8.3",
     "@electron/notarize": "^2.5.0",
     "@types/node": "^20.19.11",
+    "@types/semver": "^7.7.0",
+    "@types/underscore": "^1.13.0",
     "cpy-cli": "^5.0.0",
     "cross-env": "^7.0.3",
     "electron": "^28.2.4",
@@ -59,6 +61,8 @@
     "electron-updater": "^6.6.2",
     "extract-zip": "^2.0.1",
     "fs-extra": "^11.3.1",
+    "mkdirp": "^3.0.1",
+    "semver": "^7.7.2",
     "underscore": "^1.13.7"
   }
 }
