@@ -1,5 +1,5 @@
 import { app } from "electron";
-const pkg = require("../../package.json");
+const pkg = require("../../../package.json");
 //const config = require('../../config.json');
 
 const API_ENV = process.env.API_ENV;
