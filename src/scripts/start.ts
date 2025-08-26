@@ -552,10 +552,7 @@ async function main(): Promise<void> {
     // 生成配置
     await generator.generateElectronBuilderConfig(environment);
   } catch (error) {
-    console.error(
-      "❌ 配置生成失败:",
-      error instanceof Error ? error.message : String(error)
-    );
+    console.error('❌ 配置生成失败:', error);
     process.exit(1);
   }
 }

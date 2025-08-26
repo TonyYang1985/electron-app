@@ -1,0 +1,196 @@
+{
+  "appId": "com.tonyyang1985.myawesomeapp",
+  "productName": "My Awesome App",
+  "copyright": "Copyright 2025 TonyYang1985",
+  "directories": {
+    "output": "BMO-MO-APP-RELEASES/PROD"
+  },
+  "files": [
+    "release/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "assets",
+      "to": "assets",
+      "filter": [
+        "**/*"
+      ]
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "portable",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "icon": "assets/icon.png",
+    "forceCodeSigning": false,
+    "requestedExecutionLevel": "asInvoker"
+  },
+  "mac": {
+    "target": [
+      {
+        "target": "dmg",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      },
+      {
+        "target": "zip",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
+    ],
+    "icon": "assets/icon.png",
+    "category": "public.app-category.productivity",
+    "identity": null
+  },
+  "dmg": {
+    "title": "BMO Middle Office 2.0.1",
+    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.dmg",
+    "backgroundColor": "#ffffff",
+    "format": "UDZO",
+    "icon": "./assets/mol.icns",
+    "iconSize": "80",
+    "window": {
+      "width": "600",
+      "height": "400"
+    },
+    "contents": [
+      {
+        "x": 200,
+        "y": 100
+      },
+      {
+        "x": 400,
+        "y": 100,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ],
+    "writeUpdateInfo": true,
+    "sign": false,
+    "internetEnabled": false
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "deb",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "rpm",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "icon": "assets/icon.png",
+    "category": "Utility",
+    "maintainer": "TonyYang1985 <yangxindev@gmail.com>",
+    "vendor": "TonyYang1985",
+    "synopsis": "A lightweight",
+    "description": "My Awesome App是一个基于Electron构建的跨平台桌面应用，提供现代化的用户界面和丰富的功能。支持Windows、macOS和Linux平台，内置自动更新功能。",
+    "desktop": {
+      "entry": {
+        "Name": "My Awesome App",
+        "Comment": "A lightweight productivity application",
+        "Categories": [
+          "Utility"
+        ],
+        "Keywords": [
+          "productivity",
+          "utility"
+        ],
+        "StartupNotify": "true",
+        "MimeType": [
+          "text/plain",
+          "application/json"
+        ]
+      }
+    }
+  },
+  "deb": {
+    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.deb",
+    "compression": "xz",
+    "depends": [
+      "gconf2",
+      "gconf-service",
+      "libnotify4",
+      "libappindicator1",
+      "libxtst6",
+      "libnss3"
+    ],
+    "afterInstall": "build/linux-after-install.sh",
+    "afterRemove": "build/linux-after-remove.sh"
+  },
+  "appImage": {
+    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.AppImage"
+  },
+  "rpm": {
+    "compression": "xz",
+    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.rpm"
+  },
+  "protocols": [
+    {
+      "name": "Middle Office Protocol",
+      "schemes": [
+        "mo"
+      ]
+    }
+  ],
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "TonyYang1985",
+      "repo": "electron-app",
+      "releaseType": "prerelease"
+    }
+  ],
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "${productName}",
+    "deleteAppDataOnUninstall": false,
+    "runAfterFinish": true,
+    "menuCategory": "",
+    "installerIcon": "assets/icon.ico",
+    "uninstallerIcon": "assets/icon.ico",
+    "include": "build/installer.nsh",
+    "warningsAsErrors": false,
+    "unicode": true,
+    "multiLanguageInstaller": true,
+    "installerLanguages": [
+      "en_US",
+      "zh_CN",
+      "zh_TW"
+    ],
+    "language": "2052",
+    "differentialPackage": false
+  }
+}

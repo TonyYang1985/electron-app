@@ -7,23 +7,6 @@ const isDev: boolean = process.env.NODE_ENV === 'development';
 
 let mainWindow: BrowserWindow | null = null;
 
-// 自动更新配置
-// if (!isDev) {
-//   autoUpdater.checkForUpdatesAndNotify();
-// }
-
-autoUpdater.on('update-available', (info: UpdateInfo) => {
-  if (mainWindow) {
-    const options: MessageBoxOptions = {
-      type: 'info',
-      title: '发现更新',
-      message: `发现新版本 ${info.version} ${utils.getCurrentVersion()}`,
-      buttons: ['立即更新', '稍后提醒']
-    };
-    dialog.showMessageBox(mainWindow, options);
-  }
-});
-
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -62,6 +45,20 @@ app.whenReady().then(() => {
   });
   
   if (!isDev) {
+    // 自动更新配置
+    autoUpdater.on('update-available', (info: UpdateInfo) => {
+      if (mainWindow) {
+        const options: MessageBoxOptions = {
+          type: 'info',
+          title: '发现更新',
+          message: `发现新版本 ${info.version}`,
+          buttons: ['立即更新', '稍后提醒']
+        };
+        console.log('发现新版本', utils.MO_APP_VERSION);
+        dialog.showMessageBox(mainWindow, options);
+      }
+    });
+
     // 立即检查更新
     autoUpdater.checkForUpdatesAndNotify();
     
