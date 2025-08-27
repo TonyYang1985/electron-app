@@ -30,12 +30,12 @@ export class WindowLoader implements ElectronMicroframeworkLoader {
       minHeight: windowSettings.minHeight || 600,
       webPreferences: {
         nodeIntegration: false,
-      // contextIsolation: true,
+        contextIsolation: true,
        // enableRemoteModule: false,
         webSecurity: this.options.webSecurity ?? true,
-        preload: this.options.customPreload || path.join(__dirname, '../preload.js'),
+       // preload: this.options.customPreload || path.join(__dirname, '../preload.js'),
       },
-      icon: path.join(__dirname, '../../assets/icon.png'),
+      icon: path.join(__dirname, '../../../assets/icon.png'),
       show: false,
       titleBarStyle: 'default',
       frame: true,
@@ -45,14 +45,13 @@ export class WindowLoader implements ElectronMicroframeworkLoader {
 
     // 防止导航到外部链接 - 在加载页面前设置
     mainWindow.webContents.setWindowOpenHandler((details: { url: any; }) => {
-      console.log('🚫 阻止打开外部链接:', details.url);
+      console.log(' 阻止打开外部链接:', details.url);
       return { action: 'deny' as const };
     });
 
     // 加载页面
-    const indexPath = path.join(__dirname, '../index.html');
+    const indexPath = path.join(__dirname, '../../index.html');
     await mainWindow.loadFile(indexPath);
-
 
     // 保存到全局上下文
     const context = (global as any).electronContext;
@@ -68,6 +67,7 @@ export class WindowLoader implements ElectronMicroframeworkLoader {
     if (!mainWindow) return;
 
     mainWindow.once('ready-to-show', () => {
+      console.log('Window ready-to-show');
       mainWindow.show();
       mainWindow.focus();
       
@@ -78,6 +78,7 @@ export class WindowLoader implements ElectronMicroframeworkLoader {
     });
 
     mainWindow.on('closed', () => {
+      console.log('Window closed');
       if (context) {
         context.mainWindow = null;
       }

@@ -21,7 +21,9 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+"emitDecoratorMetadata": true,
   },
   "include": [
     "src/**/*"

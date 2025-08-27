@@ -1,5 +1,6 @@
 import 'reflect-metadata';
-import { AppEventsLoader, AutoUpdaterLoader,  SingleInstanceLoader, WindowLoader } from './microframework/bootstrap/Bootstrap';
+//import { AppEventsLoader, AutoUpdaterLoader,  SingleInstanceLoader, WindowLoader } from './microframework/bootstrap/Bootstrap';
+import { SingleInstanceLoader, WindowLoader } from './microframework/bootstrap/Bootstrap';
 import { MicroframeworkBootstrap } from './microframework/bootstrap/MicroframeworkBootstrap';
 
 const framework = new MicroframeworkBootstrap({
@@ -24,12 +25,12 @@ const framework = new MicroframeworkBootstrap({
       devTools: true,
       webSecurity: false 
     }))
-    .use(new AppEventsLoader())
-    .use(new AutoUpdaterLoader({ 
-      silent: false,
-      checkInterval: 5000,
-      allowPrerelease: false 
-    }))
+    // .use(new AppEventsLoader())
+    // .use(new AutoUpdaterLoader({ 
+    //   silent: false,
+    //   checkInterval: 5000,
+    //   allowPrerelease: false 
+    // }))
     .bootstrap()
     .catch((e: any) => {
       console.error(e);

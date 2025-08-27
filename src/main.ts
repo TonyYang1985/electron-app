@@ -22,15 +22,17 @@ function createWindow(): void {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   
   mainWindow.once('ready-to-show', () => {
+    console.log('Window ready-to-show');
     if (mainWindow) {
       mainWindow.show();
-      if (isDev) {
+      if (!isDev) {
         mainWindow.webContents.openDevTools();
       }
     }
   });
 
   mainWindow.on('closed', () => {
+    console.log('Window closed');
     mainWindow = null;
   });
 }
@@ -39,6 +41,7 @@ app.whenReady().then(() => {
   createWindow();
   
   app.on('activate', () => {
+    console.log('Window activate');
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
@@ -70,6 +73,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  console.log('Window all closed');   
   if (process.platform !== 'darwin') {
     app.quit();
   }
