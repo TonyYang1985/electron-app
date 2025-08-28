@@ -1,10 +1,10 @@
 {
   "name": "my-awesome-app",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "staticVersion": "1.7.16",
   "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",
-  "main": "release/main.js",
+  "main": "release/app.js",
   "homepage": "https://github.com/TonyYang1985/electron-app",
   "author": {
     "name": "TonyYang1985",
