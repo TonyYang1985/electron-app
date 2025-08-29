@@ -134,8 +134,7 @@
     {
       "provider": "github",
       "owner": "TonyYang1985",
-      "repo": "electron-app",
-      "overwrite": true
+      "repo": "electron-app"
     }
   ],
   "nsis": {
