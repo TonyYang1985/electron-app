@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { AppEventsLoader, SingleInstanceLoader, WindowLoader } from './microframework/bootstrap/Bootstrap';
 import { MicroframeworkBootstrap } from './microframework/bootstrap/MicroframeworkBootstrap';
 import { GitHubAutoUpdaterLoader } from './microframework/loaders/GitHubAutoUpdaterLoader';
-const packageJson = require('../../package.json');
+const packageJson = require('../package.json');
 
 const framework = new MicroframeworkBootstrap({
     app: {
