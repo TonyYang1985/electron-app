@@ -3,11 +3,12 @@ import 'reflect-metadata';
 import { AppEventsLoader, SingleInstanceLoader, WindowLoader } from './microframework/bootstrap/Bootstrap';
 import { MicroframeworkBootstrap } from './microframework/bootstrap/MicroframeworkBootstrap';
 import { GitHubAutoUpdaterLoader } from './microframework/loaders/GitHubAutoUpdaterLoader';
+const packageJson = require('../../package.json');
 
 const framework = new MicroframeworkBootstrap({
     app: {
-      name: 'my-awesome-app',
-      version: '2.0.2',
+      name: packageJson.name,
+      version: packageJson.version,
       protocol: 'my-awesome-app'
     },
     window: {
