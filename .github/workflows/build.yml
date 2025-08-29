@@ -114,6 +114,81 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
+      # macOS专用：修复DMG构建问题
+      - name: 🍎 macOS DMG构建环境准备
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          echo "🧹 准备macOS构建环境..."
+          
+          # 获取应用信息
+          PRODUCT_NAME=$(node -p "require('./package.json').build?.productName || require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          
+          echo "📱 应用名称: $PRODUCT_NAME"
+          echo "🏷️ 版本: $VERSION"
+          
+          # 定义可能的卷名称
+          VOLUME_PATTERNS=(
+            "$PRODUCT_NAME $VERSION"
+            "BMO Middle Office $VERSION"
+            "My Awesome App $VERSION"
+            "$PRODUCT_NAME"
+          )
+          
+          echo "🔍 检查并清理现有卷..."
+          
+          for VOLUME_NAME in "${VOLUME_PATTERNS[@]}"; do
+            VOLUME_PATH="/Volumes/$VOLUME_NAME"
+            
+            if [ -d "$VOLUME_PATH" ]; then
+              echo "📱 发现现有卷: $VOLUME_PATH"
+              
+              # 终止使用该卷的进程
+              echo "🔄 终止使用卷的进程..."
+              sudo lsof +D "$VOLUME_PATH" 2>/dev/null | awk 'NR>1 {print $2}' | xargs -r sudo kill -9 2>/dev/null || true
+              
+              # 等待进程终止
+              sleep 2
+              
+              # 尝试多种方法卸载
+              echo "🔄 尝试卸载卷..."
+              sudo diskutil unmount force "$VOLUME_PATH" 2>/dev/null || true
+              sudo hdiutil detach "$VOLUME_PATH" -force -quiet 2>/dev/null || true
+              
+              # 验证清理结果
+              if [ -d "$VOLUME_PATH" ]; then
+                echo "⚠️ 卷仍然存在，尝试更强制的方法..."
+                sudo umount -f "$VOLUME_PATH" 2>/dev/null || true
+              else
+                echo "✅ 卷已成功清理: $VOLUME_NAME"
+              fi
+            fi
+          done
+          
+          # 清理孤立的磁盘镜像
+          echo "🔄 清理孤立的磁盘镜像..."
+          hdiutil info 2>/dev/null | grep -E "(BMO|My.*Awesome.*App)" | awk '{print $1}' | xargs -r sudo hdiutil detach -force 2>/dev/null || true
+          
+          # 清理旧的构建文件
+          echo "🗑️ 清理旧的构建文件..."
+          rm -rf dist/ build/ *.dmg 2>/dev/null || true
+          
+          # 优化系统设置
+          echo "⚙️ 优化系统设置..."
+          sudo sysctl -w kern.maxfiles=65536 2>/dev/null || true
+          sudo sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
+          
+          # 禁用Spotlight索引以避免文件锁定
+          echo "🔍 临时禁用Spotlight索引..."
+          sudo mdutil -a -i off 2>/dev/null || true
+          
+          # 等待系统稳定
+          echo "⏳ 等待系统稳定..."
+          sleep 3
+          
+          echo "✅ macOS构建环境准备完成"
+
       # 编译 TypeScript 代码和准备文件
       - name: 编译和准备文件
         run: |
@@ -164,15 +239,6 @@ jobs:
 
           echo "✅ Git环境已清理，electron-builder不会检测到发布条件"
 
-      - name: Setup macOS for DMG creation
-        if: matrix.os == 'macos-latest'
-        run: |
-          # Clean up any hanging disk images
-          hdiutil detach /dev/disk* 2>/dev/null || true
-          # Increase system limits for disk operations
-          sudo sysctl -w kern.maxfiles=65536
-          sudo sysctl -w kern.maxfilesperproc=65536
-
       # 生成构建配置
       - name: Generate electron-builder config
         run: |
@@ -183,16 +249,136 @@ jobs:
           echo "✅ Config generated. Contents:"
           cat electron-builder.json
 
-      # 构建
-      - name: 构建 ${{ matrix.name }}
+      # macOS构建后清理准备
+      - name: 🍎 macOS构建后清理准备
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          echo "🔧 设置构建后清理钩子..."
+          
+          # 创建清理脚本
+          cat > cleanup-volumes.sh << 'EOF'
+          #!/bin/bash
+          
+          echo "🧹 执行构建后卷清理..."
+          
+          # 获取应用信息
+          PRODUCT_NAME=$(node -p "require('./package.json').build?.productName || require('./package.json').name" 2>/dev/null || echo "BMO Middle Office")
+          VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "2.0.4")
+          
+          echo "📱 清理应用: $PRODUCT_NAME v$VERSION"
+          
+          # 强制清理所有相关卷
+          for pattern in "$PRODUCT_NAME $VERSION" "BMO Middle Office $VERSION" "My Awesome App $VERSION"; do
+            VOLUME_PATH="/Volumes/$pattern"
+            if [ -d "$VOLUME_PATH" ]; then
+              echo "🔄 清理卷: $VOLUME_PATH"
+              sudo lsof +D "$VOLUME_PATH" 2>/dev/null | awk 'NR>1 {print $2}' | xargs -r sudo kill -9 2>/dev/null || true
+              sleep 1
+              sudo diskutil unmount force "$VOLUME_PATH" 2>/dev/null || true
+              sudo hdiutil detach "$VOLUME_PATH" -force -quiet 2>/dev/null || true
+            fi
+          done
+          
+          # 清理所有BMO相关卷
+          for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+            if [ -d "$vol" ]; then
+              echo "🔄 强制清理: $vol"
+              sudo diskutil unmount force "$vol" 2>/dev/null || true
+              sudo hdiutil detach "$vol" -force 2>/dev/null || true
+            fi
+          done
+          
+          echo "✅ 卷清理完成"
+          EOF
+          
+          chmod +x cleanup-volumes.sh
+
+      # 构建 - 增强版本
+      - name: 🔨 构建 ${{ matrix.name }}
+        shell: bash
         run: |
           echo "➡️ Current directory (before package):"
           pwd
-          npm run build:${{ matrix.platform }}
+          
+          # macOS特殊处理
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            echo "🍎 开始macOS构建 (增强版本)..."
+            
+            # 设置Node.js选项以处理大量事件监听器
+            export NODE_OPTIONS="--max-old-space-size=4096 --max-listeners=50"
+            export UV_USE_IO_URING=0
+            
+            # 构建前最后清理
+            echo "🧹 构建前最后清理..."
+            ./cleanup-volumes.sh
+            
+            # 使用trap确保构建失败时也能清理
+            trap './cleanup-volumes.sh' EXIT
+            
+            echo "🔨 执行macOS构建..."
+            timeout 30m npm run build:${{ matrix.platform }} || {
+              echo "⚠️ 构建超时或失败，执行紧急清理..."
+              ./cleanup-volumes.sh
+              
+              # 强制清理所有相关进程
+              sudo pkill -f "hdiutil" 2>/dev/null || true
+              sudo pkill -f "BMO" 2>/dev/null || true
+              sudo pkill -f "Middle Office" 2>/dev/null || true
+              
+              # 等待系统稳定后重试一次
+              sleep 5
+              echo "🔄 重试构建..."
+              npm run build:${{ matrix.platform }}
+            }
+            
+          else
+            # Windows和Linux正常构建
+            echo "🔨 开始 ${{ matrix.name }} 构建..."
+            npm run build:${{ matrix.platform }}
+          fi
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_ENVIRONMENT: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
+          # 增加Node.js内存限制
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      # macOS构建后强制清理
+      - name: 🍎 macOS构建后强制清理
+        if: matrix.os == 'macos-latest' && always()
+        shell: bash
+        run: |
+          echo "🧹 执行构建后强制清理..."
+          
+          # 执行清理脚本
+          ./cleanup-volumes.sh
+          
+          # 额外的强制清理措施
+          echo "🔄 额外强制清理措施..."
+          
+          # 终止所有相关进程
+          sudo pkill -f "hdiutil" 2>/dev/null || true
+          sudo pkill -f "BMO" 2>/dev/null || true
+          sudo pkill -f "Middle Office" 2>/dev/null || true
+          sudo pkill -f "My Awesome App" 2>/dev/null || true
+          
+          # 强制卸载所有可能的卷
+          for vol in /Volumes/*; do
+            if [[ "$vol" == *"BMO"* || "$vol" == *"Middle Office"* || "$vol" == *"My Awesome App"* ]]; then
+              echo "🔄 强制清理卷: $vol"
+              sudo diskutil unmount force "$vol" 2>/dev/null || true
+              sudo hdiutil detach "$vol" -force 2>/dev/null || true
+            fi
+          done
+          
+          # 清理临时文件
+          rm -f cleanup-volumes.sh
+          
+          # 重新启用Spotlight（如果之前禁用了）
+          sudo mdutil -a -i on 2>/dev/null || true
+          
+          echo "✅ macOS构建后清理完成"
 
       # 验证构建结果 - 使用目标环境
       - name: 验证构建结果
@@ -221,6 +407,10 @@ jobs:
               echo "✅ ${{ matrix.name }} 构建成功"
             else
               echo "❌ ${{ matrix.name }} 构建失败: 目录存在但未找到构建文件"
+              
+              # 显示目录内容帮助调试
+              echo "🔍 调试信息 - 目录内容:"
+              find "$BUILD_DIR" -type f | head -20
               exit 1
             fi
           else
@@ -331,7 +521,7 @@ jobs:
         run: |
           mkdir -p release-files
 
-          echo "=== 检查下载的构建产物 (环境: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}) ==="
+          echo "=== 📁 检查下载的构建产物 (环境: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}) ==="
           find artifacts/ -type f \( \
             -name "*.exe" -o \
             -name "*.dmg" -o \
@@ -453,7 +643,7 @@ jobs:
           - **构建平台**: GitHub Actions
           - **构建环境**: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
 
-          ### 🔍 文件校验
+          ### 📁 文件校验
 
           所有文件都包含SHA校验值 (.blockmap文件)，确保下载完整性。
 
@@ -488,7 +678,7 @@ jobs:
           echo "⏳ 等待Release完全创建..."
           sleep 15
 
-          echo "=== 🔍 验证Release状态 ==="
+          echo "=== 📁 验证Release状态 ==="
           response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                           "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.version.outputs.tag }}")
 
@@ -536,7 +726,7 @@ jobs:
             
           else
             echo "❌ Release验证失败"
-            echo "API响应: $response"
+            echo "API响应": $response"
             exit 1
           fi
 
@@ -549,7 +739,7 @@ jobs:
           echo "📊 发布摘要:"
           echo "  🏷️ 应用名称: My Awesome App"
           echo "  📋 版本号: ${{ steps.version.outputs.version }}"
-          echo "  🔖 Git标签: ${{ steps.version.outputs.tag }}"
+          echo "  📖 Git标签: ${{ steps.version.outputs.tag }}"
           echo "  🎯 构建环境: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}"
           echo "  📅 发布时间: $(date)"
           echo ""
