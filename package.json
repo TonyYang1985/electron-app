@@ -1,6 +1,6 @@
 {
   "name": "my-awesome-app",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "staticVersion": "1.7.16",
   "minio": "http://minio.bm.bwoilmarine.com",
   "description": "基于Electron构建的桌面应用",

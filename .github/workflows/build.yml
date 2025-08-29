@@ -121,67 +121,28 @@ jobs:
         run: |
           echo "🧹 准备macOS构建环境..."
           
-          # 获取应用信息
-          PRODUCT_NAME=$(node -p "require('./package.json').build?.productName || require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
-          
-          echo "📱 应用名称: $PRODUCT_NAME"
-          echo "🏷️ 版本: $VERSION"
-          
-          # 定义可能的卷名称
-          VOLUME_PATTERNS=(
-            "$PRODUCT_NAME $VERSION"
-            "BMO Middle Office $VERSION"
-            "My Awesome App $VERSION"
-            "$PRODUCT_NAME"
-          )
-          
-          echo "🔍 检查并清理现有卷..."
-          
-          for VOLUME_NAME in "${VOLUME_PATTERNS[@]}"; do
-            VOLUME_PATH="/Volumes/$VOLUME_NAME"
-            
-            if [ -d "$VOLUME_PATH" ]; then
-              echo "📱 发现现有卷: $VOLUME_PATH"
-              
-              # 终止使用该卷的进程
-              echo "🔄 终止使用卷的进程..."
-              sudo lsof +D "$VOLUME_PATH" 2>/dev/null | awk 'NR>1 {print $2}' | xargs -r sudo kill -9 2>/dev/null || true
-              
-              # 等待进程终止
-              sleep 2
-              
-              # 尝试多种方法卸载
-              echo "🔄 尝试卸载卷..."
-              sudo diskutil unmount force "$VOLUME_PATH" 2>/dev/null || true
-              sudo hdiutil detach "$VOLUME_PATH" -force -quiet 2>/dev/null || true
-              
-              # 验证清理结果
-              if [ -d "$VOLUME_PATH" ]; then
-                echo "⚠️ 卷仍然存在，尝试更强制的方法..."
-                sudo umount -f "$VOLUME_PATH" 2>/dev/null || true
-              else
-                echo "✅ 卷已成功清理: $VOLUME_NAME"
-              fi
+          # 清理现有卷 - 简化版本
+          echo "🔍 清理现有相关卷..."
+          for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+            if [ -d "$vol" ]; then
+              echo "📱 发现卷: $vol"
+              # 尝试正常卸载
+              diskutil unmount "$vol" 2>/dev/null || true
+              # 尝试强制卸载 
+              diskutil unmount force "$vol" 2>/dev/null || true
+              # 尝试hdiutil分离
+              hdiutil detach "$vol" -force -quiet 2>/dev/null || true
             fi
           done
           
-          # 清理孤立的磁盘镜像
-          echo "🔄 清理孤立的磁盘镜像..."
-          hdiutil info 2>/dev/null | grep -E "(BMO|My.*Awesome.*App)" | awk '{print $1}' | xargs -r sudo hdiutil detach -force 2>/dev/null || true
-          
-          # 清理旧的构建文件
-          echo "🗑️ 清理旧的构建文件..."
+          # 清理构建文件
+          echo "🗑️ 清理旧构建文件..."
           rm -rf dist/ build/ *.dmg 2>/dev/null || true
           
-          # 优化系统设置
-          echo "⚙️ 优化系统设置..."
-          sudo sysctl -w kern.maxfiles=65536 2>/dev/null || true
-          sudo sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
-          
-          # 禁用Spotlight索引以避免文件锁定
-          echo "🔍 临时禁用Spotlight索引..."
-          sudo mdutil -a -i off 2>/dev/null || true
+          # 基本系统优化
+          echo "⚙️ 基本系统优化..."
+          sysctl -w kern.maxfiles=65536 2>/dev/null || true
+          sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
           
           # 等待系统稳定
           echo "⏳ 等待系统稳定..."
@@ -256,45 +217,34 @@ jobs:
         run: |
           echo "🔧 设置构建后清理钩子..."
           
-          # 创建清理脚本
+          # 创建简化清理脚本
           cat > cleanup-volumes.sh << 'EOF'
           #!/bin/bash
           
-          echo "🧹 执行构建后卷清理..."
+          echo "🧹 执行卷清理..."
           
-          # 获取应用信息
-          PRODUCT_NAME=$(node -p "require('./package.json').build?.productName || require('./package.json').name" 2>/dev/null || echo "BMO Middle Office")
-          VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "2.0.4")
-          
-          echo "📱 清理应用: $PRODUCT_NAME v$VERSION"
-          
-          # 强制清理所有相关卷
-          for pattern in "$PRODUCT_NAME $VERSION" "BMO Middle Office $VERSION" "My Awesome App $VERSION"; do
-            VOLUME_PATH="/Volumes/$pattern"
-            if [ -d "$VOLUME_PATH" ]; then
-              echo "🔄 清理卷: $VOLUME_PATH"
-              sudo lsof +D "$VOLUME_PATH" 2>/dev/null | awk 'NR>1 {print $2}' | xargs -r sudo kill -9 2>/dev/null || true
-              sleep 1
-              sudo diskutil unmount force "$VOLUME_PATH" 2>/dev/null || true
-              sudo hdiutil detach "$VOLUME_PATH" -force -quiet 2>/dev/null || true
-            fi
-          done
-          
-          # 清理所有BMO相关卷
+          # 清理BMO相关卷 - 使用通配符简化
           for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
             if [ -d "$vol" ]; then
-              echo "🔄 强制清理: $vol"
-              sudo diskutil unmount force "$vol" 2>/dev/null || true
-              sudo hdiutil detach "$vol" -force 2>/dev/null || true
+              echo "🔄 清理卷: $vol"
+              # 先尝试正常卸载
+              diskutil unmount "$vol" 2>/dev/null || true
+              # 再尝试强制卸载
+              diskutil unmount force "$vol" 2>/dev/null || true
+              # 最后尝试hdiutil分离
+              hdiutil detach "$vol" -force -quiet 2>/dev/null || true
             fi
           done
+          
+          # 终止可能的hdiutil进程
+          pkill -f "hdiutil" 2>/dev/null || true
           
           echo "✅ 卷清理完成"
           EOF
           
           chmod +x cleanup-volumes.sh
 
-      # 构建 - 增强版本
+      # 构建 - 修复版本
       - name: 🔨 构建 ${{ matrix.name }}
         shell: bash
         run: |
@@ -303,22 +253,16 @@ jobs:
           
           # macOS特殊处理
           if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            echo "🍎 开始macOS构建 (增强版本)..."
-            
-            # 设置Node.js选项以处理大量事件监听器
-            export NODE_OPTIONS="--max-old-space-size=4096 --max-listeners=50"
-            export UV_USE_IO_URING=0
+            echo "🍎 开始macOS构建..."
             
             # 构建前最后清理
             echo "🧹 构建前最后清理..."
             ./cleanup-volumes.sh
             
-            # 使用trap确保构建失败时也能清理
-            trap './cleanup-volumes.sh' EXIT
-            
             echo "🔨 执行macOS构建..."
-            timeout 30m npm run build:${{ matrix.platform }} || {
-              echo "⚠️ 构建超时或失败，执行紧急清理..."
+            # 使用简化的构建过程，避免复杂的错误处理
+            if ! npm run build:${{ matrix.platform }}; then
+              echo "⚠️ 首次构建失败，执行清理后重试..."
               ./cleanup-volumes.sh
               
               # 强制清理所有相关进程
@@ -326,11 +270,11 @@ jobs:
               sudo pkill -f "BMO" 2>/dev/null || true
               sudo pkill -f "Middle Office" 2>/dev/null || true
               
-              # 等待系统稳定后重试一次
+              # 等待系统稳定
               sleep 5
               echo "🔄 重试构建..."
               npm run build:${{ matrix.platform }}
-            }
+            fi
             
           else
             # Windows和Linux正常构建
@@ -341,7 +285,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_ENVIRONMENT: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
-          # 增加Node.js内存限制
+          # 只设置内存限制，移除不支持的参数
           NODE_OPTIONS: --max-old-space-size=4096
 
       # macOS构建后强制清理
@@ -349,34 +293,24 @@ jobs:
         if: matrix.os == 'macos-latest' && always()
         shell: bash
         run: |
-          echo "🧹 执行构建后强制清理..."
+          echo "🧹 执行构建后清理..."
           
           # 执行清理脚本
-          ./cleanup-volumes.sh
+          if [ -f "./cleanup-volumes.sh" ]; then
+            ./cleanup-volumes.sh
+          fi
           
-          # 额外的强制清理措施
-          echo "🔄 额外强制清理措施..."
+          # 简化的额外清理
+          echo "🔄 额外清理措施..."
           
-          # 终止所有相关进程
-          sudo pkill -f "hdiutil" 2>/dev/null || true
-          sudo pkill -f "BMO" 2>/dev/null || true
-          sudo pkill -f "Middle Office" 2>/dev/null || true
-          sudo pkill -f "My Awesome App" 2>/dev/null || true
-          
-          # 强制卸载所有可能的卷
-          for vol in /Volumes/*; do
-            if [[ "$vol" == *"BMO"* || "$vol" == *"Middle Office"* || "$vol" == *"My Awesome App"* ]]; then
-              echo "🔄 强制清理卷: $vol"
-              sudo diskutil unmount force "$vol" 2>/dev/null || true
-              sudo hdiutil detach "$vol" -force 2>/dev/null || true
-            fi
-          done
+          # 终止相关进程
+          pkill -f "hdiutil" 2>/dev/null || true
+          pkill -f "BMO" 2>/dev/null || true
+          pkill -f "Middle Office" 2>/dev/null || true
+          pkill -f "My Awesome App" 2>/dev/null || true
           
           # 清理临时文件
           rm -f cleanup-volumes.sh
-          
-          # 重新启用Spotlight（如果之前禁用了）
-          sudo mdutil -a -i on 2>/dev/null || true
           
           echo "✅ macOS构建后清理完成"
 
