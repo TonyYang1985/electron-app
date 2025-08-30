@@ -35,6 +35,7 @@ electron-app/
 │   ├── main.ts                     # 主入口文件
 │   ├── core/                       # 核心框架
 │   │   ├── bootstrap.ts            # 启动器核心类
+│   │   ├── MicroframeworkBootstrap.ts            # 启动器核心类
 │   │   ├── interfaces/             # 接口定义
 │   │   │   ├── loader.interface.ts
 │   │   │   ├── config.interface.ts
