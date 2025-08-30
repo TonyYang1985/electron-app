@@ -60,10 +60,10 @@
     "identity": null
   },
   "dmg": {
-    "title": "BMO Middle Office 2.0.1",
-    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.dmg",
+    "title": "BMO Middle Office 2.0.16",
+    "artifactName": "BMO Middle Office-2.0.16-${os}-${arch}.dmg",
     "backgroundColor": "#ffffff",
-    "format": "UDZO",
+    "format": "ULFO",
     "icon": "./assets/mol.icns",
     "iconSize": "80",
     "window": {
@@ -82,7 +82,7 @@
         "path": "/Applications"
       }
     ],
-    "writeUpdateInfo": true,
+    "writeUpdateInfo": false,
     "sign": false,
     "internetEnabled": false
   },
@@ -133,7 +133,7 @@
     }
   },
   "deb": {
-    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.deb",
+    "artifactName": "BMO Middle Office-2.0.16-${os}-${arch}.deb",
     "compression": "xz",
     "depends": [
       "gconf2",
@@ -147,11 +147,11 @@
     "afterRemove": "build/linux-after-remove.sh"
   },
   "appImage": {
-    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.AppImage"
+    "artifactName": "BMO Middle Office-2.0.16-${os}-${arch}.AppImage"
   },
   "rpm": {
     "compression": "xz",
-    "artifactName": "BMO Middle Office-2.0.1-${os}-${arch}.rpm"
+    "artifactName": "BMO Middle Office-2.0.16-${os}-${arch}.rpm"
   },
   "protocols": [
     {

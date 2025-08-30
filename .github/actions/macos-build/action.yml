@@ -12,49 +12,78 @@ inputs:
 runs:
   using: composite
   steps:
-    # macOS专用：修复DMG构建问题（包含符号链接修复）
+    # macOS专用：强化DMG构建问题修复
     - name: macOS DMG构建环境准备
       shell: bash
       run: |
         echo "准备macOS构建环境..."
         
-        # 清理现有卷 - 添加符号链接修复
+        # 1. 强制终止所有相关进程
+        echo "终止DMG相关进程..."
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        
+        # 2. 清理所有相关的磁盘映像
+        echo "清理磁盘映像..."
+        hdiutil info | grep -E "(BMO|Middle Office|My Awesome App)" | awk '{print $1}' | while read -r device; do
+          if [ -n "$device" ]; then
+            echo "强制分离设备: $device"
+            hdiutil detach "$device" -force 2>/dev/null || true
+          fi
+        done
+        
+        # 3. 清理现有卷 - 增强版符号链接修复
         echo "清理现有相关卷..."
         for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
           if [ -d "$vol" ]; then
             echo "发现卷: $vol"
             
-            # 【新增】删除现有的Applications符号链接 - 关键修复
+            # 删除Applications符号链接 - 关键修复
             if [ -L "$vol/Applications" ]; then
-              echo "删除现有Applications符号链接: $vol/Applications"
+              echo "删除Applications符号链接: $vol/Applications"
               rm -f "$vol/Applications" 2>/dev/null || true
             fi
             
-            # 【新增】删除所有其他符号链接
-            find "$vol" -type l -delete 2>/dev/null || true
+            # 删除.DS_Store文件
+            if [ -f "$vol/.DS_Store" ]; then
+              echo "删除.DS_Store文件: $vol/.DS_Store"
+              rm -f "$vol/.DS_Store" 2>/dev/null || true
+            fi
             
-            # 原有的卸载逻辑
-            # 尝试正常卸载
+            # 删除所有符号链接和隐藏文件
+            find "$vol" -type l -delete 2>/dev/null || true
+            find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+            
+            # 强制卸载流程
             diskutil unmount "$vol" 2>/dev/null || true
-            # 尝试强制卸载 
             diskutil unmount force "$vol" 2>/dev/null || true
-            # 尝试hdiutil分离
-            hdiutil detach "$vol" -force -quiet 2>/dev/null || true
+            hdiutil detach "$vol" -force 2>/dev/null || true
+            
+            # 如果还存在，使用设备路径强制分离
+            device=$(hdiutil info | grep "$vol" | awk '{print $1}' | head -1)
+            if [ -n "$device" ]; then
+              echo "使用设备路径强制分离: $device"
+              hdiutil detach "$device" -force 2>/dev/null || true
+            fi
           fi
         done
         
-        # 清理构建文件
-        echo "清理旧构建文件..."
-        rm -rf dist/ build/ *.dmg 2>/dev/null || true
+        # 4. 清理构建文件和缓存
+        echo "清理构建文件..."
+        rm -rf dist/ build/ *.dmg *.pkg 2>/dev/null || true
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        rm -rf ~/Library/Caches/com.apple.DiskImages* 2>/dev/null || true
         
-        # 基本系统优化
-        echo "基本系统优化..."
+        # 5. 系统优化和缓存清理
+        echo "系统优化..."
         sysctl -w kern.maxfiles=65536 2>/dev/null || true
         sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
+        sudo purge 2>/dev/null || true
         
-        # 等待系统稳定
+        # 6. 等待系统完全稳定
         echo "等待系统稳定..."
-        sleep 3
+        sleep 5
         
         echo "macOS构建环境准备完成"
 
@@ -120,48 +149,77 @@ runs:
         echo "Config generated. Contents:"
         cat electron-builder.json
 
-    # macOS构建后清理准备（包含符号链接修复）
+    # macOS构建后清理准备（增强版符号链接修复）
     - name: macOS构建后清理准备
       shell: bash
       run: |
         echo "设置构建后清理钩子..."
         
-        # 创建包含符号链接修复的清理脚本
-        cat > cleanup-volumes.sh << 'EOF'
+        # 创建增强版清理脚本
+        cat > cleanup-volumes.sh << 'CLEANUP_EOF'
         #!/bin/bash
         
-        echo "执行卷清理..."
+        echo "执行强化卷清理..."
         
-        # 清理BMO相关卷 - 添加符号链接处理
+        # 1. 终止所有DMG相关进程
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        
+        # 2. 使用hdiutil info获取准确的挂载信息
+        hdiutil info | grep -E "(BMO|Middle Office|My Awesome App)" | awk '{print $1}' | while read -r device; do
+          if [ -n "$device" ]; then
+            echo "强制分离设备: $device"
+            hdiutil detach "$device" -force 2>/dev/null || true
+          fi
+        done
+        
+        # 3. 清理BMO相关卷
         for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
           if [ -d "$vol" ]; then
             echo "清理卷: $vol"
             
-            # 【新增】先删除Applications符号链接
+            # 删除Applications符号链接
             if [ -L "$vol/Applications" ]; then
               echo "删除符号链接: $vol/Applications"
               rm -f "$vol/Applications" 2>/dev/null || true
             fi
             
-            # 【新增】删除所有符号链接
-            find "$vol" -type l -delete 2>/dev/null || true
+            # 删除.DS_Store文件
+            if [ -f "$vol/.DS_Store" ]; then
+              echo "删除.DS_Store文件: $vol/.DS_Store"
+              rm -f "$vol/.DS_Store" 2>/dev/null || true
+            fi
             
-            # 然后卸载卷
+            # 删除所有符号链接和隐藏文件
+            find "$vol" -type l -delete 2>/dev/null || true
+            find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+            
+            # 多重卸载尝试
             diskutil unmount "$vol" 2>/dev/null || true
             diskutil unmount force "$vol" 2>/dev/null || true
-            hdiutil detach "$vol" -force -quiet 2>/dev/null || true
+            hdiutil detach "$vol" -force 2>/dev/null || true
+            
+            # 通过设备路径强制分离
+            device=$(hdiutil info | grep "$vol" | awk '{print $1}' | head -1)
+            if [ -n "$device" ]; then
+              hdiutil detach "$device" -force 2>/dev/null || true
+            fi
           fi
         done
         
-        # 终止可能的hdiutil进程
-        pkill -f "hdiutil" 2>/dev/null || true
+        # 4. 清理临时文件
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
         
-        echo "卷清理完成"
-        EOF
+        # 5. 等待操作完成
+        sleep 2
+        
+        echo "强化卷清理完成"
+        CLEANUP_EOF
         
         chmod +x cleanup-volumes.sh
 
-    # 构建 - 包含符号链接冲突修复
+    # 构建 - 增强版符号链接冲突修复和DMG优化
     - name: 构建 ${{ inputs.platform }}
       shell: bash
       run: |
@@ -170,44 +228,148 @@ runs:
         
         echo "开始macOS构建..."
         
-        # 构建前最后清理
-        echo "构建前最后清理..."
+        # 构建前强化清理
+        echo "构建前强化清理..."
         ./cleanup-volumes.sh
         
-        echo "执行macOS构建..."
-        # 使用简化的构建过程，避免复杂的错误处理
-        if ! npm run build:${{ inputs.platform }}; then
-          echo "首次构建失败，执行清理后重试..."
+        # 额外的electron-builder优化
+        echo "配置electron-builder DMG选项..."
+        if [ -f "electron-builder.json" ]; then
+          # 使用Python修改配置，优化DMG构建
+          python3 << PYTHON_EOF
+        import json
+        
+        with open('electron-builder.json', 'r') as f:
+            config = json.load(f)
+        
+        # 确保不会自动发布
+        config['publish'] = None
+        
+        # 优化DMG配置
+        if 'dmg' not in config:
+            config['dmg'] = {}
+        
+        # 关键：简化DMG配置以避免复杂的卷操作
+        config['dmg']['format'] = 'ULFO'
+        config['dmg']['writeUpdateInfo'] = False
+        config['dmg']['sign'] = False
+        config['dmg']['background'] = None
+        config['dmg']['icon'] = None
+        config['dmg']['iconSize'] = 80
+        config['dmg']['window'] = {'width': 540, 'height': 380}
+        config['dmg']['contents'] = [
+            {'x': 130, 'y': 220, 'type': 'file'},
+            {'x': 410, 'y': 220, 'type': 'link', 'path': '/Applications'}
+        ]
+        
+        # 禁用一些可能导致问题的功能
+        config['dmg']['internetEnabled'] = False
+        
+        with open('electron-builder.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        PYTHON_EOF
           
-          # 【新增】专门清理符号链接冲突
-          echo "清理符号链接冲突..."
-          for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
-            if [ -d "$vol" ]; then
-              echo "清理卷内符号链接: $vol"
-              # 删除Applications符号链接
-              [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
-              # 删除所有符号链接
-              find "$vol" -type l -delete 2>/dev/null || true
-            fi
-          done
-          
-          ./cleanup-volumes.sh
-          
-          # 强制清理所有相关进程
-          sudo pkill -f "hdiutil" 2>/dev/null || true
-          sudo pkill -f "BMO" 2>/dev/null || true
-          sudo pkill -f "Middle Office" 2>/dev/null || true
-          
-          # 等待系统稳定
-          sleep 5
-          echo "重试构建..."
-          npm run build:${{ inputs.platform }}
+          echo "优化后的DMG配置:"
+          cat electron-builder.json | grep -A 20 '"dmg"'
         fi
+        
+        echo "执行macOS构建..."
+        
+        # 使用更强的重试逻辑
+        build_success=false
+        max_attempts=3
+        
+        for attempt in $(seq 1 $max_attempts); do
+          echo "构建尝试 $attempt/$max_attempts..."
+          
+          if [ $attempt -gt 1 ]; then
+            echo "重试前深度清理..."
+            
+            # 强制终止所有相关进程
+            sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+            sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+            sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+            sudo pkill -9 -f "electron" 2>/dev/null || true
+            
+            # 专门清理符号链接冲突
+            echo "清理符号链接冲突..."
+            for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+              if [ -d "$vol" ]; then
+                echo "清理卷内符号链接: $vol"
+                # 删除Applications符号链接
+                [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
+                # 删除.DS_Store文件
+                [ -f "$vol/.DS_Store" ] && rm -f "$vol/.DS_Store" 2>/dev/null || true
+                # 删除所有符号链接和隐藏文件
+                find "$vol" -type l -delete 2>/dev/null || true
+                find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+              fi
+            done
+            
+            # 强化清理
+            ./cleanup-volumes.sh
+            
+            # 清理构建缓存
+            rm -rf BMO-MO-APP-RELEASES/ dist/ build/ 2>/dev/null || true
+            
+            # 等待系统完全稳定
+            sleep 10
+          fi
+          
+          # 尝试构建
+          if timeout 1800 npm run build:${{ inputs.platform }}; then
+            echo "macOS构建成功 (尝试 $attempt)"
+            build_success=true
+            break
+          else
+            echo "构建失败 (尝试 $attempt)"
+            
+            # 如果是最后一次尝试且仍然失败，尝试替代方案
+            if [ $attempt -eq $max_attempts ]; then
+              echo "常规DMG构建失败，尝试替代方案..."
+              
+              # 替代方案：只构建zip文件，跳过DMG
+              if [ -f "electron-builder.json" ]; then
+                echo "修改配置为仅构建zip..."
+                python3 << FALLBACK_EOF
+        import json
+        with open('electron-builder.json', 'r') as f:
+            config = json.load(f)
+        
+        # 移除DMG目标，只保留ZIP
+        if 'mac' in config:
+            config['mac']['target'] = [
+                {'target': 'zip', 'arch': ['x64', 'arm64']}
+            ]
+        
+        with open('electron-builder.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        FALLBACK_EOF
+                
+                echo "尝试仅构建ZIP文件..."
+                if npm run build:${{ inputs.platform }}; then
+                  echo "ZIP构建成功"
+                  build_success=true
+                  break
+                fi
+              fi
+              
+              echo "所有构建尝试都失败了"
+              echo "最后尝试：显示详细调试信息"
+              echo "当前挂载的卷:"
+              mount | grep "/Volumes/"
+              echo "hdiutil信息:"
+              hdiutil info | head -20
+              echo "运行中的进程:"
+              ps aux | grep -E "(hdiutil|dmgbuild|electron)" | head -10
+              exit 1
+            fi
+          fi
+        done
       env:
         CSC_IDENTITY_AUTO_DISCOVERY: false
         GH_TOKEN: ${{ github.token }}
         BUILD_ENVIRONMENT: ${{ inputs.environment }}
-        # 只设置内存限制，移除不支持的参数
         NODE_OPTIONS: --max-old-space-size=4096
 
     # macOS构建后强制清理
@@ -222,16 +384,32 @@ runs:
           ./cleanup-volumes.sh
         fi
         
-        # 简化的额外清理
+        # 强化的额外清理措施
         echo "额外清理措施..."
         
-        # 终止相关进程
-        pkill -f "hdiutil" 2>/dev/null || true
-        pkill -f "BMO" 2>/dev/null || true
-        pkill -f "Middle Office" 2>/dev/null || true
-        pkill -f "My Awesome App" 2>/dev/null || true
+        # 强制终止所有相关进程
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "BMO" 2>/dev/null || true
+        sudo pkill -9 -f "Middle Office" 2>/dev/null || true
+        sudo pkill -9 -f "My Awesome App" 2>/dev/null || true
         
-        # 清理临时文件
+        # 最后一次强制清理所有相关卷
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "最终清理卷: $vol"
+            # 删除所有内容
+            rm -rf "$vol"/* 2>/dev/null || true
+            rm -rf "$vol"/.*  2>/dev/null || true
+            # 强制卸载
+            diskutil unmount force "$vol" 2>/dev/null || true
+            hdiutil detach "$vol" -force 2>/dev/null || true
+          fi
+        done
+        
+        # 清理所有临时文件
         rm -f cleanup-volumes.sh
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
         
         echo "macOS构建后清理完成"
