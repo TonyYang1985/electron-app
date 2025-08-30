@@ -50,10 +50,11 @@
             <div><strong>Electron版本:</strong> <span id="electron-version"></span></div>
         </div>
     </div>
-
     <script>
-        document.getElementById('app-version').textContent = require('../package.json').version;
-        document.getElementById('electron-version').textContent = process.versions.electron;
+      window.ipcRenderer.invoke('get-version-info').then(versions => {
+            document.getElementById('app-version').textContent = versions.appVersion;
+            document.getElementById('electron-version').textContent = versions.electronVersion;
+        });
     </script>
 </body>
 </html>

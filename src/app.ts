@@ -22,8 +22,8 @@ const framework = new MicroframeworkBootstrap({
   
   framework
     .use(new SingleInstanceLoader())
-    .use(new WindowLoader({ theme: 'dark',devTools: true, webSecurity: false}))
     .use(new AppEventsLoader())
+    .use(new WindowLoader({ theme: 'dark',devTools: true, webSecurity: true}))
     .use(new GitHubAutoUpdaterLoader({silent: false,checkInterval: 5000,allowPrerelease: false}))
     .bootstrap()
     .catch((e: any) => {

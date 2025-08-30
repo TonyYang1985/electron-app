@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow,ipcMain } from "electron";
 import { ElectronMicroframeworkSettings } from "../../shared/ElectronMicroframeworkSettings";
 import { ElectronMicroframeworkLoader } from "../../shared/ElectronMicroframeworkLoader";
 
@@ -8,6 +8,7 @@ export class AppEventsLoader implements ElectronMicroframeworkLoader {
   load(settings: ElectronMicroframeworkSettings): void {
     this.setupAppEvents();
     this.setupProcessEvents(settings);
+    this.setupIpcHandlers();
   }
 
   private setupAppEvents(): void {
@@ -55,6 +56,15 @@ export class AppEventsLoader implements ElectronMicroframeworkLoader {
     process.on("unhandledRejection", (reason, promise) => {
       console.error("🚨 未处理的 Promise 拒绝:", reason);
       console.error("Promise:", promise);
+    });
+  }
+
+  private setupIpcHandlers(): void {
+    ipcMain.handle('get-version-info', () => {
+      return {
+        appVersion: app.getVersion(),
+        electronVersion: process.versions.electron,
+      };
     });
   }
 }
