@@ -1,0 +1,34 @@
+name: 清理临时文件
+
+on:
+  workflow_call:
+    inputs:
+      run_number:
+        required: true
+        type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+
+jobs:
+  cleanup:
+    name: 清理临时文件
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 显示当前目录 (Cleanup Job)
+        run: |
+          echo "Current directory (cleanup job start):"
+          pwd
+
+      - name: 清理构建工件
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            Windows-*-v${{ inputs.run_number }}
+            macOS-*-v${{ inputs.run_number }}
+            Linux-*-v${{ inputs.run_number }}
+        continue-on-error: true
+
+      - name: 清理完成
+        run: echo "临时文件清理完成"

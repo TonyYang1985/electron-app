@@ -1,0 +1,237 @@
+name: macOS构建处理
+description: 处理macOS DMG构建，包含完整的符号链接冲突修复
+
+inputs:
+  platform:
+    description: '构建平台'
+    required: true
+  environment:
+    description: '构建环境'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # macOS专用：修复DMG构建问题（包含符号链接修复）
+    - name: macOS DMG构建环境准备
+      shell: bash
+      run: |
+        echo "准备macOS构建环境..."
+        
+        # 清理现有卷 - 添加符号链接修复
+        echo "清理现有相关卷..."
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "发现卷: $vol"
+            
+            # 【新增】删除现有的Applications符号链接 - 关键修复
+            if [ -L "$vol/Applications" ]; then
+              echo "删除现有Applications符号链接: $vol/Applications"
+              rm -f "$vol/Applications" 2>/dev/null || true
+            fi
+            
+            # 【新增】删除所有其他符号链接
+            find "$vol" -type l -delete 2>/dev/null || true
+            
+            # 原有的卸载逻辑
+            # 尝试正常卸载
+            diskutil unmount "$vol" 2>/dev/null || true
+            # 尝试强制卸载 
+            diskutil unmount force "$vol" 2>/dev/null || true
+            # 尝试hdiutil分离
+            hdiutil detach "$vol" -force -quiet 2>/dev/null || true
+          fi
+        done
+        
+        # 清理构建文件
+        echo "清理旧构建文件..."
+        rm -rf dist/ build/ *.dmg 2>/dev/null || true
+        
+        # 基本系统优化
+        echo "基本系统优化..."
+        sysctl -w kern.maxfiles=65536 2>/dev/null || true
+        sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
+        
+        # 等待系统稳定
+        echo "等待系统稳定..."
+        sleep 3
+        
+        echo "macOS构建环境准备完成"
+
+    # 编译 TypeScript 代码和准备文件
+    - name: 编译和准备文件
+      shell: bash
+      run: |
+        echo "Current directory (before compile):"
+        pwd
+        npm run build
+
+    # 验证编译结果
+    - name: 验证编译结果
+      shell: bash
+      run: |
+        echo "=== TypeScript 编译验证 ==="
+        if [ -f "release/main.js" ]; then
+          echo "main.js 编译成功"
+          ls -la release/
+        else
+          echo "TypeScript 编译失败: main.js 不存在"
+          exit 1
+        fi
+
+        if [ -f "release/index.html" ]; then
+          echo "index.html 复制成功"
+        else
+          echo "资源复制失败: index.html 不存在"
+          exit 1
+        fi
+
+    # 彻底清理Git环境防止electron-builder检测标签
+    - name: 清理Git标签环境
+      shell: bash
+      run: |
+        echo "清理Git环境以防止electron-builder自动发布..."
+
+        # 移除所有远程引用
+        git remote remove origin || true
+
+        # 删除所有标签
+        git tag -l | xargs -r git tag -d
+
+        # 重新初始化为普通仓库
+        rm -rf .git/refs/remotes
+        rm -rf .git/refs/tags
+
+        # 验证清理结果
+        echo "当前Git状态:"
+        git status || echo "Git状态检查完成"
+        git tag -l || echo "无标签"
+
+        echo "Git环境已清理，electron-builder不会检测到发布条件"
+
+    # 生成构建配置
+    - name: Generate electron-builder config
+      shell: bash
+      run: |
+        echo "Deleting old config file..."
+        npx shx rm -f electron-builder.json
+        echo "Generating new config for ${{ inputs.environment }}..."
+        npm run config:ts:${{ inputs.environment }}
+        echo "Config generated. Contents:"
+        cat electron-builder.json
+
+    # macOS构建后清理准备（包含符号链接修复）
+    - name: macOS构建后清理准备
+      shell: bash
+      run: |
+        echo "设置构建后清理钩子..."
+        
+        # 创建包含符号链接修复的清理脚本
+        cat > cleanup-volumes.sh << 'EOF'
+        #!/bin/bash
+        
+        echo "执行卷清理..."
+        
+        # 清理BMO相关卷 - 添加符号链接处理
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "清理卷: $vol"
+            
+            # 【新增】先删除Applications符号链接
+            if [ -L "$vol/Applications" ]; then
+              echo "删除符号链接: $vol/Applications"
+              rm -f "$vol/Applications" 2>/dev/null || true
+            fi
+            
+            # 【新增】删除所有符号链接
+            find "$vol" -type l -delete 2>/dev/null || true
+            
+            # 然后卸载卷
+            diskutil unmount "$vol" 2>/dev/null || true
+            diskutil unmount force "$vol" 2>/dev/null || true
+            hdiutil detach "$vol" -force -quiet 2>/dev/null || true
+          fi
+        done
+        
+        # 终止可能的hdiutil进程
+        pkill -f "hdiutil" 2>/dev/null || true
+        
+        echo "卷清理完成"
+        EOF
+        
+        chmod +x cleanup-volumes.sh
+
+    # 构建 - 包含符号链接冲突修复
+    - name: 构建 ${{ inputs.platform }}
+      shell: bash
+      run: |
+        echo "Current directory (before package):"
+        pwd
+        
+        echo "开始macOS构建..."
+        
+        # 构建前最后清理
+        echo "构建前最后清理..."
+        ./cleanup-volumes.sh
+        
+        echo "执行macOS构建..."
+        # 使用简化的构建过程，避免复杂的错误处理
+        if ! npm run build:${{ inputs.platform }}; then
+          echo "首次构建失败，执行清理后重试..."
+          
+          # 【新增】专门清理符号链接冲突
+          echo "清理符号链接冲突..."
+          for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+            if [ -d "$vol" ]; then
+              echo "清理卷内符号链接: $vol"
+              # 删除Applications符号链接
+              [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
+              # 删除所有符号链接
+              find "$vol" -type l -delete 2>/dev/null || true
+            fi
+          done
+          
+          ./cleanup-volumes.sh
+          
+          # 强制清理所有相关进程
+          sudo pkill -f "hdiutil" 2>/dev/null || true
+          sudo pkill -f "BMO" 2>/dev/null || true
+          sudo pkill -f "Middle Office" 2>/dev/null || true
+          
+          # 等待系统稳定
+          sleep 5
+          echo "重试构建..."
+          npm run build:${{ inputs.platform }}
+        fi
+      env:
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BUILD_ENVIRONMENT: ${{ inputs.environment }}
+        # 只设置内存限制，移除不支持的参数
+        NODE_OPTIONS: --max-old-space-size=4096
+
+    # macOS构建后强制清理
+    - name: macOS构建后强制清理
+      if: always()
+      shell: bash
+      run: |
+        echo "执行构建后清理..."
+        
+        # 执行清理脚本
+        if [ -f "./cleanup-volumes.sh" ]; then
+          ./cleanup-volumes.sh
+        fi
+        
+        # 简化的额外清理
+        echo "额外清理措施..."
+        
+        # 终止相关进程
+        pkill -f "hdiutil" 2>/dev/null || true
+        pkill -f "BMO" 2>/dev/null || true
+        pkill -f "Middle Office" 2>/dev/null || true
+        pkill -f "My Awesome App" 2>/dev/null || true
+        
+        # 清理临时文件
+        rm -f cleanup-volumes.sh
+        
+        echo "macOS构建后清理完成"

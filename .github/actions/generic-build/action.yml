@@ -1,0 +1,91 @@
+name: 通用构建处理
+description: 处理Windows和Linux构建
+
+inputs:
+  platform:
+    description: '构建平台'
+    required: true
+  environment:
+    description: '构建环境'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # 编译 TypeScript 代码和准备文件
+    - name: 编译和准备文件
+      shell: bash
+      run: |
+        echo "Current directory (before compile):"
+        pwd
+        npm run build
+
+    # 验证编译结果
+    - name: 验证编译结果
+      shell: bash
+      run: |
+        echo "=== TypeScript 编译验证 ==="
+        if [ -f "release/main.js" ]; then
+          echo "main.js 编译成功"
+          ls -la release/
+        else
+          echo "TypeScript 编译失败: main.js 不存在"
+          exit 1
+        fi
+
+        if [ -f "release/index.html" ]; then
+          echo "index.html 复制成功"
+        else
+          echo "资源复制失败: index.html 不存在"
+          exit 1
+        fi
+
+    # 彻底清理Git环境防止electron-builder检测标签
+    - name: 清理Git标签环境
+      shell: bash
+      run: |
+        echo "清理Git环境以防止electron-builder自动发布..."
+
+        # 移除所有远程引用
+        git remote remove origin || true
+
+        # 删除所有标签
+        git tag -l | xargs -r git tag -d
+
+        # 重新初始化为普通仓库
+        rm -rf .git/refs/remotes
+        rm -rf .git/refs/tags
+
+        # 验证清理结果
+        echo "当前Git状态:"
+        git status || echo "Git状态检查完成"
+        git tag -l || echo "无标签"
+
+        echo "Git环境已清理，electron-builder不会检测到发布条件"
+
+    # 生成构建配置
+    - name: Generate electron-builder config
+      shell: bash
+      run: |
+        echo "Deleting old config file..."
+        npx shx rm -f electron-builder.json
+        echo "Generating new config for ${{ inputs.environment }}..."
+        npm run config:ts:${{ inputs.environment }}
+        echo "Config generated. Contents:"
+        cat electron-builder.json
+
+    # 构建
+    - name: 构建 ${{ inputs.platform }}
+      shell: bash
+      run: |
+        echo "Current directory (before package):"
+        pwd
+        
+        echo "开始 ${{ inputs.platform }} 构建..."
+        npm run build:${{ inputs.platform }}
+      env:
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BUILD_ENVIRONMENT: ${{ inputs.environment }}
+        # 只设置内存限制，移除不支持的参数
+        NODE_OPTIONS: --max-old-space-size=4096

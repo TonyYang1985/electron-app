@@ -1,0 +1,62 @@
+name: 构建和发布
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "发布版本号 (例如: 1.0.18)"
+        required: true
+        default: "1.0.18"
+      environment:
+        description: "构建环境 (PROD, DEV, SIT, DEMO)"
+        required: false
+        default: "PROD"
+        type: choice
+        options:
+          - "PROD"
+          - "DEV"
+          - "SIT"
+          - "DEMO"
+
+permissions:
+  contents: write
+
+jobs:
+  # 调用构建工作流
+  build:
+    uses: ./.github/workflows/build-apps.yml
+    with:
+      ref: ${{ github.sha }}
+      event_name: ${{ github.event_name }}
+      github_ref: ${{ github.ref }}
+      input_environment: ${{ github.event.inputs.environment || 'PROD' }}
+      input_version: ${{ github.event.inputs.version || '1.0.18' }}
+      run_number: ${{ github.run_number }}
+    secrets: inherit
+
+  # 调用发布工作流
+  release:
+    needs: build
+    if: needs.build.result == 'success'
+    uses: ./.github/workflows/release.yml
+    with:
+      ref: ${{ github.sha }}
+      event_name: ${{ github.event_name }}
+      github_ref: ${{ github.ref }}
+      input_environment: ${{ github.event.inputs.environment || 'PROD' }}
+      input_version: ${{ github.event.inputs.version || '1.0.18' }}
+      run_number: ${{ github.run_number }}
+      build_environment: ${{ needs.build.outputs.build_environment }}
+    secrets: inherit
+
+  # 调用清理工作流
+  cleanup:
+    needs: [build, release]
+    if: always()
+    uses: ./.github/workflows/cleanup.yml
+    with:
+      run_number: ${{ github.run_number }}
+    secrets: inherit

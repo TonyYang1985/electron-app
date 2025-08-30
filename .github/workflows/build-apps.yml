@@ -1,0 +1,188 @@
+name: 应用构建
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      event_name:
+        required: true
+        type: string
+      github_ref:
+        required: true
+        type: string
+      input_environment:
+        required: true
+        type: string
+      input_version:
+        required: true
+        type: string
+      run_number:
+        required: true
+        type: string
+    outputs:
+      build_environment:
+        description: "构建环境"
+        value: ${{ jobs.build.outputs.build_environment }}
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+
+jobs:
+  build:
+    name: 构建 ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+            platform: win
+          - os: macos-latest
+            name: macOS
+            platform: mac
+          - os: ubuntu-latest
+            name: Linux
+            platform: linux
+
+    outputs:
+      build_environment: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: 显示当前目录 (Build Job)
+        run: |
+          echo "➡️ Current directory (build job start):"
+          pwd
+
+      - name: 解析环境信息
+        id: parse_env
+        shell: bash
+        run: |
+          # 从git tag或手动输入解析环境
+          if [[ "${{ inputs.event_name }}" == "push" && "${{ inputs.github_ref }}" == refs/tags/* ]]; then
+            # 从标签解析环境 (支持忽略大小写)
+            TAG_NAME="${{ inputs.github_ref }}"
+            TAG_NAME=${TAG_NAME#refs/tags/}
+            echo "📋 检测到标签: $TAG_NAME"
+            
+            # 提取环境后缀并转换为大写
+            if [[ $TAG_NAME =~ -([a-zA-Z]+)$ ]]; then
+              ENV_SUFFIX="${BASH_REMATCH[1]}"
+              ENV_SUFFIX=$(echo "$ENV_SUFFIX" | tr '[:lower:]' '[:upper:]')
+              echo "🎯 检测到环境后缀: $ENV_SUFFIX"
+              
+              case $ENV_SUFFIX in
+                "DEV"|"DEVELOPMENT")
+                  BUILD_ENV="DEV"
+                  ;;
+                "SIT"|"STAGING")
+                  BUILD_ENV="SIT"
+                  ;;
+                "DEMO"|"DEMONSTRATION")
+                  BUILD_ENV="DEMO"
+                  ;;
+                "PROD"|"PRODUCTION")
+                  BUILD_ENV="PROD"
+                  ;;
+                *)
+                  echo "⚠️ 未识别的环境后缀: $ENV_SUFFIX，默认使用 PROD"
+                  BUILD_ENV="PROD"
+                  ;;
+              esac
+            else
+              echo "📦 无环境后缀，默认使用 PROD"
+              BUILD_ENV="PROD"
+            fi
+          else
+            # 手动触发时使用输入的环境
+            BUILD_ENV="${{ inputs.input_environment }}"
+          fi
+
+          echo "🚀 构建环境: $BUILD_ENV"
+          echo "BUILD_ENVIRONMENT=$BUILD_ENV" >> $GITHUB_OUTPUT
+          echo "BUILD_ENVIRONMENT=$BUILD_ENV" >> $GITHUB_ENV
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: 安装依赖
+        run: npm ci
+
+      # 使用复合动作处理macOS构建
+      - name: macOS构建处理
+        if: matrix.os == 'macos-latest'
+        uses: ./.github/actions/macos-build
+        with:
+          platform: ${{ matrix.platform }}
+          environment: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
+
+      # 使用复合动作处理通用构建
+      - name: 通用构建处理
+        if: matrix.os != 'macos-latest'
+        uses: ./.github/actions/generic-build
+        with:
+          platform: ${{ matrix.platform }}
+          environment: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}
+
+      # 验证构建结果 - 使用目标环境
+      - name: 验证构建结果
+        shell: bash
+        run: |
+          echo "=== ${{ matrix.name }} 构建验证 (环境: ${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}) ==="
+
+          # 只检查目标环境目录
+          TARGET_ENV="${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}"
+          BUILD_DIR="BMO-MO-APP-RELEASES/$TARGET_ENV"
+
+          if [ -d "$BUILD_DIR" ]; then
+            echo "📁 找到构建目录: $BUILD_DIR"
+            
+            # 查找构建文件
+            BUILD_FILES=$(find "$BUILD_DIR" -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" 2>/dev/null || true)
+            
+            if [ -n "$BUILD_FILES" ]; then
+              echo "✅ 找到构建文件:"
+              echo "$BUILD_FILES" | while read -r file; do
+                [ -n "$file" ] && ls -lh "$file"
+              done
+              
+              FILE_COUNT=$(echo "$BUILD_FILES" | grep -c . || echo 0)
+              echo "📊 构建统计: 找到 $FILE_COUNT 个构建文件"
+              echo "✅ ${{ matrix.name }} 构建成功"
+            else
+              echo "❌ ${{ matrix.name }} 构建失败: 目录存在但未找到构建文件"
+              
+              # 显示目录内容帮助调试
+              echo "🔍 调试信息 - 目录内容:"
+              find "$BUILD_DIR" -type f | head -20
+              exit 1
+            fi
+          else
+            echo "❌ ${{ matrix.name }} 构建失败: 未找到目标环境目录 $BUILD_DIR"
+            echo "当前目录结构:"
+            find . -maxdepth 2 -type d | head -10
+            exit 1
+          fi
+
+      # 上传构建产物 - 只上传目标环境
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}-${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}-v${{ inputs.run_number }}
+          path: |
+            BMO-MO-APP-RELEASES/${{ steps.parse_env.outputs.BUILD_ENVIRONMENT }}/*
+          retention-days: 7
+          compression-level: 6
+          if-no-files-found: warn

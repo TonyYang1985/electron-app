@@ -1,0 +1,351 @@
+name: 创建Release
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      event_name:
+        required: true
+        type: string
+      github_ref:
+        required: true
+        type: string
+      input_environment:
+        required: true
+        type: string
+      input_version:
+        required: true
+        type: string
+      run_number:
+        required: true
+        type: string
+      build_environment:
+        required: true
+        type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+
+jobs:
+  release:
+    name: 创建GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 显示当前目录 (Release Job)
+        run: |
+          echo "Current directory (release job start):"
+          pwd
+
+      - name: 解析环境信息
+        id: parse_env
+        shell: bash
+        run: |
+          # 从git tag或手动输入解析环境
+          if [[ "${{ inputs.event_name }}" == "push" && "${{ inputs.github_ref }}" == refs/tags/* ]]; then
+            # 从标签解析环境 (支持忽略大小写)
+            TAG_NAME="${{ inputs.github_ref }}"
+            TAG_NAME=${TAG_NAME#refs/tags/}
+            echo "检测到标签: $TAG_NAME"
+            
+            # 提取环境后缀并转换为大写
+            if [[ $TAG_NAME =~ -([a-zA-Z]+)$ ]]; then
+              ENV_SUFFIX="${BASH_REMATCH[1]}"
+              ENV_SUFFIX=$(echo "$ENV_SUFFIX" | tr '[:lower:]' '[:upper:]')
+              echo "检测到环境后缀: $ENV_SUFFIX"
+              
+              case $ENV_SUFFIX in
+                "DEV"|"DEVELOPMENT")
+                  BUILD_ENV="DEV"
+                  ;;
+                "SIT"|"STAGING")
+                  BUILD_ENV="SIT"
+                  ;;
+                "DEMO"|"DEMONSTRATION")
+                  BUILD_ENV="DEMO"
+                  ;;
+                "PROD"|"PRODUCTION")
+                  BUILD_ENV="PROD"
+                  ;;
+                *)
+                  echo "未识别的环境后缀: $ENV_SUFFIX，默认使用 PROD"
+                  BUILD_ENV="PROD"
+                  ;;
+              esac
+            else
+              echo "无环境后缀，默认使用 PROD"
+              BUILD_ENV="PROD"
+            fi
+          else
+            # 手动触发时使用输入的环境
+            BUILD_ENV="${{ inputs.input_environment }}"
+          fi
+
+          echo "发布环境: $BUILD_ENV"
+          echo "BUILD_ENVIRONMENT=$BUILD_ENV" >> $GITHUB_OUTPUT
+          echo "BUILD_ENVIRONMENT=$BUILD_ENV" >> $GITHUB_ENV
+
+      - name: 获取版本信息
+        id: version
+        run: |
+          if [[ "${{ inputs.github_ref }}" == refs/tags/* ]]; then
+            VERSION="${{ inputs.github_ref }}"
+            VERSION=${VERSION#refs/tags/v}
+          else
+            VERSION="${{ inputs.input_version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "发布版本: $VERSION"
+
+      # 下载所有构建产物
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      # 整理发布文件
+      - name: 整理发布文件
+        run: |
+          mkdir -p release-files
+
+          echo "=== 检查下载的构建产物 (环境: ${{ inputs.build_environment }}) ==="
+          find artifacts/ -type f \( \
+            -name "*.exe" -o \
+            -name "*.dmg" -o \
+            -name "*.zip" -o \
+            -name "*.deb" -o \
+            -name "*.rpm" -o \
+            -name "*.AppImage" -o \
+            -name "*.yml" -o \
+            -name "*.blockmap" \
+          \) -exec ls -lh {} \;
+
+          # 复制所有文件到release目录
+          find artifacts/ -type f \( \
+            -name "*.exe" -o \
+            -name "*.dmg" -o \
+            -name "*.zip" -o \
+            -name "*.deb" -o \
+            -name "*.rpm" -o \
+            -name "*.AppImage" -o \
+            -name "*.yml" -o \
+            -name "*.blockmap" \
+          \) -exec cp {} release-files/ \;
+
+          echo ""
+          echo "=== 准备发布的文件 ==="
+          ls -lah release-files/
+
+          # 统计文件信息
+          file_count=$(ls -1 release-files/ | wc -l)
+          total_size=$(du -sh release-files/ | cut -f1)
+
+          echo ""
+          echo "发布统计:"
+          echo "  文件数量: $file_count"
+          echo "  总大小: $total_size"
+          echo "  构建环境: ${{ inputs.build_environment }}"
+
+          # 分类统计
+          windows_count=$(ls -1 release-files/*.exe 2>/dev/null | wc -l || echo 0)
+          macos_count=$(ls -1 release-files/*.dmg 2>/dev/null | wc -l || echo 0)
+          linux_count=$(ls -1 release-files/*.AppImage 2>/dev/null | wc -l || echo 0)
+
+          echo "  Windows文件: $windows_count"
+          echo "  macOS文件: $macos_count"
+          echo "  Linux文件: $linux_count"
+
+          if [ $file_count -eq 0 ]; then
+            echo "没有找到可发布的文件"
+            exit 1
+          fi
+
+      # 生成Release说明
+      - name: 生成Release说明
+        run: |
+          ENV_LABEL=""
+          case "${{ inputs.build_environment }}" in
+            "DEV")
+              ENV_LABEL=" (开发版)"
+              ;;
+            "SIT")
+              ENV_LABEL=" (测试版)"
+              ;;
+            "DEMO")
+              ENV_LABEL=" (演示版)"
+              ;;
+            "PROD")
+              ENV_LABEL=""
+              ;;
+          esac
+
+          cat > release_notes.md << EOF
+          ## My Awesome App v${{ steps.version.outputs.version }}$ENV_LABEL
+
+          > **构建环境**: ${{ inputs.build_environment }}  
+          > **构建时间**: $(date)
+
+          ### 支持平台
+
+          **Windows (x64)**
+          - NSIS安装程序 (推荐) - 双击安装，支持自动更新
+          - 便携版本 - 绿色版，无需安装
+
+          **macOS**
+          - Intel Mac (x64) - 支持macOS 10.15+
+          - Apple Silicon (ARM64) - 原生M系列芯片支持
+
+          **Linux (x64)**
+          - AppImage - 通用便携版本，适用于所有发行版
+          - Debian/Ubuntu (.deb) - 系统包管理器安装
+          - CentOS/Fedora (.rpm) - 系统包管理器安装
+
+          ### 安装指南
+
+          **Windows:**
+          1. 下载 \`my-awesome-app-*-win-x64.exe\` (NSIS安装程序)
+          2. 双击运行，按向导安装
+          3. 如遇安全提示，点击"更多信息" → "仍要运行"
+
+          **macOS:**
+          1. 根据芯片类型下载对应的 \`.dmg\` 文件
+          2. 双击挂载，拖拽应用到 Applications 文件夹
+          3. 首次运行可能需要右键点击 → "打开"
+
+          **Linux:**
+          1. **AppImage (推荐)**: 下载后添加执行权限 \`chmod +x *.AppImage\`
+          2. **Ubuntu/Debian**: \`sudo dpkg -i *.deb\`
+          3. **CentOS/Fedora**: \`sudo rpm -i *.rpm\`
+
+          ### 自动更新
+
+          应用内置自动更新功能  
+          安装后会自动检测新版本  
+          支持增量更新，节省下载时间  
+
+          ### 技术信息
+
+          - **Electron**: 28.2.4
+          - **Node.js**: 20.x  
+          - **构建平台**: GitHub Actions
+          - **构建环境**: ${{ inputs.build_environment }}
+
+          ### 文件校验
+
+          所有文件都包含SHA校验值 (.blockmap文件)，确保下载完整性。
+
+          ---
+
+          **相关链接**
+          - [源代码](https://github.com/${{ github.repository }})
+          - [问题反馈](https://github.com/${{ github.repository }}/issues)
+          - [更新日志](https://github.com/${{ github.repository }}/releases)
+          - [使用文档](https://github.com/${{ github.repository }}#readme)
+          EOF
+
+      # 创建Release
+      - name: 创建GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "My Awesome App v${{ steps.version.outputs.version }} [${{ inputs.build_environment }}]"
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ inputs.build_environment != 'PROD' }}
+          files: release-files/*
+          make_latest: ${{ inputs.build_environment == 'PROD' }}
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 验证Release创建
+      - name: 验证Release创建
+        run: |
+          echo "等待Release完全创建..."
+          sleep 15
+
+          echo "=== 验证Release状态 ==="
+          response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.version.outputs.tag }}")
+
+          if echo "$response" | jq -e '.tag_name' > /dev/null; then
+            echo "Release创建成功"
+            
+            release_url=$(echo "$response" | jq -r '.html_url')
+            assets_count=$(echo "$response" | jq '.assets | length')
+            is_prerelease=$(echo "$response" | jq -r '.prerelease')
+            
+            echo "Release URL: $release_url"
+            echo "包含文件: $assets_count 个"
+            echo "构建环境: ${{ inputs.build_environment }}"
+            echo "预发布版: $is_prerelease"
+            
+            if [ $assets_count -gt 0 ]; then
+              echo ""
+              echo "文件清单:"
+              echo "$response" | jq -r '.assets[] | "  \(.name) (\((.size / 1024 / 1024 * 100 | floor) / 100)MB)"'
+              
+              # 检查关键文件
+              echo ""
+              echo "平台文件检查:"
+              if echo "$response" | jq -e '.assets[] | select(.name | test("\\.exe$"))' > /dev/null; then
+                echo "  Windows文件已包含"
+              else
+                echo "  未找到Windows文件"
+              fi
+              
+              if echo "$response" | jq -e '.assets[] | select(.name | test("\\.dmg$"))' > /dev/null; then
+                echo "  macOS文件已包含"
+              else
+                echo "  未找到macOS文件"
+              fi
+              
+              if echo "$response" | jq -e '.assets[] | select(.name | test("\\.AppImage$"))' > /dev/null; then
+                echo "  Linux文件已包含"
+              else
+                echo "  未找到Linux文件"
+              fi
+              
+            else
+              echo "Release创建成功但没有附加文件"
+            fi
+            
+          else
+            echo "Release验证失败"
+            echo "API响应: $response"
+            exit 1
+          fi
+
+      # 发布成功通知
+      - name: 发布成功通知
+        run: |
+          echo ""
+          echo "发布完成!"
+          echo ""
+          echo "发布摘要:"
+          echo "  应用名称: My Awesome App"
+          echo "  版本号: ${{ steps.version.outputs.version }}"
+          echo "  Git标签: ${{ steps.version.outputs.tag }}"
+          echo "  构建环境: ${{ inputs.build_environment }}"
+          echo "  发布时间: $(date)"
+          echo ""
+          echo "用户下载地址:"
+          echo "  https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+          echo ""
+          echo "特性说明:"
+          echo "  支持 Windows 10/11 (x64)"
+          echo "  支持 macOS Intel & Apple Silicon"
+          echo "  支持主流 Linux 发行版"
+          echo "  内置自动更新功能"
+          echo ""
+          echo "用户现在可以下载并安装最新版本!"
