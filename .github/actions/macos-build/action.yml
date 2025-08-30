@@ -34,16 +34,14 @@ runs:
               if [ -n "$device" ]; then
                 echo "强制分离设备: $device"
                 if mount | grep -q "$device"; then
-                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
-                else
-                  echo "Device $device already detached or does not exist."
-                fi
-              fi
-            done
-          else
-            echo "没有找到需要清理的DMG卷"
-          fi
-        fi
+                  # Get the mount point for the device
+                  mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                  if [ -n "$mount_point" ]; then
+                    echo "Found mount point: $mount_point"
+                    
+                    # List and kill processes using the DMG volume before detach
+                    echo "Checking for processes using the DMG volume..."
+                    for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+
         
         # 3. 清理现有卷 - 增强版符号链接修复
         echo "清理现有相关卷..."
@@ -71,7 +69,22 @@ runs:
             diskutil unmount "$vol" 2>/dev/null || true
             diskutil unmount force "$vol" 2>/dev/null || true
             if mount | grep -q "$vol"; then
-              hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol, but continuing."
+              # List and kill processes using the DMG volume before detach
+              echo "Checking for processes using volume: $vol"
+              for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                echo "Killing process $pid using the DMG volume"
+                kill -9 $pid || true
+              done
+              
+              # Retry logic for detaching the DMG
+              echo "Attempting to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "First detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol after retries, but continuing."
+              else
+                echo "Successfully detached $vol"
+              fi
             else
               echo "Volume $vol already detached or does not exist."
             fi
@@ -81,7 +94,25 @@ runs:
             if [ -n "$device" ]; then
               echo "使用设备路径强制分离: $device"
               if mount | grep -q "$device"; then
-                hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+                # List and kill processes using the device before detach
+                echo "Checking for processes using device: $device"
+                mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                if [ -n "$mount_point" ]; then
+                  for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                    echo "Killing process $pid using the device mount point"
+                    kill -9 $pid || true
+                  done
+                fi
+                
+                # Retry logic for detaching the device
+                echo "Attempting to detach device: $device"
+                if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                  echo "First device detach failed, waiting 5s and retrying with -force..."
+                  sleep 5
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                else
+                  echo "Successfully detached $device"
+                fi
               else
                 echo "Device $device already detached or does not exist."
               fi
@@ -196,7 +227,42 @@ runs:
               if [ -n "$device" ]; then
                 echo "强制分离设备: $device"
                 if mount | grep -q "$device"; then
-                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+                  # Get the mount point for the device
+                  mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                  if [ -n "$mount_point" ]; then
+                    echo "Found mount point: $mount_point"
+                    
+                    # List and kill processes using the DMG volume before detach
+                    echo "Checking for processes using the DMG volume..."
+                    for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                      echo "Killing process $pid using the DMG volume"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the DMG
+                    echo "Attempting to detach $device from $mount_point..."
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    else
+                      echo "Successfully detached $device"
+                    fi
+                  else
+                    # Fallback to original method if mount point not found
+                    # List and kill processes using the device before detach
+                    for pid in $(lsof | grep "$device" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                      echo "Killing process $pid using device $device"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the device
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First device detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    fi
+                  fi
                 else
                   echo "Device $device already detached or does not exist."
                 fi
@@ -232,7 +298,22 @@ runs:
             diskutil unmount "$vol" 2>/dev/null || true
             diskutil unmount force "$vol" 2>/dev/null || true
             if mount | grep -q "$vol"; then
-              hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol, but continuing."
+              # List and kill processes using the DMG volume before detach
+              echo "Checking for processes using volume: $vol"
+              for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                echo "Killing process $pid using the DMG volume"
+                kill -9 $pid || true
+              done
+              
+              # Retry logic for detaching the DMG
+              echo "Attempting to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "First detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol after retries, but continuing."
+              else
+                echo "Successfully detached $vol"
+              fi
             else
               echo "Volume $vol already detached or does not exist."
             fi
@@ -241,7 +322,25 @@ runs:
             device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
             if [ -n "$device" ]; then
               if mount | grep -q "$device"; then
-                hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+                # List and kill processes using the device before detach
+                echo "Checking for processes using device: $device"
+                mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                if [ -n "$mount_point" ]; then
+                  for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                    echo "Killing process $pid using the device mount point"
+                    kill -9 $pid || true
+                  done
+                fi
+                
+                # Retry logic for detaching the device
+                echo "Attempting to detach device: $device"
+                if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                  echo "First device detach failed, waiting 5s and retrying with -force..."
+                  sleep 5
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                else
+                  echo "Successfully detached $device"
+                fi
               else
                 echo "Device $device already detached or does not exist."
               fi
@@ -342,6 +441,14 @@ runs:
             for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
               if [ -d "$vol" ]; then
                 echo "清理卷内符号链接: $vol"
+                
+                # List and kill processes using the volume before cleanup
+                echo "Checking for processes using retry cleanup volume: $vol"
+                for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                  echo "Killing process $pid using the retry cleanup volume"
+                  kill -9 $pid || true
+                done
+                
                 # 删除Applications符号链接
                 [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
                 # 删除.DS_Store文件
@@ -349,6 +456,18 @@ runs:
                 # 删除所有符号链接和隐藏文件
                 find "$vol" -type l -delete 2>/dev/null || true
                 find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+                
+                # Improved detach logic for retry cleanup
+                if mount | grep -q "$vol"; then
+                  echo "Retry cleanup: attempting to detach volume: $vol"
+                  if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                    echo "Retry cleanup detach failed, waiting 3s and retrying with -force..."
+                    sleep 3
+                    hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol during retry cleanup, but continuing."
+                  else
+                    echo "Successfully detached $vol during retry cleanup"
+                  fi
+                fi
               fi
             done
             
@@ -448,13 +567,1192 @@ runs:
         for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
           if [ -d "$vol" ]; then
             echo "最终清理卷: $vol"
+            
+            # List and kill processes using the volume before cleanup
+            echo "Checking for processes using final cleanup volume: $vol"
+            for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+              echo "Killing process $pid using the final cleanup volume"
+              kill -9 $pid || true
+            done
+            
             # 删除所有内容
             rm -rf "$vol"/* 2>/dev/null || true
             rm -rf "$vol"/.*  2>/dev/null || true
-            # 强制卸载
+            
+            # 强制卸载with improved retry logic
+            diskutil unmount force "$vol" 2>/dev/null || true
+            
+            if mount | grep -q "$vol"; then
+              # Retry logic for final detaching
+              echo "Final attempt to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "Final detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol in final cleanup, but continuing."
+              else
+                echo "Successfully detached $vol in final cleanup"
+              fi
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
+          fi
+        done
+        
+        # 清理所有临时文件
+        rm -f cleanup-volumes.sh
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        
+        echo "macOS构建后清理完成"
+        set -e  # Re-enable exit on error | sort -u); do
+                      echo "Killing process $pid using the DMG volume"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the DMG
+                    echo "Attempting to detach $device from $mount_point..."
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    else
+                      echo "Successfully detached $device"
+                    fi
+                  else
+                    # Fallback to original method if mount point not found
+                    # List and kill processes using the device before detach
+                    for pid in $(lsof | grep "$device" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+
+        
+        # 3. 清理现有卷 - 增强版符号链接修复
+        echo "清理现有相关卷..."
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "发现卷: $vol"
+            
+            # 删除Applications符号链接 - 关键修复
+            if [ -L "$vol/Applications" ]; then
+              echo "删除Applications符号链接: $vol/Applications"
+              rm -f "$vol/Applications" 2>/dev/null || true
+            fi
+            
+            # 删除.DS_Store文件
+            if [ -f "$vol/.DS_Store" ]; then
+              echo "删除.DS_Store文件: $vol/.DS_Store"
+              rm -f "$vol/.DS_Store" 2>/dev/null || true
+            fi
+            
+            # 删除所有符号链接和隐藏文件
+            find "$vol" -type l -delete 2>/dev/null || true
+            find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+            
+            # 强制卸载流程
+            diskutil unmount "$vol" 2>/dev/null || true
             diskutil unmount force "$vol" 2>/dev/null || true
             if mount | grep -q "$vol"; then
-              hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol, but continuing."
+              # List and kill processes using the DMG volume before detach
+              echo "Checking for processes using volume: $vol"
+              for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                echo "Killing process $pid using the DMG volume"
+                kill -9 $pid || true
+              done
+              
+              # Retry logic for detaching the DMG
+              echo "Attempting to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "First detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol after retries, but continuing."
+              else
+                echo "Successfully detached $vol"
+              fi
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
+            
+            # 如果还存在，使用设备路径强制分离
+            device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
+            if [ -n "$device" ]; then
+              echo "使用设备路径强制分离: $device"
+              if mount | grep -q "$device"; then
+                # List and kill processes using the device before detach
+                echo "Checking for processes using device: $device"
+                mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                if [ -n "$mount_point" ]; then
+                  for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                    echo "Killing process $pid using the device mount point"
+                    kill -9 $pid || true
+                  done
+                fi
+                
+                # Retry logic for detaching the device
+                echo "Attempting to detach device: $device"
+                if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                  echo "First device detach failed, waiting 5s and retrying with -force..."
+                  sleep 5
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                else
+                  echo "Successfully detached $device"
+                fi
+              else
+                echo "Device $device already detached or does not exist."
+              fi
+            fi
+          fi
+        done
+        
+        # 4. 清理构建文件和缓存
+        echo "清理构建文件..."
+        rm -rf dist/ build/ *.dmg *.pkg 2>/dev/null || true
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        rm -rf ~/Library/Caches/com.apple.DiskImages* 2>/dev/null || true
+        
+        # 5. 系统优化和缓存清理
+        echo "系统优化..."
+        sysctl -w kern.maxfiles=65536 2>/dev/null || true
+        sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
+        sudo purge 2>/dev/null || true
+        
+        # 6. 等待系统完全稳定
+        echo "等待系统稳定..."
+        sleep 5
+        
+        echo "macOS构建环境准备完成"
+        set -e  # Re-enable exit on error for actual build steps
+
+    # 编译 TypeScript 代码和准备文件
+    - name: 编译和准备文件
+      shell: bash
+      run: |
+        echo "Current directory (before compile):"
+        pwd
+        npm run build
+
+    # 验证编译结果
+    - name: 验证编译结果
+      shell: bash
+      run: |
+        echo "=== TypeScript 编译验证 ==="
+        if [ -f "release/main.js" ]; then
+          echo "main.js 编译成功"
+          ls -la release/
+        else
+          echo "TypeScript 编译失败: main.js 不存在"
+          exit 1
+        fi
+
+        if [ -f "release/index.html" ]; then
+          echo "index.html 复制成功"
+        else
+          echo "资源复制失败: index.html 不存在"
+          exit 1
+        fi
+
+    # 彻底清理Git环境防止electron-builder检测标签
+    - name: 清理Git标签环境
+      shell: bash
+      run: |
+        echo "清理Git环境以防止electron-builder自动发布..."
+
+        # 移除所有远程引用
+        git remote remove origin || true
+
+        # 删除所有标签
+        git tag -l | xargs -r git tag -d 2>/dev/null || true
+
+        # 重新初始化为普通仓库
+        rm -rf .git/refs/remotes
+        rm -rf .git/refs/tags
+
+        # 验证清理结果
+        echo "当前Git状态:"
+        git status || echo "Git状态检查完成"
+        git tag -l || echo "无标签"
+
+        echo "Git环境已清理，electron-builder不会检测到发布条件"
+
+    # 生成构建配置
+    - name: Generate electron-builder config
+      shell: bash
+      run: |
+        echo "Deleting old config file..."
+        npx shx rm -f electron-builder.json
+        echo "Generating new config for ${{ inputs.environment }}..."
+        npm run config:ts:${{ inputs.environment }}
+        echo "Config generated. Contents:"
+        cat electron-builder.json || echo "Failed to read electron-builder.json"
+
+    # macOS构建后清理准备（增强版符号链接修复）
+    - name: macOS构建后清理准备
+      shell: bash
+      run: |
+        echo "设置构建后清理钩子..."
+        
+        # 创建增强版清理脚本
+        cat > cleanup-volumes.sh << 'CLEANUP_EOF'
+        #!/bin/bash
+        set +e  # Don't exit on error for cleanup operations
+        
+        echo "执行强化卷清理..."
+        
+        # 1. 终止所有DMG相关进程
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        
+        # 2. 使用hdiutil info获取准确的挂载信息
+        # Fix: Add proper error handling for grep when no matches found
+        if hdiutil_output=$(hdiutil info 2>/dev/null); then
+          if echo "$hdiutil_output" | grep -qE "(BMO|Middle Office|My Awesome App)"; then
+            echo "$hdiutil_output" | grep -E "(BMO|Middle Office|My Awesome App)" | awk '{print $1}' | while read -r device; do
+              if [ -n "$device" ]; then
+                echo "强制分离设备: $device"
+                if mount | grep -q "$device"; then
+                  # Get the mount point for the device
+                  mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                  if [ -n "$mount_point" ]; then
+                    echo "Found mount point: $mount_point"
+                    
+                    # List and kill processes using the DMG volume before detach
+                    echo "Checking for processes using the DMG volume..."
+                    for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                      echo "Killing process $pid using the DMG volume"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the DMG
+                    echo "Attempting to detach $device from $mount_point..."
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    else
+                      echo "Successfully detached $device"
+                    fi
+                  else
+                    # Fallback to original method if mount point not found
+                    # List and kill processes using the device before detach
+                    for pid in $(lsof | grep "$device" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                      echo "Killing process $pid using device $device"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the device
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First device detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    fi
+                  fi
+                else
+                  echo "Device $device already detached or does not exist."
+                fi
+              fi
+            done
+          else
+            echo "没有找到需要清理的DMG卷"
+          fi
+        fi
+        
+        # 3. 清理BMO相关卷
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "清理卷: $vol"
+            
+            # 删除Applications符号链接
+            if [ -L "$vol/Applications" ]; then
+              echo "删除符号链接: $vol/Applications"
+              rm -f "$vol/Applications" 2>/dev/null || true
+            fi
+            
+            # 删除.DS_Store文件
+            if [ -f "$vol/.DS_Store" ]; then
+              echo "删除.DS_Store文件: $vol/.DS_Store"
+              rm -f "$vol/.DS_Store" 2>/dev/null || true
+            fi
+            
+            # 删除所有符号链接和隐藏文件
+            find "$vol" -type l -delete 2>/dev/null || true
+            find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+            
+            # 多重卸载尝试
+            diskutil unmount "$vol" 2>/dev/null || true
+            diskutil unmount force "$vol" 2>/dev/null || true
+            if mount | grep -q "$vol"; then
+              # List and kill processes using the DMG volume before detach
+              echo "Checking for processes using volume: $vol"
+              for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                echo "Killing process $pid using the DMG volume"
+                kill -9 $pid || true
+              done
+              
+              # Retry logic for detaching the DMG
+              echo "Attempting to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "First detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol after retries, but continuing."
+              else
+                echo "Successfully detached $vol"
+              fi
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
+            
+            # 通过设备路径强制分离
+            device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
+            if [ -n "$device" ]; then
+              if mount | grep -q "$device"; then
+                # List and kill processes using the device before detach
+                echo "Checking for processes using device: $device"
+                mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                if [ -n "$mount_point" ]; then
+                  for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                    echo "Killing process $pid using the device mount point"
+                    kill -9 $pid || true
+                  done
+                fi
+                
+                # Retry logic for detaching the device
+                echo "Attempting to detach device: $device"
+                if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                  echo "First device detach failed, waiting 5s and retrying with -force..."
+                  sleep 5
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                else
+                  echo "Successfully detached $device"
+                fi
+              else
+                echo "Device $device already detached or does not exist."
+              fi
+            fi
+          fi
+        done
+        
+        # 4. 清理临时文件
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        
+        # 5. 等待操作完成
+        sleep 2
+        
+        echo "强化卷清理完成"
+        set -e  # Re-enable exit on error
+        CLEANUP_EOF
+        
+        chmod +x cleanup-volumes.sh || echo "Warning: Could not make cleanup script executable"
+
+    # 构建 - 增强版符号链接冲突修复和DMG优化
+    - name: 构建 ${{ inputs.platform }}
+      shell: bash
+      run: |
+        echo "Current directory (before package):"
+        pwd
+        
+        echo "开始macOS构建..."
+        
+        # 构建前强化清理
+        echo "构建前强化清理..."
+        if [ -f "./cleanup-volumes.sh" ]; then
+          ./cleanup-volumes.sh || echo "Warning: Cleanup script encountered issues but continuing"
+        else
+          echo "Warning: cleanup-volumes.sh not found, skipping pre-build cleanup"
+        fi
+        
+        # 额外的electron-builder优化
+        echo "配置electron-builder DMG选项..."
+        if [ -f "electron-builder.json" ]; then
+          # 使用Python修改配置，优化DMG构建
+          python3 << PYTHON_EOF
+        import json
+        
+        with open('electron-builder.json', 'r') as f:
+            config = json.load(f)
+        
+        # 确保不会自动发布
+        config['publish'] = None
+        
+        # 优化DMG配置
+        if 'dmg' not in config:
+            config['dmg'] = {}
+        
+        # 关键：简化DMG配置以避免复杂的卷操作
+        config['dmg']['format'] = 'ULFO'
+        config['dmg']['writeUpdateInfo'] = False
+        config['dmg']['sign'] = False
+        config['dmg']['background'] = None
+        config['dmg']['icon'] = None
+        config['dmg']['iconSize'] = 80
+        config['dmg']['window'] = {'width': 540, 'height': 380}
+        config['dmg']['contents'] = [
+            {'x': 130, 'y': 220, 'type': 'file'},
+            {'x': 410, 'y': 220, 'type': 'link', 'path': '/Applications'}
+        ]
+        
+        # 禁用一些可能导致问题的功能
+        config['dmg']['internetEnabled'] = False
+        
+        with open('electron-builder.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        PYTHON_EOF
+          
+          echo "优化后的DMG配置:"
+          cat electron-builder.json | grep -A 20 '"dmg"' || echo "DMG配置未找到"
+        fi
+        
+        echo "执行macOS构建..."
+        
+        # 使用更强的重试逻辑
+        build_success=false
+        max_attempts=3
+        
+        for attempt in $(seq 1 $max_attempts); do
+          echo "构建尝试 $attempt/$max_attempts..."
+          
+          if [ $attempt -gt 1 ]; then
+            echo "重试前深度清理..."
+            
+            # 强制终止所有相关进程
+            sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+            sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+            sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+            sudo pkill -9 -f "electron" 2>/dev/null || true
+            
+            # 专门清理符号链接冲突
+            echo "清理符号链接冲突..."
+            for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+              if [ -d "$vol" ]; then
+                echo "清理卷内符号链接: $vol"
+                
+                # List and kill processes using the volume before cleanup
+                echo "Checking for processes using retry cleanup volume: $vol"
+                for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                  echo "Killing process $pid using the retry cleanup volume"
+                  kill -9 $pid || true
+                done
+                
+                # 删除Applications符号链接
+                [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
+                # 删除.DS_Store文件
+                [ -f "$vol/.DS_Store" ] && rm -f "$vol/.DS_Store" 2>/dev/null || true
+                # 删除所有符号链接和隐藏文件
+                find "$vol" -type l -delete 2>/dev/null || true
+                find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+                
+                # Improved detach logic for retry cleanup
+                if mount | grep -q "$vol"; then
+                  echo "Retry cleanup: attempting to detach volume: $vol"
+                  if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                    echo "Retry cleanup detach failed, waiting 3s and retrying with -force..."
+                    sleep 3
+                    hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol during retry cleanup, but continuing."
+                  else
+                    echo "Successfully detached $vol during retry cleanup"
+                  fi
+                fi
+              fi
+            done
+            
+            # 强化清理
+            if [ -f "./cleanup-volumes.sh" ]; then
+              ./cleanup-volumes.sh || echo "Warning: Cleanup script encountered issues during retry"
+            fi
+            
+            # 清理构建缓存
+            rm -rf BMO-MO-APP-RELEASES/ dist/ build/ 2>/dev/null || true
+            
+            # 等待系统完全稳定
+            sleep 10
+          fi
+          
+          # 尝试构建
+          if timeout 1800 npm run build:${{ inputs.platform }}; then
+            echo "macOS构建成功 (尝试 $attempt)"
+            build_success=true
+            break
+          else
+            echo "构建失败 (尝试 $attempt)"
+            
+            # 如果是最后一次尝试且仍然失败，尝试替代方案
+            if [ $attempt -eq $max_attempts ]; then
+              echo "常规DMG构建失败，尝试替代方案..."
+              
+              # 替代方案：只构建zip文件，跳过DMG
+              if [ -f "electron-builder.json" ]; then
+                echo "修改配置为仅构建zip..."
+                python3 << FALLBACK_EOF
+        import json
+        with open('electron-builder.json', 'r') as f:
+            config = json.load(f)
+        
+        # 移除DMG目标，只保留ZIP
+        if 'mac' in config:
+            config['mac']['target'] = [
+                {'target': 'zip', 'arch': ['x64', 'arm64']}
+            ]
+        
+        with open('electron-builder.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        FALLBACK_EOF
+                
+                echo "尝试仅构建ZIP文件..."
+                if npm run build:${{ inputs.platform }}; then
+                  echo "ZIP构建成功"
+                  build_success=true
+                  break
+                fi
+              fi
+              
+              echo "所有构建尝试都失败了"
+              echo "最后尝试：显示详细调试信息"
+              echo "当前挂载的卷:"
+              mount | grep "/Volumes/" || echo "没有找到挂载的卷"
+              echo "hdiutil信息:"
+              hdiutil info | head -20 || echo "无法获取hdiutil信息"
+              echo "运行中的进程:"
+              ps aux | grep -E "(hdiutil|dmgbuild|electron)" | head -10 || echo "没有找到相关进程"
+              exit 1
+            fi
+          fi
+        done
+      env:
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+        GH_TOKEN: ${{ github.token }}
+        BUILD_ENVIRONMENT: ${{ inputs.environment }}
+        NODE_OPTIONS: --max-old-space-size=4096
+
+    # macOS构建后强制清理
+    - name: macOS构建后强制清理
+      if: always()
+      shell: bash
+      run: |
+        set +e  # Don't exit on error for cleanup operations
+        echo "执行构建后清理..."
+        
+        # 执行清理脚本
+        if [ -f "./cleanup-volumes.sh" ]; then
+          ./cleanup-volumes.sh || echo "Warning: Cleanup script encountered issues"
+        fi
+        
+        # 强化的额外清理措施
+        echo "额外清理措施..."
+        
+        # 强制终止所有相关进程
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "BMO" 2>/dev/null || true
+        sudo pkill -9 -f "Middle Office" 2>/dev/null || true
+        sudo pkill -9 -f "My Awesome App" 2>/dev/null || true
+        
+        # 最后一次强制清理所有相关卷
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "最终清理卷: $vol"
+            
+            # List and kill processes using the volume before cleanup
+            echo "Checking for processes using final cleanup volume: $vol"
+            for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+              echo "Killing process $pid using the final cleanup volume"
+              kill -9 $pid || true
+            done
+            
+            # 删除所有内容
+            rm -rf "$vol"/* 2>/dev/null || true
+            rm -rf "$vol"/.*  2>/dev/null || true
+            
+            # 强制卸载with improved retry logic
+            diskutil unmount force "$vol" 2>/dev/null || true
+            
+            if mount | grep -q "$vol"; then
+              # Retry logic for final detaching
+              echo "Final attempt to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "Final detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol in final cleanup, but continuing."
+              else
+                echo "Successfully detached $vol in final cleanup"
+              fi
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
+          fi
+        done
+        
+        # 清理所有临时文件
+        rm -f cleanup-volumes.sh
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        
+        echo "macOS构建后清理完成"
+        set -e  # Re-enable exit on error | sort -u); do
+                      echo "Killing process $pid using device $device"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the device
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First device detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    fi
+                  fi
+                else
+                  echo "Device $device already detached or does not exist."
+                fi
+              fi
+            done
+          else
+            echo "没有找到需要清理的DMG卷"
+          fi
+        fi
+        
+        # 3. 清理现有卷 - 增强版符号链接修复
+        echo "清理现有相关卷..."
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "发现卷: $vol"
+            
+            # 删除Applications符号链接 - 关键修复
+            if [ -L "$vol/Applications" ]; then
+              echo "删除Applications符号链接: $vol/Applications"
+              rm -f "$vol/Applications" 2>/dev/null || true
+            fi
+            
+            # 删除.DS_Store文件
+            if [ -f "$vol/.DS_Store" ]; then
+              echo "删除.DS_Store文件: $vol/.DS_Store"
+              rm -f "$vol/.DS_Store" 2>/dev/null || true
+            fi
+            
+            # 删除所有符号链接和隐藏文件
+            find "$vol" -type l -delete 2>/dev/null || true
+            find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+            
+            # 强制卸载流程
+            diskutil unmount "$vol" 2>/dev/null || true
+            diskutil unmount force "$vol" 2>/dev/null || true
+            if mount | grep -q "$vol"; then
+              # List and kill processes using the DMG volume before detach
+              echo "Checking for processes using volume: $vol"
+              for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                echo "Killing process $pid using the DMG volume"
+                kill -9 $pid || true
+              done
+              
+              # Retry logic for detaching the DMG
+              echo "Attempting to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "First detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol after retries, but continuing."
+              else
+                echo "Successfully detached $vol"
+              fi
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
+            
+            # 如果还存在，使用设备路径强制分离
+            device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
+            if [ -n "$device" ]; then
+              echo "使用设备路径强制分离: $device"
+              if mount | grep -q "$device"; then
+                # List and kill processes using the device before detach
+                echo "Checking for processes using device: $device"
+                mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                if [ -n "$mount_point" ]; then
+                  for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                    echo "Killing process $pid using the device mount point"
+                    kill -9 $pid || true
+                  done
+                fi
+                
+                # Retry logic for detaching the device
+                echo "Attempting to detach device: $device"
+                if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                  echo "First device detach failed, waiting 5s and retrying with -force..."
+                  sleep 5
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                else
+                  echo "Successfully detached $device"
+                fi
+              else
+                echo "Device $device already detached or does not exist."
+              fi
+            fi
+          fi
+        done
+        
+        # 4. 清理构建文件和缓存
+        echo "清理构建文件..."
+        rm -rf dist/ build/ *.dmg *.pkg 2>/dev/null || true
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        rm -rf ~/Library/Caches/com.apple.DiskImages* 2>/dev/null || true
+        
+        # 5. 系统优化和缓存清理
+        echo "系统优化..."
+        sysctl -w kern.maxfiles=65536 2>/dev/null || true
+        sysctl -w kern.maxfilesperproc=65536 2>/dev/null || true
+        sudo purge 2>/dev/null || true
+        
+        # 6. 等待系统完全稳定
+        echo "等待系统稳定..."
+        sleep 5
+        
+        echo "macOS构建环境准备完成"
+        set -e  # Re-enable exit on error for actual build steps
+
+    # 编译 TypeScript 代码和准备文件
+    - name: 编译和准备文件
+      shell: bash
+      run: |
+        echo "Current directory (before compile):"
+        pwd
+        npm run build
+
+    # 验证编译结果
+    - name: 验证编译结果
+      shell: bash
+      run: |
+        echo "=== TypeScript 编译验证 ==="
+        if [ -f "release/main.js" ]; then
+          echo "main.js 编译成功"
+          ls -la release/
+        else
+          echo "TypeScript 编译失败: main.js 不存在"
+          exit 1
+        fi
+
+        if [ -f "release/index.html" ]; then
+          echo "index.html 复制成功"
+        else
+          echo "资源复制失败: index.html 不存在"
+          exit 1
+        fi
+
+    # 彻底清理Git环境防止electron-builder检测标签
+    - name: 清理Git标签环境
+      shell: bash
+      run: |
+        echo "清理Git环境以防止electron-builder自动发布..."
+
+        # 移除所有远程引用
+        git remote remove origin || true
+
+        # 删除所有标签
+        git tag -l | xargs -r git tag -d 2>/dev/null || true
+
+        # 重新初始化为普通仓库
+        rm -rf .git/refs/remotes
+        rm -rf .git/refs/tags
+
+        # 验证清理结果
+        echo "当前Git状态:"
+        git status || echo "Git状态检查完成"
+        git tag -l || echo "无标签"
+
+        echo "Git环境已清理，electron-builder不会检测到发布条件"
+
+    # 生成构建配置
+    - name: Generate electron-builder config
+      shell: bash
+      run: |
+        echo "Deleting old config file..."
+        npx shx rm -f electron-builder.json
+        echo "Generating new config for ${{ inputs.environment }}..."
+        npm run config:ts:${{ inputs.environment }}
+        echo "Config generated. Contents:"
+        cat electron-builder.json || echo "Failed to read electron-builder.json"
+
+    # macOS构建后清理准备（增强版符号链接修复）
+    - name: macOS构建后清理准备
+      shell: bash
+      run: |
+        echo "设置构建后清理钩子..."
+        
+        # 创建增强版清理脚本
+        cat > cleanup-volumes.sh << 'CLEANUP_EOF'
+        #!/bin/bash
+        set +e  # Don't exit on error for cleanup operations
+        
+        echo "执行强化卷清理..."
+        
+        # 1. 终止所有DMG相关进程
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        
+        # 2. 使用hdiutil info获取准确的挂载信息
+        # Fix: Add proper error handling for grep when no matches found
+        if hdiutil_output=$(hdiutil info 2>/dev/null); then
+          if echo "$hdiutil_output" | grep -qE "(BMO|Middle Office|My Awesome App)"; then
+            echo "$hdiutil_output" | grep -E "(BMO|Middle Office|My Awesome App)" | awk '{print $1}' | while read -r device; do
+              if [ -n "$device" ]; then
+                echo "强制分离设备: $device"
+                if mount | grep -q "$device"; then
+                  # Get the mount point for the device
+                  mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                  if [ -n "$mount_point" ]; then
+                    echo "Found mount point: $mount_point"
+                    
+                    # List and kill processes using the DMG volume before detach
+                    echo "Checking for processes using the DMG volume..."
+                    for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                      echo "Killing process $pid using the DMG volume"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the DMG
+                    echo "Attempting to detach $device from $mount_point..."
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    else
+                      echo "Successfully detached $device"
+                    fi
+                  else
+                    # Fallback to original method if mount point not found
+                    # List and kill processes using the device before detach
+                    for pid in $(lsof | grep "$device" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                      echo "Killing process $pid using device $device"
+                      kill -9 $pid || true
+                    done
+                    
+                    # Retry logic for detaching the device
+                    if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                      echo "First device detach failed, waiting 5s and retrying with -force..."
+                      sleep 5
+                      hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                    fi
+                  fi
+                else
+                  echo "Device $device already detached or does not exist."
+                fi
+              fi
+            done
+          else
+            echo "没有找到需要清理的DMG卷"
+          fi
+        fi
+        
+        # 3. 清理BMO相关卷
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "清理卷: $vol"
+            
+            # 删除Applications符号链接
+            if [ -L "$vol/Applications" ]; then
+              echo "删除符号链接: $vol/Applications"
+              rm -f "$vol/Applications" 2>/dev/null || true
+            fi
+            
+            # 删除.DS_Store文件
+            if [ -f "$vol/.DS_Store" ]; then
+              echo "删除.DS_Store文件: $vol/.DS_Store"
+              rm -f "$vol/.DS_Store" 2>/dev/null || true
+            fi
+            
+            # 删除所有符号链接和隐藏文件
+            find "$vol" -type l -delete 2>/dev/null || true
+            find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+            
+            # 多重卸载尝试
+            diskutil unmount "$vol" 2>/dev/null || true
+            diskutil unmount force "$vol" 2>/dev/null || true
+            if mount | grep -q "$vol"; then
+              # List and kill processes using the DMG volume before detach
+              echo "Checking for processes using volume: $vol"
+              for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                echo "Killing process $pid using the DMG volume"
+                kill -9 $pid || true
+              done
+              
+              # Retry logic for detaching the DMG
+              echo "Attempting to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "First detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol after retries, but continuing."
+              else
+                echo "Successfully detached $vol"
+              fi
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
+            
+            # 通过设备路径强制分离
+            device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
+            if [ -n "$device" ]; then
+              if mount | grep -q "$device"; then
+                # List and kill processes using the device before detach
+                echo "Checking for processes using device: $device"
+                mount_point=$(mount | grep "$device" | awk '{print $3}' | head -1)
+                if [ -n "$mount_point" ]; then
+                  for pid in $(lsof +D "$mount_point" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                    echo "Killing process $pid using the device mount point"
+                    kill -9 $pid || true
+                  done
+                fi
+                
+                # Retry logic for detaching the device
+                echo "Attempting to detach device: $device"
+                if ! hdiutil detach "$device" -quiet 2>/dev/null; then
+                  echo "First device detach failed, waiting 5s and retrying with -force..."
+                  sleep 5
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device after retries, but continuing."
+                else
+                  echo "Successfully detached $device"
+                fi
+              else
+                echo "Device $device already detached or does not exist."
+              fi
+            fi
+          fi
+        done
+        
+        # 4. 清理临时文件
+        rm -rf /tmp/*BMO* /tmp/*"My Awesome App"* /tmp/*"Middle Office"* 2>/dev/null || true
+        
+        # 5. 等待操作完成
+        sleep 2
+        
+        echo "强化卷清理完成"
+        set -e  # Re-enable exit on error
+        CLEANUP_EOF
+        
+        chmod +x cleanup-volumes.sh || echo "Warning: Could not make cleanup script executable"
+
+    # 构建 - 增强版符号链接冲突修复和DMG优化
+    - name: 构建 ${{ inputs.platform }}
+      shell: bash
+      run: |
+        echo "Current directory (before package):"
+        pwd
+        
+        echo "开始macOS构建..."
+        
+        # 构建前强化清理
+        echo "构建前强化清理..."
+        if [ -f "./cleanup-volumes.sh" ]; then
+          ./cleanup-volumes.sh || echo "Warning: Cleanup script encountered issues but continuing"
+        else
+          echo "Warning: cleanup-volumes.sh not found, skipping pre-build cleanup"
+        fi
+        
+        # 额外的electron-builder优化
+        echo "配置electron-builder DMG选项..."
+        if [ -f "electron-builder.json" ]; then
+          # 使用Python修改配置，优化DMG构建
+          python3 << PYTHON_EOF
+        import json
+        
+        with open('electron-builder.json', 'r') as f:
+            config = json.load(f)
+        
+        # 确保不会自动发布
+        config['publish'] = None
+        
+        # 优化DMG配置
+        if 'dmg' not in config:
+            config['dmg'] = {}
+        
+        # 关键：简化DMG配置以避免复杂的卷操作
+        config['dmg']['format'] = 'ULFO'
+        config['dmg']['writeUpdateInfo'] = False
+        config['dmg']['sign'] = False
+        config['dmg']['background'] = None
+        config['dmg']['icon'] = None
+        config['dmg']['iconSize'] = 80
+        config['dmg']['window'] = {'width': 540, 'height': 380}
+        config['dmg']['contents'] = [
+            {'x': 130, 'y': 220, 'type': 'file'},
+            {'x': 410, 'y': 220, 'type': 'link', 'path': '/Applications'}
+        ]
+        
+        # 禁用一些可能导致问题的功能
+        config['dmg']['internetEnabled'] = False
+        
+        with open('electron-builder.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        PYTHON_EOF
+          
+          echo "优化后的DMG配置:"
+          cat electron-builder.json | grep -A 20 '"dmg"' || echo "DMG配置未找到"
+        fi
+        
+        echo "执行macOS构建..."
+        
+        # 使用更强的重试逻辑
+        build_success=false
+        max_attempts=3
+        
+        for attempt in $(seq 1 $max_attempts); do
+          echo "构建尝试 $attempt/$max_attempts..."
+          
+          if [ $attempt -gt 1 ]; then
+            echo "重试前深度清理..."
+            
+            # 强制终止所有相关进程
+            sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+            sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+            sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+            sudo pkill -9 -f "electron" 2>/dev/null || true
+            
+            # 专门清理符号链接冲突
+            echo "清理符号链接冲突..."
+            for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+              if [ -d "$vol" ]; then
+                echo "清理卷内符号链接: $vol"
+                
+                # List and kill processes using the volume before cleanup
+                echo "Checking for processes using retry cleanup volume: $vol"
+                for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+                  echo "Killing process $pid using the retry cleanup volume"
+                  kill -9 $pid || true
+                done
+                
+                # 删除Applications符号链接
+                [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
+                # 删除.DS_Store文件
+                [ -f "$vol/.DS_Store" ] && rm -f "$vol/.DS_Store" 2>/dev/null || true
+                # 删除所有符号链接和隐藏文件
+                find "$vol" -type l -delete 2>/dev/null || true
+                find "$vol" -name ".*" -type f -delete 2>/dev/null || true
+                
+                # Improved detach logic for retry cleanup
+                if mount | grep -q "$vol"; then
+                  echo "Retry cleanup: attempting to detach volume: $vol"
+                  if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                    echo "Retry cleanup detach failed, waiting 3s and retrying with -force..."
+                    sleep 3
+                    hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol during retry cleanup, but continuing."
+                  else
+                    echo "Successfully detached $vol during retry cleanup"
+                  fi
+                fi
+              fi
+            done
+            
+            # 强化清理
+            if [ -f "./cleanup-volumes.sh" ]; then
+              ./cleanup-volumes.sh || echo "Warning: Cleanup script encountered issues during retry"
+            fi
+            
+            # 清理构建缓存
+            rm -rf BMO-MO-APP-RELEASES/ dist/ build/ 2>/dev/null || true
+            
+            # 等待系统完全稳定
+            sleep 10
+          fi
+          
+          # 尝试构建
+          if timeout 1800 npm run build:${{ inputs.platform }}; then
+            echo "macOS构建成功 (尝试 $attempt)"
+            build_success=true
+            break
+          else
+            echo "构建失败 (尝试 $attempt)"
+            
+            # 如果是最后一次尝试且仍然失败，尝试替代方案
+            if [ $attempt -eq $max_attempts ]; then
+              echo "常规DMG构建失败，尝试替代方案..."
+              
+              # 替代方案：只构建zip文件，跳过DMG
+              if [ -f "electron-builder.json" ]; then
+                echo "修改配置为仅构建zip..."
+                python3 << FALLBACK_EOF
+        import json
+        with open('electron-builder.json', 'r') as f:
+            config = json.load(f)
+        
+        # 移除DMG目标，只保留ZIP
+        if 'mac' in config:
+            config['mac']['target'] = [
+                {'target': 'zip', 'arch': ['x64', 'arm64']}
+            ]
+        
+        with open('electron-builder.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        FALLBACK_EOF
+                
+                echo "尝试仅构建ZIP文件..."
+                if npm run build:${{ inputs.platform }}; then
+                  echo "ZIP构建成功"
+                  build_success=true
+                  break
+                fi
+              fi
+              
+              echo "所有构建尝试都失败了"
+              echo "最后尝试：显示详细调试信息"
+              echo "当前挂载的卷:"
+              mount | grep "/Volumes/" || echo "没有找到挂载的卷"
+              echo "hdiutil信息:"
+              hdiutil info | head -20 || echo "无法获取hdiutil信息"
+              echo "运行中的进程:"
+              ps aux | grep -E "(hdiutil|dmgbuild|electron)" | head -10 || echo "没有找到相关进程"
+              exit 1
+            fi
+          fi
+        done
+      env:
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+        GH_TOKEN: ${{ github.token }}
+        BUILD_ENVIRONMENT: ${{ inputs.environment }}
+        NODE_OPTIONS: --max-old-space-size=4096
+
+    # macOS构建后强制清理
+    - name: macOS构建后强制清理
+      if: always()
+      shell: bash
+      run: |
+        set +e  # Don't exit on error for cleanup operations
+        echo "执行构建后清理..."
+        
+        # 执行清理脚本
+        if [ -f "./cleanup-volumes.sh" ]; then
+          ./cleanup-volumes.sh || echo "Warning: Cleanup script encountered issues"
+        fi
+        
+        # 强化的额外清理措施
+        echo "额外清理措施..."
+        
+        # 强制终止所有相关进程
+        sudo pkill -9 -f "hdiutil" 2>/dev/null || true
+        sudo pkill -9 -f "dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "python.*dmgbuild" 2>/dev/null || true
+        sudo pkill -9 -f "BMO" 2>/dev/null || true
+        sudo pkill -9 -f "Middle Office" 2>/dev/null || true
+        sudo pkill -9 -f "My Awesome App" 2>/dev/null || true
+        
+        # 最后一次强制清理所有相关卷
+        for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+          if [ -d "$vol" ]; then
+            echo "最终清理卷: $vol"
+            
+            # List and kill processes using the volume before cleanup
+            echo "Checking for processes using final cleanup volume: $vol"
+            for pid in $(lsof +D "$vol" 2>/dev/null | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u); do
+              echo "Killing process $pid using the final cleanup volume"
+              kill -9 $pid || true
+            done
+            
+            # 删除所有内容
+            rm -rf "$vol"/* 2>/dev/null || true
+            rm -rf "$vol"/.*  2>/dev/null || true
+            
+            # 强制卸载with improved retry logic
+            diskutil unmount force "$vol" 2>/dev/null || true
+            
+            if mount | grep -q "$vol"; then
+              # Retry logic for final detaching
+              echo "Final attempt to detach volume: $vol"
+              if ! hdiutil detach "$vol" -quiet 2>/dev/null; then
+                echo "Final detach failed, waiting 5s and retrying with -force..."
+                sleep 5
+                hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol in final cleanup, but continuing."
+              else
+                echo "Successfully detached $vol in final cleanup"
+              fi
             else
               echo "Volume $vol already detached or does not exist."
             fi
