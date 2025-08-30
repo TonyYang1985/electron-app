@@ -6,9 +6,6 @@ on:
       run_number:
         required: true
         type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   cleanup:

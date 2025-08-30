@@ -25,9 +25,6 @@ on:
       build_environment:
         description: "构建环境"
         value: ${{ jobs.build.outputs.build_environment }}
-    secrets:
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   build:
