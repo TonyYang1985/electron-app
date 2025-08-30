@@ -14,7 +14,7 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
     this.options = {
       silent: false,
       checkInterval: 3600000, // 1 hour
-      allowPrerelease: true, // 👈 关键：允许预发布版本
+      allowPrerelease: true, // 
       autoDownload: true,
       ...options,
     };
@@ -22,11 +22,11 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
 
   load(settings: ElectronMicroframeworkSettings): void {
     if (settings.isDev) {
-      console.log("🔧 开发模式：跳过 GitHub 自动更新功能");
+      console.log("");
       return;
     }
 
-    console.log("🔄 配置 GitHub 自动更新功能...");
+    console.log("");
     this.configureAutoUpdater();
     this.setupUpdateEvents(settings);
 
@@ -34,34 +34,40 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
   }
 
   private configureAutoUpdater(): void {
-    // GitHub 专用配置
+    // GitHub 
+    autoUpdater.setFeedURL({
+      provider: 'github',
+      owner: 'TonyYang1985',
+      repo: 'electron-app',
+    });
+
     autoUpdater.logger = console;
     autoUpdater.autoDownload = this.options.autoDownload ?? true;
-    autoUpdater.allowPrerelease = this.options.allowPrerelease ?? true; // 👈 关键
+    autoUpdater.allowPrerelease = this.options.allowPrerelease ?? true; // 
     
-    // 设置 GitHub 特定选项
+    // GitHub 
     autoUpdater.allowDowngrade = false;
     autoUpdater.forceDevUpdateConfig = false;
     
-    // GitHub API 配置
+    // GitHub API 
     if (process.env.GITHUB_TOKEN) {
       autoUpdater.requestHeaders = {
         'Authorization': `token ${process.env.GITHUB_TOKEN}`
       };
     }
     
-    console.log("🔧 GitHub AutoUpdater 配置:");
+    console.log("");
     console.log(`  Repository: TonyYang1985/electron-app`);
     console.log(`  allowPrerelease: ${autoUpdater.allowPrerelease}`);
     console.log(`  autoDownload: ${autoUpdater.autoDownload}`);
-    console.log(`  GitHub Token: ${process.env.GITHUB_TOKEN ? '✅ 已配置' : '❌ 未配置'}`);
+    console.log(`  GitHub Token: ${process.env.GITHUB_TOKEN ? ' ' : ' '}`);
   }
 
   private setupUpdateEvents(settings: ElectronMicroframeworkSettings): void {
-    // 检查更新开始
+    // 
     autoUpdater.on("checking-for-update", () => {
-      console.log("🔍 正在从 GitHub 检查更新...");
-      console.log(`🔍 检查地址: https://api.github.com/repos/TonyYang1985/electron-app/releases`);
+      console.log("");
+      console.log(``);
     });
 
     autoUpdater.on("update-available", (info: UpdateInfo) =>
@@ -81,10 +87,11 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
 
   private checkForUpdates(): void {
     try {
-      console.log("🔍 开始从 GitHub 检查更新...");
+      console.log("checkForUpdates start");
       autoUpdater.checkForUpdates();
     } catch (error) {
-      console.error("🚨 启动 GitHub 更新检查时出错:", error);
+      console.error("checkForUpdates error");
+      console.error(`  : ${error}`);
     }
   }
 
@@ -96,33 +103,33 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
     const newVersion = info.version;
     const isPrerelease = prerelease(newVersion) !== null;
 
-    console.log("🎉 在 GitHub 发现新版本!");
-    console.log(`  当前版本: ${currentVersion}`);
-    console.log(`  新版本: ${newVersion}`);
-    console.log(`  Release 页面: https://github.com/TonyYang1985/electron-app/releases/tag/v${newVersion}`);
-    console.log(`  是否预发布: ${isPrerelease || false}`);
-    console.log(`  发布日期: ${info.releaseDate}`);
+    console.log("");
+    console.log(`  : ${currentVersion}`);
+    console.log(`  : ${newVersion}`);
+    console.log(`  Release : https://github.com/TonyYang1985/electron-app/releases/tag/v${newVersion}`);
+    console.log(`  : ${isPrerelease || false}`);
+    console.log(`  : ${info.releaseDate}`);
     
-    // 详细的文件信息
+    // 
     if (info.files && info.files.length > 0) {
-      console.log("📦 可用文件:");
+      console.log("");
       info.files.forEach(file => {
         console.log(`  - ${file.url} (${this.formatBytes(file.size ?? 0)})`);
       });
     }
 
-    // 验证版本号
+    // 
     const isNewer = gt(newVersion, currentVersion);
-    console.log(`  版本比较: ${isNewer ? '✅ 需要更新' : '❌ 无需更新'}`);
+    console.log(`  : ${isNewer ? ' ' : ' '}`);
     
     if (!isNewer) {
-      console.warn("⚠️ GitHub Release 版本不比当前版本新");
+      console.warn("");
       return;
     }
 
-    // 检查是否为预发布版本
+    // 
     if (isPrerelease && !this.options.allowPrerelease) {
-      console.log("⚠️ 跳过预发布版本");
+      console.log("isPrerelease",isPrerelease);
       return;
     }
 
@@ -140,7 +147,7 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
 
   private onDownloadProgress(progress: ProgressInfo): void {
     const percent = Math.round(progress.percent);
-    console.log(`📥 GitHub 下载进度: ${percent}%`);
+    console.log(` : ${percent}%`);
     const context = (global as any).electronContext;
     if (context?.mainWindow && !context.mainWindow.isDestroyed()) {
       context.mainWindow.setProgressBar(percent / 100);
@@ -169,30 +176,30 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
   }
 
   private onUpdateError(error: Error): void {
-    console.error("❌ GitHub 自动更新检查失败:");
-    console.error(`  错误: ${error.message}`);
+    console.error("");
+    console.error(`  : ${error.message}`);
     
-    // GitHub 特定错误分析
+    // GitHub 
     const message = error.message.toLowerCase();
     
     if (message.includes('api rate limit')) {
-      console.error("🚫 GitHub API 速率限制");
-      console.error("   解决方案: 设置 GITHUB_TOKEN 环境变量");
-      console.error("   获取 Token: https://github.com/settings/tokens");
+      console.error("");
+      console.error("   ");
+      console.error("   : https://github.com/settings/tokens");
     } else if (message.includes('404') || message.includes('not found')) {
-      console.error("🔍 GitHub Repository 或 Release 未找到");
-      console.error("   请检查: https://github.com/TonyYang1985/electron-app/releases");
+      console.error("");
+      console.error("   : https://github.com/TonyYang1985/electron-app/releases");
     } else if (message.includes('network') || message.includes('timeout')) {
-      console.error("🌐 网络连接问题");
-      console.error("   GitHub 可能在某些地区访问受限");
-      console.error("   考虑使用代理或 VPN");
+      console.error("");
+      console.error("   GitHub ");
+      console.error("   ");
     } else if (message.includes('forbidden') || message.includes('403')) {
-      console.error("🔒 GitHub API 访问被禁止");
-      console.error("   检查 Repository 是否为 public");
-      console.error("   或配置正确的 GITHUB_TOKEN");
+      console.error("");
+      console.error("   Repository ");
+      console.error("   ");
     }
     
-    // 提供备用方案
+    // 
     this.suggestFallbackOptions();
   }
 
@@ -209,34 +216,34 @@ export class GitHubAutoUpdaterLoader implements ElectronMicroframeworkLoader {
     
     const { response } = await dialog.showMessageBox(context.mainWindow, {
       type: "info",
-      title: "GitHub 发现更新",
-      message: `发现新版本 ${info.version}${isPrerelease ? ' (预发布)' : ''}`,
-      detail: `当前版本: ${settings.app?.version}\n新版本: ${info.version}\n\n查看发布说明: ${releaseUrl}\n\n是否立即下载并安装更新？`,
-      buttons: ["立即更新", "查看发布页面", "稍后提醒"],
+      title: "",
+      message: ` ${info.version}${isPrerelease ? ' ' : ''}`,
+      detail: ` : ${settings.app?.version}\n : ${info.version}\n\n : ${releaseUrl}\n\n ?`,
+      buttons: ["", "", ""],
       defaultId: 0,
       cancelId: 2,
     });
 
     switch (response) {
       case 0:
-        console.log("✅ 用户选择立即更新");
+        console.log("");
         autoUpdater.downloadUpdate();
         break;
       case 1:
-        console.log("🌐 用户选择查看发布页面");
+        console.log("");
         require('electron').shell.openExternal(releaseUrl);
         break;
       default:
-        console.log("⏰ 用户选择稍后提醒");
+        console.log("");
     }
   }
 
   private suggestFallbackOptions(): void {
-    console.log("📄 可选的备用方案:");
-    console.log("1. 手动检查更新: https://github.com/TonyYang1985/electron-app/releases");
-    console.log("2. 配置镜像源（如适用）");
-    console.log("3. 使用本地更新服务器");
-    console.log("4. 修改为 release 而不是 prerelease");
+    console.log("");
+    console.log("1. : https://github.com/TonyYang1985/electron-app/releases");
+    console.log("2. ");
+    console.log("3. ");
+    console.log("4. ");
   }
 
   private formatBytes(bytes: number): string {

@@ -19,7 +19,7 @@ export class AutoUpdaterLoader implements ElectronMicroframeworkLoader {
     this.options = {
       silent: false,
       checkInterval: 3600000, // 1 hour
-      allowPrerelease: false,
+      allowPrerelease: true,
       ...options,
     };
   }
@@ -46,7 +46,7 @@ export class AutoUpdaterLoader implements ElectronMicroframeworkLoader {
   private configureAutoUpdater(): void {
     autoUpdater.logger = console;
     autoUpdater.autoDownload = this.options.autoDownload ?? true;
-    autoUpdater.allowPrerelease = this.options.allowPrerelease ?? false;
+    autoUpdater.allowPrerelease = this.options.allowPrerelease ?? true;
   }
 
   private setupUpdateEvents(settings: ElectronMicroframeworkSettings): void {
