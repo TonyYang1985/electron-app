@@ -85,7 +85,7 @@ runs:
         npm run build:${{ inputs.platform }}
       env:
         CSC_IDENTITY_AUTO_DISCOVERY: false
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ github.token}}
         BUILD_ENVIRONMENT: ${{ inputs.environment }}
         # 只设置内存限制，移除不支持的参数
         NODE_OPTIONS: --max-old-space-size=4096
