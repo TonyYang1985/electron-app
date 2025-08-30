@@ -33,7 +33,11 @@ runs:
             echo "$hdiutil_output" | grep -E "(BMO|Middle Office|My Awesome App)" | awk '{print $1}' | while read -r device; do
               if [ -n "$device" ]; then
                 echo "强制分离设备: $device"
-                hdiutil detach "$device" -force 2>/dev/null || true
+                if mount | grep -q "$device"; then
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+                else
+                  echo "Device $device already detached or does not exist."
+                fi
               fi
             done
           else
@@ -66,13 +70,21 @@ runs:
             # 强制卸载流程
             diskutil unmount "$vol" 2>/dev/null || true
             diskutil unmount force "$vol" 2>/dev/null || true
-            hdiutil detach "$vol" -force 2>/dev/null || true
+            if mount | grep -q "$vol"; then
+              hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol, but continuing."
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
             
             # 如果还存在，使用设备路径强制分离
             device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
             if [ -n "$device" ]; then
               echo "使用设备路径强制分离: $device"
-              hdiutil detach "$device" -force 2>/dev/null || true
+              if mount | grep -q "$device"; then
+                hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+              else
+                echo "Device $device already detached or does not exist."
+              fi
             fi
           fi
         done
@@ -183,7 +195,11 @@ runs:
             echo "$hdiutil_output" | grep -E "(BMO|Middle Office|My Awesome App)" | awk '{print $1}' | while read -r device; do
               if [ -n "$device" ]; then
                 echo "强制分离设备: $device"
-                hdiutil detach "$device" -force 2>/dev/null || true
+                if mount | grep -q "$device"; then
+                  hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+                else
+                  echo "Device $device already detached or does not exist."
+                fi
               fi
             done
           else
@@ -215,12 +231,20 @@ runs:
             # 多重卸载尝试
             diskutil unmount "$vol" 2>/dev/null || true
             diskutil unmount force "$vol" 2>/dev/null || true
-            hdiutil detach "$vol" -force 2>/dev/null || true
+            if mount | grep -q "$vol"; then
+              hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol, but continuing."
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
             
             # 通过设备路径强制分离
             device=$(hdiutil info 2>/dev/null | grep "$vol" 2>/dev/null | awk '{print $1}' | head -1)
             if [ -n "$device" ]; then
-              hdiutil detach "$device" -force 2>/dev/null || true
+              if mount | grep -q "$device"; then
+                hdiutil detach "$device" -force || echo "Warning: Failed to detach $device, but continuing."
+              else
+                echo "Device $device already detached or does not exist."
+              fi
             fi
           fi
         done
@@ -429,7 +453,11 @@ runs:
             rm -rf "$vol"/.*  2>/dev/null || true
             # 强制卸载
             diskutil unmount force "$vol" 2>/dev/null || true
-            hdiutil detach "$vol" -force 2>/dev/null || true
+            if mount | grep -q "$vol"; then
+              hdiutil detach "$vol" -force || echo "Warning: Failed to detach $vol, but continuing."
+            else
+              echo "Volume $vol already detached or does not exist."
+            fi
           fi
         done
         
