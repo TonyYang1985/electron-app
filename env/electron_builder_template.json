@@ -47,7 +47,7 @@
     "title": "${PRODUCT_NAME} ${VERSION}",
     "artifactName": "${PRODUCT_NAME}-${VERSION}-${os}-${arch}.dmg",
     "backgroundColor": "#ffffff",
-    "format": "UDZO",
+    "format": "ULFO",
     "icon": "${ICON_MACOS}",
     "iconSize": "${PLATFORM_MACOS_DMG_ICON_SIZE}",
     "window": {
@@ -67,7 +67,7 @@
       }
     ],
 
-    "writeUpdateInfo": true,
+    "writeUpdateInfo": false,
     "sign": false,
     "internetEnabled": false
   },
