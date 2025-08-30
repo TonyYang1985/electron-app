@@ -114,18 +114,29 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
-      # macOS专用：修复DMG构建问题
+      # macOS专用：修复DMG构建问题（包含符号链接修复）
       - name: 🍎 macOS DMG构建环境准备
         if: matrix.os == 'macos-latest'
         shell: bash
         run: |
           echo "🧹 准备macOS构建环境..."
           
-          # 清理现有卷 - 简化版本
+          # 清理现有卷 - 添加符号链接修复
           echo "🔍 清理现有相关卷..."
           for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
             if [ -d "$vol" ]; then
               echo "📱 发现卷: $vol"
+              
+              # 【新增】删除现有的Applications符号链接 - 关键修复
+              if [ -L "$vol/Applications" ]; then
+                echo "🔗 删除现有Applications符号链接: $vol/Applications"
+                rm -f "$vol/Applications" 2>/dev/null || true
+              fi
+              
+              # 【新增】删除所有其他符号链接
+              find "$vol" -type l -delete 2>/dev/null || true
+              
+              # 原有的卸载逻辑
               # 尝试正常卸载
               diskutil unmount "$vol" 2>/dev/null || true
               # 尝试强制卸载 
@@ -210,28 +221,36 @@ jobs:
           echo "✅ Config generated. Contents:"
           cat electron-builder.json
 
-      # macOS构建后清理准备
+      # macOS构建后清理准备（包含符号链接修复）
       - name: 🍎 macOS构建后清理准备
         if: matrix.os == 'macos-latest'
         shell: bash
         run: |
           echo "🔧 设置构建后清理钩子..."
           
-          # 创建简化清理脚本
+          # 创建包含符号链接修复的清理脚本
           cat > cleanup-volumes.sh << 'EOF'
           #!/bin/bash
           
           echo "🧹 执行卷清理..."
           
-          # 清理BMO相关卷 - 使用通配符简化
+          # 清理BMO相关卷 - 添加符号链接处理
           for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
             if [ -d "$vol" ]; then
               echo "🔄 清理卷: $vol"
-              # 先尝试正常卸载
+              
+              # 【新增】先删除Applications符号链接
+              if [ -L "$vol/Applications" ]; then
+                echo "删除符号链接: $vol/Applications"
+                rm -f "$vol/Applications" 2>/dev/null || true
+              fi
+              
+              # 【新增】删除所有符号链接
+              find "$vol" -type l -delete 2>/dev/null || true
+              
+              # 然后卸载卷
               diskutil unmount "$vol" 2>/dev/null || true
-              # 再尝试强制卸载
               diskutil unmount force "$vol" 2>/dev/null || true
-              # 最后尝试hdiutil分离
               hdiutil detach "$vol" -force -quiet 2>/dev/null || true
             fi
           done
@@ -244,7 +263,7 @@ jobs:
           
           chmod +x cleanup-volumes.sh
 
-      # 构建 - 修复版本
+      # 构建 - 包含符号链接冲突修复
       - name: 🔨 构建 ${{ matrix.name }}
         shell: bash
         run: |
@@ -263,6 +282,19 @@ jobs:
             # 使用简化的构建过程，避免复杂的错误处理
             if ! npm run build:${{ matrix.platform }}; then
               echo "⚠️ 首次构建失败，执行清理后重试..."
+              
+              # 【新增】专门清理符号链接冲突
+              echo "🔗 清理符号链接冲突..."
+              for vol in /Volumes/*"BMO"* /Volumes/*"My Awesome App"* /Volumes/*"Middle Office"*; do
+                if [ -d "$vol" ]; then
+                  echo "清理卷内符号链接: $vol"
+                  # 删除Applications符号链接
+                  [ -L "$vol/Applications" ] && rm -f "$vol/Applications" 2>/dev/null || true
+                  # 删除所有符号链接
+                  find "$vol" -type l -delete 2>/dev/null || true
+                fi
+              done
+              
               ./cleanup-volumes.sh
               
               # 强制清理所有相关进程
